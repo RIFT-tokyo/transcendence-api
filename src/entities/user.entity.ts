@@ -11,7 +11,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 16 })
+  @Column()
   name: string;
 
   @CreateDateColumn()
