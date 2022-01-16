@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { IsDate } from 'class-validator';
 
 @Entity()
 export class User {
@@ -14,9 +15,11 @@ export class User {
   @Column()
   name: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @IsDate()
+  created_at: string;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  @IsDate()
+  updated_at: string;
 }

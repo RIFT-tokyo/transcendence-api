@@ -1,9 +1,9 @@
-export class CreateUserDTO {
-  screenName: string;
-  password: string;
+import { User } from '../generated/model/models';
+
+export class CreateUserDTO implements Partial<User> {
+  name: string;
 }
 
-export class LoginUserDTO {
-  screenName: string;
-  password: string;
+export class UpdateUserDTO implements Partial<User> {
+  name: string;
 }
