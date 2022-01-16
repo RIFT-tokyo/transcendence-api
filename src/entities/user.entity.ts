@@ -8,12 +8,9 @@ export class User {
   @Column({ length: 16 })
   name: string;
 
-  @Column({ length: 128 })
-  password: string;
-
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 }
