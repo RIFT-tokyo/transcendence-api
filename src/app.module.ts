@@ -7,19 +7,16 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'db',
-      port: 5432,
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      entities: [__dirname + '/**/*.entity.{js,ts}'],
-      synchronize: true,
-    }),
-    UsersModule,
-  ],
+  imports: [TypeOrmModule.forRoot({
+    type: "postgres",
+    host: "db",
+    port: 5432,
+    username: "admin",
+    password: "password",
+    database: "transcendence",
+    synchronize: false,
+    entities: ["dist/**/*.entity{.js,.ts}"],
+  }), UsersModule],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],
 })

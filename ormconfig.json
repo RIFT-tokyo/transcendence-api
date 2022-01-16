@@ -1,0 +1,16 @@
+{
+  "type": "postgres",
+  "host": "db",
+  "port": 5432,
+  "username": "admin",
+  "password": "password",
+  "database": "transcendence",
+  "synchronize": false,
+  "logging": true,
+  "entities": ["src/entities/*.entity.ts"],
+  "migrations": ["src/migrations/*.ts"],
+  "cli": {
+    "entitiesDir": "src/entities",
+    "migrationsDir": "src/migrations"
+  }
+}
