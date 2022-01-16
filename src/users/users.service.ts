@@ -33,11 +33,21 @@ export class UsersService {
   }
 
   async deleteUser(id: number) {
-    return await this.userRepository.delete(id);
+    const result = await this.userRepository.delete(id);
+    if (result.affected == 0) {
+      throw new NotFoundException();
+    }
+
+    return;
   }
 
   async updateUser(id: number, user: Partial<User>) {
-    return await this.userRepository.update(id, user);
+    const result = await this.userRepository.update(id, user);
+    if (result.affected == 0) {
+      throw new NotFoundException();
+    }
+
+    return;
   }
 
   async createUser(userData: Partial<User>): Promise<void> {

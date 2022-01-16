@@ -21,17 +21,13 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @HttpCode(200)
   async deleteUser(@Param('id') id: number) {
-    this.usersService.deleteUser(id);
-    return;
+    return this.usersService.deleteUser(id);
   }
 
   @Put(':id')
-  @HttpCode(200)
   async updateUser(@Param('id') id: number, @Body() userData: Partial<User>) {
-    this.usersService.updateUser(id, userData);
-    return;
+    return this.usersService.updateUser(id, userData);
   }
 
   @Get()
