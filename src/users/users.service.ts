@@ -50,11 +50,10 @@ export class UsersService {
     return;
   }
 
-  async createUser(userData: Partial<User>): Promise<void> {
-    await this.userRepository.insert({
-      ...userData,
-      //   password: this.createPasswordDigest(userData.password),
-    });
-    return;
+  async createUser(userData: Partial<User>) {
+    const result = await this.userRepository.insert({ ...userData });
+    const id = result.identifiers[0].id;
+
+    return await this.userRepository.findOne(id);
   }
 }
