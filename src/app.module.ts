@@ -5,7 +5,6 @@ import { UsersService } from './users/users.service';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
 
 @Module({
   imports: [
@@ -13,9 +12,9 @@ import { User } from './entities/user.entity';
       type: 'postgres',
       host: 'db',
       port: 5432,
-      username: 'admin',
-      password: 'password',
-      database: 'transcendence',
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
       entities: [__dirname + '/**/*.entity.{js,ts}'],
       synchronize: true,
     }),
