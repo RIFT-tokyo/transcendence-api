@@ -16,7 +16,7 @@ import { User } from './entities/user.entity';
       username: 'admin',
       password: 'password',
       database: 'transcendence',
-      entities: [User],
+      entities: [__dirname + '/**/*.entity.{js,ts}'],
       synchronize: true,
     }),
     UsersModule,

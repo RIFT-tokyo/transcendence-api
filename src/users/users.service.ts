@@ -53,7 +53,7 @@ export class UsersService {
   async createUser(userData: Partial<User>): Promise<void> {
     await this.userRepository.insert({
       ...userData,
-      password: this.createPasswordDigest(userData.password),
+      //   password: this.createPasswordDigest(userData.password),
     });
     return;
   }
