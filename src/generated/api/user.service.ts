@@ -14,7 +14,8 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
-import { User } from '../model/user';
+import { RequestUser } from '../model/requestUser';
+import { ResponseUser } from '../model/responseUser';
 import { Configuration } from '../configuration';
 
 
@@ -79,7 +80,7 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsers(): Observable<AxiosResponse<Array<User>>>;
+    public getUsers(): Observable<AxiosResponse<Array<ResponseUser>>>;
     public getUsers(): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -96,7 +97,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<User>>(`${this.basePath}/users`,
+        return this.httpClient.get<Array<ResponseUser>>(`${this.basePath}/users`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -110,7 +111,7 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserId(userId: number, ): Observable<AxiosResponse<User>>;
+    public getUsersUserId(userId: number, ): Observable<AxiosResponse<ResponseUser>>;
     public getUsersUserId(userId: number, ): Observable<any> {
 
         if (userId === null || userId === undefined) {
@@ -131,7 +132,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<User>(`${this.basePath}/users/${encodeURIComponent(String(userId))}`,
+        return this.httpClient.get<ResponseUser>(`${this.basePath}/users/${encodeURIComponent(String(userId))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -141,12 +142,12 @@ export class UserService {
     /**
      * 
      * 
-     * @param user 
+     * @param requestUser 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public postUsers(user?: User, ): Observable<AxiosResponse<User>>;
-    public postUsers(user?: User, ): Observable<any> {
+    public postUsers(requestUser?: RequestUser, ): Observable<AxiosResponse<ResponseUser>>;
+    public postUsers(requestUser?: RequestUser, ): Observable<any> {
 
 
         let headers = this.defaultHeaders;
@@ -168,8 +169,8 @@ export class UserService {
         if (httpContentTypeSelected != undefined) {
             headers['Content-Type'] = httpContentTypeSelected;
         }
-        return this.httpClient.post<User>(`${this.basePath}/users`,
-            user,
+        return this.httpClient.post<ResponseUser>(`${this.basePath}/users`,
+            requestUser,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -180,12 +181,12 @@ export class UserService {
      * Update User Information
      * 
      * @param userId 
-     * @param user 
+     * @param requestUser 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public putUsersUserId(userId: number, user?: User, ): Observable<AxiosResponse<User>>;
-    public putUsersUserId(userId: number, user?: User, ): Observable<any> {
+    public putUsersUserId(userId: number, requestUser?: RequestUser, ): Observable<AxiosResponse<ResponseUser>>;
+    public putUsersUserId(userId: number, requestUser?: RequestUser, ): Observable<any> {
 
         if (userId === null || userId === undefined) {
             throw new Error('Required parameter userId was null or undefined when calling putUsersUserId.');
@@ -211,8 +212,8 @@ export class UserService {
         if (httpContentTypeSelected != undefined) {
             headers['Content-Type'] = httpContentTypeSelected;
         }
-        return this.httpClient.put<User>(`${this.basePath}/users/${encodeURIComponent(String(userId))}`,
-            user,
+        return this.httpClient.put<ResponseUser>(`${this.basePath}/users/${encodeURIComponent(String(userId))}`,
+            requestUser,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers

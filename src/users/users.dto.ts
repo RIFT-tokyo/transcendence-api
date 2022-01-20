@@ -1,9 +1,9 @@
-import { User } from '../generated/model/models';
+import { RequestUser, ResponseUser } from '../generated/model/models';
 
-export class CreateUserDTO implements Partial<User> {
+export class CreateUserDTO implements RequestUser {
   name: string;
 }
 
-export class UpdateUserDTO implements Partial<User> {
+export class UpdateUserDTO implements RequestUser {
   name: string;
 }
