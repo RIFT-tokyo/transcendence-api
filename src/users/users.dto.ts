@@ -7,3 +7,11 @@ export class CreateUserDTO implements RequestUser {
 export class UpdateUserDTO implements RequestUser {
   name: string;
 }
+
+
+export class ResponseUserDTO implements ResponseUser {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}

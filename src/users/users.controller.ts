@@ -7,8 +7,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { User } from 'src/entities/user.entity';
-import { CreateUserDTO, UpdateUserDTO } from './users.dto';
+import { CreateUserDTO, ResponseUserDTO, UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -16,7 +15,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(':id')
-  async getUser(@Param('id') id: number) {
+  async getUser(@Param('id') id: number): Promise<ResponseUserDTO> {
     return this.usersService.findUserById(id);
   }
 

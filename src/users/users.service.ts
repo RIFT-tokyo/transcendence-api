@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
+import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 
 const SALT = '12345';
 @Injectable()
@@ -41,16 +42,16 @@ export class UsersService {
     return;
   }
 
-  async updateUser(id: number, user: Partial<User>) {
+  async updateUser(id: number, user: UpdateUserDTO) {
     const result = await this.userRepository.update(id, user);
     if (result.affected == 0) {
       throw new NotFoundException();
     }
 
-    return;
+    return await this.userRepository.findOne(id);
   }
 
-  async createUser(userData: Partial<User>) {
+  async createUser(userData: CreateUserDTO) {
     const result = await this.userRepository.insert({ ...userData });
     const id = result.identifiers[0].id;
 
