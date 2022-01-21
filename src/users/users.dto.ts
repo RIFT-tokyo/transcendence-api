@@ -1,13 +1,11 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { RequestUser, ResponseUser } from '../generated/model/models';
 
 export class CreateUserDTO implements RequestUser {
   name: string;
 }
 
-export class UpdateUserDTO implements RequestUser {
-  name: string;
-}
-
+export class UpdateUserDTO extends PartialType(CreateUserDTO) {}
 
 export class ResponseUserDTO implements ResponseUser {
   id: number;
