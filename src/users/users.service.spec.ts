@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { UsersService } from './users.service';

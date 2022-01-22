@@ -1,6 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { User } from 'src/entities/user.entity';
-import { ResponseUser } from 'src/generated/model/models';
 import { Repository } from 'typeorm';
 import { UsersController } from './users.controller';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
