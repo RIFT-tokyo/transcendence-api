@@ -14,6 +14,16 @@ describe('UsersController', () => {
     repository = new Repository<User>();
     service = new UsersService(repository);
     controller = new UsersController(service);
+
+    jest.spyOn(service, 'findAll').mockImplementation(() => {
+      const user: User = {
+        id: 1,
+        name: 'Mock Name',
+        created_at: '2019-08-24T14:15:22Z',
+        updated_at: '2019-08-24T14:15:22Z',
+      };
+      return Promise.resolve([user]);
+    });
   });
 
   it('should be defined', () => {
@@ -22,15 +32,6 @@ describe('UsersController', () => {
 
   describe('/users', () => {
     it('should return users list', async () => {
-      jest.spyOn(service, 'findAll').mockImplementation(() => {
-        const user: User = {
-          id: 1,
-          name: 'Mock Name',
-          created_at: '2019-08-24T14:15:22Z',
-          updated_at: '2019-08-24T14:15:22Z',
-        };
-        return Promise.resolve([user]);
-      });
       expect(await controller.index()).toEqual([
         {
           id: 1,
@@ -39,6 +40,10 @@ describe('UsersController', () => {
           updated_at: '2019-08-24T14:15:22Z',
         },
       ]);
+    });
+
+    it('should return users list', async () => {
+      expect(await controller.index()).toHaveLength(1);
     });
   });
 });
