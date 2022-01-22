@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { User } from 'src/entities/user.entity';
+import { Repository } from 'typeorm';
 import { UsersService } from './users.service';
 
 describe('UsersService', () => {
   let service: UsersService;
+  let repository: Repository<User>;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService],
-    }).compile();
-
-    service = module.get<UsersService>(UsersService);
+    repository = new Repository<User>();
+    service = new UsersService(repository);
   });
 
   it('should be defined', () => {
