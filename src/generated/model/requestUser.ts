@@ -12,6 +12,9 @@
 
 
 export interface RequestUser { 
-    name: string;
+    username?: string;
+    display_name?: string;
+    profile_image?: string;
+    status_message?: string;
 }
 
