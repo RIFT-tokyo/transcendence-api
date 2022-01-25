@@ -20,6 +20,13 @@ export class UsersController {
     return this.usersService.findUserById(id);
   }
 
+  @Get('/by/:username')
+  async getUserByUsername(
+    @Param('username') username: string,
+  ): Promise<ResponseUser> {
+    return this.usersService.findUserByUsername(username);
+  }
+
   @Delete(':id')
   async deleteUser(@Param('id') id: number): Promise<void> {
     return this.usersService.deleteUser(id);

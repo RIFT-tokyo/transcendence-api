@@ -29,6 +29,14 @@ export class UsersService {
     return user;
   }
 
+  async findUserByUsername(username: string) {
+    const user = await this.userRepository.findOne({ username });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return user;
+  }
+
   async findAll() {
     return await this.userRepository.find();
   }
