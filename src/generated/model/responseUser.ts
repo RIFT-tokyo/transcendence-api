@@ -16,8 +16,21 @@ export interface ResponseUser {
      * Unique identifier for the given user.
      */
     id: number;
-    name: string;
+    username: string;
+    display_name: string;
+    profile_image: string;
+    status: ResponseUser.StatusEnum;
+    status_message: string;
     created_at: string;
     updated_at: string;
 }
+export namespace ResponseUser {
+    export type StatusEnum = 'online' | 'offline' | 'game';
+    export const StatusEnum = {
+        Online: 'online' as StatusEnum,
+        Offline: 'offline' as StatusEnum,
+        Game: 'game' as StatusEnum
+    };
+}
+
 
