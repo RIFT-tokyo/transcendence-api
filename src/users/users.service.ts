@@ -60,7 +60,10 @@ export class UsersService {
   }
 
   async createUser(userData: CreateUserDTO) {
-    const result = await this.userRepository.insert({ ...userData });
+    const result = await this.userRepository.insert({
+      ...userData,
+      password: 'password',
+    });
     const id = result.identifiers[0].id;
 
     return await this.userRepository.findOne(id);

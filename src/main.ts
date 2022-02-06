@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 import * as session from 'express-session';
-import flash = require('connect-flash');
 import * as passport from 'passport';
 
 async function bootstrap() {
@@ -17,12 +16,12 @@ async function bootstrap() {
       secret: 'nest cats',
       resave: false,
       saveUninitialized: false,
+      cookie: { maxAge: 7 * 24 * 3600 * 1000 }, // 1 week
     }),
   );
 
   app.use(passport.initialize());
   app.use(passport.session());
-  app.use(flash());
 
   await app.listen(3000);
 }
