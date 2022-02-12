@@ -14,13 +14,12 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
-import { RequestUser } from '../model/requestUser';
 import { ResponseUser } from '../model/responseUser';
 import { Configuration } from '../configuration';
 
 
 @Injectable()
-export class UserService {
+export class FollowService {
 
     protected basePath = 'http://localhost:4211';
     public defaultHeaders: Record<string,string> = {};
@@ -41,17 +40,17 @@ export class UserService {
     }
 
     /**
-     * Delete a user
+     * Unfollow a user
      * 
      * @param userID 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public deleteUsersUserId(userID: number, ): Observable<AxiosResponse<any>>;
-    public deleteUsersUserId(userID: number, ): Observable<any> {
+    public deleteUsersFollowingUserID(userID: number, ): Observable<AxiosResponse<Error>>;
+    public deleteUsersFollowingUserID(userID: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
-            throw new Error('Required parameter userID was null or undefined when calling deleteUsersUserId.');
+            throw new Error('Required parameter userID was null or undefined when calling deleteUsersFollowingUserID.');
         }
 
         let headers = this.defaultHeaders;
@@ -69,7 +68,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.delete<any>(`${this.basePath}/users/${encodeURIComponent(String(userID))}`,
+        return this.httpClient.delete<Error>(`${this.basePath}/users/following/${encodeURIComponent(String(userID))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -77,46 +76,20 @@ export class UserService {
         );
     }
     /**
-     * Get the authenticated user
-     * Retrieve the information of the user with the matching user ID.
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public getMe(): Observable<AxiosResponse<ResponseUser>>;
-    public getMe(): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // authentication (sessionAuth) required
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers['Accept'] = httpHeaderAcceptSelected;
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-        return this.httpClient.get<ResponseUser>(`${this.basePath}/me`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers
-            }
-        );
-    }
-    /**
-     * List users
-     * 
+     * List the people a user follows
+     * Lists the people who the specified user follows.
+     * @param userID 
      * @param limit 
      * @param offset 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsers(limit?: number, offset?: number, ): Observable<AxiosResponse<Array<ResponseUser>>>;
-    public getUsers(limit?: number, offset?: number, ): Observable<any> {
+    public getUsersUserIDFollowing(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<Array<ResponseUser>>>;
+    public getUsersUserIDFollowing(userID: number, limit?: number, offset?: number, ): Observable<any> {
+
+        if (userID === null || userID === undefined) {
+            throw new Error('Required parameter userID was null or undefined when calling getUsersUserIDFollowing.');
+        }
 
 
 
@@ -143,7 +116,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<ResponseUser>>(`${this.basePath}/users`,
+        return this.httpClient.get<Array<ResponseUser>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/following`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -152,17 +125,107 @@ export class UserService {
         );
     }
     /**
-     * Get a user
-     * Retrieve the information of the user with the matching user ID.
+     * Check if a user follows another user
+     * 
+     * @param userID 
+     * @param targetUserID 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getUsersUserIDFollowingTargetUserID(userID: number, targetUserID: number, ): Observable<AxiosResponse<object>>;
+    public getUsersUserIDFollowingTargetUserID(userID: number, targetUserID: number, ): Observable<any> {
+
+        if (userID === null || userID === undefined) {
+            throw new Error('Required parameter userID was null or undefined when calling getUsersUserIDFollowingTargetUserID.');
+        }
+
+        if (targetUserID === null || targetUserID === undefined) {
+            throw new Error('Required parameter targetUserID was null or undefined when calling getUsersUserIDFollowingTargetUserID.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        return this.httpClient.get<object>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/following/${encodeURIComponent(String(targetUserID))}`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * List Followers of a user
+     * Lists the people following the specified user.
+     * @param userID 
+     * @param limit 
+     * @param offset 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getUsersUserIdFriends(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<Array<ResponseUser>>>;
+    public getUsersUserIdFriends(userID: number, limit?: number, offset?: number, ): Observable<any> {
+
+        if (userID === null || userID === undefined) {
+            throw new Error('Required parameter userID was null or undefined when calling getUsersUserIdFriends.');
+        }
+
+
+
+        let queryParameters = {};
+        if (limit !== undefined && limit !== null) {
+            queryParameters['limit'] = <any>limit;
+        }
+        if (offset !== undefined && offset !== null) {
+            queryParameters['offset'] = <any>offset;
+        }
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        return this.httpClient.get<Array<ResponseUser>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/followers`,
+            {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * Follow a user
+     * 
      * @param userID 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserId(userID: number, ): Observable<AxiosResponse<ResponseUser>>;
-    public getUsersUserId(userID: number, ): Observable<any> {
+    public putUsersFollowingUserID(userID: number, ): Observable<AxiosResponse<any>>;
+    public putUsersFollowingUserID(userID: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
-            throw new Error('Required parameter userID was null or undefined when calling getUsersUserId.');
+            throw new Error('Required parameter userID was null or undefined when calling putUsersFollowingUserID.');
         }
 
         let headers = this.defaultHeaders;
@@ -180,126 +243,8 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<ResponseUser>(`${this.basePath}/users/${encodeURIComponent(String(userID))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers
-            }
-        );
-    }
-    /**
-     * Get a user by username
-     * 
-     * @param username Username
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public getUsersUsername(username: string, ): Observable<AxiosResponse<ResponseUser>>;
-    public getUsersUsername(username: string, ): Observable<any> {
-
-        if (username === null || username === undefined) {
-            throw new Error('Required parameter username was null or undefined when calling getUsersUsername.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // authentication (sessionAuth) required
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers['Accept'] = httpHeaderAcceptSelected;
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-        return this.httpClient.get<ResponseUser>(`${this.basePath}/users/by/${encodeURIComponent(String(username))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers
-            }
-        );
-    }
-    /**
-     * Create new user
-     * 
-     * @param requestUser 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public postUsers(requestUser?: RequestUser, ): Observable<AxiosResponse<ResponseUser>>;
-    public postUsers(requestUser?: RequestUser, ): Observable<any> {
-
-
-        let headers = this.defaultHeaders;
-
-        // authentication (sessionAuth) required
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers['Accept'] = httpHeaderAcceptSelected;
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers['Content-Type'] = httpContentTypeSelected;
-        }
-        return this.httpClient.post<ResponseUser>(`${this.basePath}/users`,
-            requestUser,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers
-            }
-        );
-    }
-    /**
-     * Update a user
-     * 
-     * @param userID 
-     * @param requestUser 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public putUsersUserId(userID: number, requestUser?: RequestUser, ): Observable<AxiosResponse<ResponseUser>>;
-    public putUsersUserId(userID: number, requestUser?: RequestUser, ): Observable<any> {
-
-        if (userID === null || userID === undefined) {
-            throw new Error('Required parameter userID was null or undefined when calling putUsersUserId.');
-        }
-
-
-        let headers = this.defaultHeaders;
-
-        // authentication (sessionAuth) required
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers['Accept'] = httpHeaderAcceptSelected;
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers['Content-Type'] = httpContentTypeSelected;
-        }
-        return this.httpClient.put<ResponseUser>(`${this.basePath}/users/${encodeURIComponent(String(userID))}`,
-            requestUser,
+        return this.httpClient.put<any>(`${this.basePath}/users/following/${encodeURIComponent(String(userID))}`,
+            null,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers

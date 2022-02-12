@@ -1,15 +1,21 @@
 import { DynamicModule, HttpService, HttpModule, Module, Global } from '@nestjs/common';
 import { Configuration } from './configuration';
 
+import { AuthService } from './api/auth.service';
+import { FollowService } from './api/follow.service';
 import { UserService } from './api/user.service';
 
 @Global()
 @Module({
   imports:      [ HttpModule ],
   exports:      [
+    AuthService,
+    FollowService,
     UserService
   ],
   providers: [
+    AuthService,
+    FollowService,
     UserService
   ]
 })
