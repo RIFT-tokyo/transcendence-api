@@ -5,6 +5,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -155,11 +156,17 @@ export class UsersController {
 
   @Get(':id/following/:targetId')
   async isFollowing(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Param('id') userId: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Param('targetId') targetUserId: number,
   ): Promise<void> {
-    return;
+    const user = await this.usersService.findUserById(userId);
+    const targetUser = await this.usersService.findUserById(targetUserId);
+    const isFollowing = await this.followsService.isFollowing(
+      user.id,
+      targetUser.id,
+    );
+    if (!isFollowing) {
+      throw new NotFoundException();
+    }
   }
 }
