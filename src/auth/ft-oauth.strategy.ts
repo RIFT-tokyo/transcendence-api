@@ -25,7 +25,7 @@ export class FtOauthStrategy extends PassportStrategy(Strategy) {
       display_name: profile.displayName,
       profile_image: profile.photos[0].value,
       status_message: "I'm feeling lucky.",
-      password: null,
+      password: 'password',
       ft_id: profile.id,
     };
 

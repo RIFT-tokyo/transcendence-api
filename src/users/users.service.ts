@@ -2,10 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
-import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 
-const SALT = '12345';
 @Injectable()
 export class UsersService {
   constructor(
@@ -13,11 +12,8 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  private createPasswordDigest(password: string) {
-    return crypto
-      .createHash('sha256')
-      .update(SALT + '/' + password)
-      .digest('hex');
+  private async createHashedPassword(password: string) {
+    return await bcrypt.hash(password, Number(process.env.HASH_SALT));
   }
 
   async findUserById(id: number) {
@@ -62,7 +58,7 @@ export class UsersService {
   async createUser(userData: CreateUserDTO) {
     const result = await this.userRepository.insert({
       ...userData,
-      password: 'password',
+      password: await this.createHashedPassword(userData.password),
     });
     const id = result.identifiers[0].id;
 

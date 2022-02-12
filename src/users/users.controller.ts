@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -48,6 +49,9 @@ export class UsersController {
 
   @Post()
   async create(@Body() userData: CreateUserDTO) {
+    if (userData.password === undefined) {
+      throw new BadRequestException('password required');
+    }
     return this.usersService.createUser(userData);
   }
 }
