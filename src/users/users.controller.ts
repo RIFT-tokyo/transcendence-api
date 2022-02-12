@@ -12,6 +12,8 @@ import {
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
+import { ResponseUser } from '../generated/model/models';
+import { User } from '../entities/user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -19,14 +21,28 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
-  async getUser(@Param('id') id: number) {
-    return await this.usersService.findUserById(id);
+  async getUser(@Param('id') id: number): Promise<ResponseUser> {
+    const user = await this.usersService.findUserById(id);
+    const { password, ...others } = user;
+    return {
+      ...others,
+      followers: 42,
+      following: 42,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get('/by/:username')
-  async getUserByUsername(@Param('username') username: string) {
-    return this.usersService.findUserByUsername(username);
+  async getUserByUsername(
+    @Param('username') username: string,
+  ): Promise<ResponseUser> {
+    const user = await this.usersService.findUserByUsername(username);
+    const { password, ...others } = user;
+    return {
+      ...others,
+      followers: 42,
+      following: 42,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -37,21 +53,45 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Put(':id')
-  async updateUser(@Param('id') id: number, @Body() userData: UpdateUserDTO) {
-    return this.usersService.updateUser(id, userData);
+  async updateUser(
+    @Param('id') id: number,
+    @Body() userData: UpdateUserDTO,
+  ): Promise<ResponseUser> {
+    const user = await this.usersService.updateUser(id, userData);
+    const { password, ...others } = user;
+    return {
+      ...others,
+      followers: 42,
+      following: 42,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  index() {
-    return this.usersService.findAll();
+  async index(): Promise<ResponseUser[]> {
+    const users = await this.usersService.findAll();
+    const res = users.map((user) => {
+      const { password, ...others } = user;
+      return {
+        ...others,
+        followers: 42,
+        following: 42,
+      };
+    });
+    return res;
   }
 
   @Post()
-  async create(@Body() userData: CreateUserDTO) {
+  async create(@Body() userData: CreateUserDTO): Promise<ResponseUser> {
     if (userData.password === undefined) {
       throw new BadRequestException('password required');
     }
-    return this.usersService.createUser(userData);
+    const user = await this.usersService.createUser(userData);
+    const { password, ...others } = user;
+    return {
+      ...others,
+      followers: 42,
+      following: 42,
+    };
   }
 }
