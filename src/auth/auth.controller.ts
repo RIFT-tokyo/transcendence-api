@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Redirect, UseGuards } from '@nestjs/common';
 import { LoginGuard } from '../common/guards/login.guard';
 import { FtOauthGuard } from '../common/guards/ft-oauth-guard';
 
@@ -6,11 +6,9 @@ import { FtOauthGuard } from '../common/guards/ft-oauth-guard';
 export class AuthController {
   @UseGuards(LoginGuard)
   @Post('login')
+  @Redirect('http://localhost:4212', 307)
   login() {
-    return {
-      url: 'http://localhost:4212/',
-      statusCode: 307,
-    };
+    // redirect client home
   }
 
   @UseGuards(FtOauthGuard)
@@ -21,12 +19,8 @@ export class AuthController {
 
   @UseGuards(FtOauthGuard)
   @Get('callback')
-  async ftCallback(@Req() req) {
-    if (req.user) {
-      return {
-        url: 'http://localhost:4212/',
-        statusCode: 307,
-      };
-    }
+  @Redirect('http://localhost:4212', 307)
+  async ftCallback() {
+    // redirect client home
   }
 }
