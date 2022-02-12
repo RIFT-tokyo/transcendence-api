@@ -15,8 +15,11 @@ export class User {
   @Column({ unique: true, nullable: false })
   username: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   password: string;
+
+  @Column({ unique: true, nullable: true })
+  ft_id: number;
 
   @Column({ nullable: true })
   display_name: string;
@@ -37,6 +40,4 @@ export class User {
   @UpdateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
   updated_at: string;
-
-  // 42ID
 }

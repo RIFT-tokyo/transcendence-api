@@ -8,7 +8,6 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ResponseUser } from 'src/generated/model/models';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
@@ -19,15 +18,13 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
-  async getUser(@Param('id') id: number): Promise<ResponseUser> {
-    return this.usersService.findUserById(id);
+  async getUser(@Param('id') id: number) {
+    return await this.usersService.findUserById(id);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get('/by/:username')
-  async getUserByUsername(
-    @Param('username') username: string,
-  ): Promise<ResponseUser> {
+  async getUserByUsername(@Param('username') username: string) {
     return this.usersService.findUserByUsername(username);
   }
 
@@ -39,21 +36,18 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Put(':id')
-  async updateUser(
-    @Param('id') id: number,
-    @Body() userData: UpdateUserDTO,
-  ): Promise<ResponseUser> {
+  async updateUser(@Param('id') id: number, @Body() userData: UpdateUserDTO) {
     return this.usersService.updateUser(id, userData);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  index(): Promise<ResponseUser[]> {
+  index() {
     return this.usersService.findAll();
   }
 
   @Post()
-  async create(@Body() userData: CreateUserDTO): Promise<ResponseUser> {
+  async create(@Body() userData: CreateUserDTO) {
     return this.usersService.createUser(userData);
   }
 }
