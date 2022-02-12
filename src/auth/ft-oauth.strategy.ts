@@ -21,11 +21,12 @@ export class FtOauthStrategy extends PassportStrategy(Strategy) {
     profile: Profile,
   ) {
     const userData: CreateUserDTO = {
-      username: profile.login,
-      display_name: profile.displayname,
-      profile_image: profile.image_url,
+      username: profile.username,
+      display_name: profile.displayName,
+      profile_image: profile.photos[0].value,
       status_message: "I'm feeling lucky.",
     };
+    console.log(profile.id);
 
     const user = await this.authService.validateFtUser(userData);
     if (!user) {

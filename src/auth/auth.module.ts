@@ -8,7 +8,12 @@ import { FtOauthStrategy } from './ft-oauth.strategy';
 import { SessionSerializer } from './session.serializer';
 
 @Module({
-  imports: [UsersModule, PassportModule],
+  imports: [
+    UsersModule,
+    PassportModule.register({
+      session: true,
+    }),
+  ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, FtOauthStrategy, SessionSerializer],
 })

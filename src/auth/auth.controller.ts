@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { LoginGuard } from '../common/guards/login.guard';
 import { FtOauthGuard } from '../common/guards/ft-oauth-guard';
 
@@ -21,11 +21,12 @@ export class AuthController {
 
   @UseGuards(FtOauthGuard)
   @Get('callback')
-  async ftCallback() {
-    console.log('ft oauth!!');
-    return {
-      url: 'http://localhost:4212/',
-      statusCode: 307,
-    };
+  async ftCallback(@Req() req) {
+    if (req.user) {
+      return {
+        url: 'http://localhost:4212/',
+        statusCode: 307,
+      };
+    }
   }
 }

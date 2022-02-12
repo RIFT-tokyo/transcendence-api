@@ -37,4 +37,6 @@ export class User {
   @UpdateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
   updated_at: string;
+
+  // 42ID
 }
