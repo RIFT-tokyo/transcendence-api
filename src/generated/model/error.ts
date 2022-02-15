@@ -11,9 +11,8 @@
  */
 
 
-export interface RequestUser { 
-    username?: string;
-    display_name?: string;
-    status_message?: string;
+export interface ModelError { 
+    status_code?: number;
+    mesasge?: string;
 }
 
