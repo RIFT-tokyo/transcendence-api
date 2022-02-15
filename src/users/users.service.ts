@@ -13,6 +13,9 @@ export class UsersService {
   ) {}
 
   private async createHashedPassword(password: string) {
+    if (password === undefined) {
+      return null;
+    }
     return await bcrypt.hash(password, Number(process.env.HASH_SALT));
   }
 
