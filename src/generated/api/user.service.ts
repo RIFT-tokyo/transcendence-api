@@ -41,6 +41,42 @@ export class UserService {
     }
 
     /**
+     * Delete a user profile image
+     * 
+     * @param userID 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public deleteUsersUserIDImages(userID: number, ): Observable<AxiosResponse<any>>;
+    public deleteUsersUserIDImages(userID: number, ): Observable<any> {
+
+        if (userID === null || userID === undefined) {
+            throw new Error('Required parameter userID was null or undefined when calling deleteUsersUserIDImages.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        return this.httpClient.delete<any>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/images`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
      * Delete a user
      * 
      * @param userID 
@@ -256,6 +292,44 @@ export class UserService {
         }
         return this.httpClient.post<ResponseUser>(`${this.basePath}/users`,
             requestUser,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * Upload a user profile image
+     * 
+     * @param userID 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public postUsersUserIDImages(userID: number, ): Observable<AxiosResponse<any>>;
+    public postUsersUserIDImages(userID: number, ): Observable<any> {
+
+        if (userID === null || userID === undefined) {
+            throw new Error('Required parameter userID was null or undefined when calling postUsersUserIDImages.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'multipart/form-data'
+        ];
+        return this.httpClient.post<any>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/images`,
+            null,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers

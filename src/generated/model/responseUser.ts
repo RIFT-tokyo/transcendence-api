@@ -25,7 +25,6 @@ export interface ResponseUser {
     following: number;
     created_at: string;
     updated_at: string;
-    ft_id?: number;
 }
 export namespace ResponseUser {
     export type StatusEnum = 'online' | 'offline' | 'game';
