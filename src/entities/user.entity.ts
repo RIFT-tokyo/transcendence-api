@@ -19,7 +19,7 @@ export class User {
   password: string;
 
   @Column({ unique: true, nullable: true })
-  ft_id: number;
+  intra_id: number;
 
   @Column({ nullable: true })
   display_name: string;

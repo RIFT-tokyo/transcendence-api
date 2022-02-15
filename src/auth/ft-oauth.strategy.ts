@@ -24,9 +24,8 @@ export class FtOauthStrategy extends PassportStrategy(Strategy) {
       username: profile.username,
       display_name: profile.displayName,
       profile_image: profile.photos[0].value,
-      status_message: "I'm feeling lucky.",
       password: 'password',
-      ft_id: profile.id,
+      intra_id: profile.id,
     };
 
     const user = await this.authService.validateFtUser(userData);
