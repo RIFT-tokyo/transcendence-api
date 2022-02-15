@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IsDate } from 'class-validator';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -16,9 +17,11 @@ export class User {
   username: string;
 
   @Column({ nullable: true })
+  @Exclude()
   password: string;
 
   @Column({ unique: true, nullable: true })
+  @Exclude()
   intra_id: number;
 
   @Column({ nullable: true })

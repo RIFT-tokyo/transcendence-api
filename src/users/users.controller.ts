@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -8,6 +9,7 @@ import {
   Post,
   Put,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
@@ -15,6 +17,7 @@ import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { ResponseUser } from '../generated/model/models';
 
 @Controller('users')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -22,12 +25,7 @@ export class UsersController {
   @Get(':id')
   async getUser(@Param('id') id: number): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(id);
-    const { password, ...others } = user;
-    return {
-      ...others,
-      followers: 42,
-      following: 42,
-    };
+    return Object.assign(user, { followers: 42, following: 42 });
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -36,12 +34,7 @@ export class UsersController {
     @Param('username') username: string,
   ): Promise<ResponseUser> {
     const user = await this.usersService.findUserByUsername(username);
-    const { password, ...others } = user;
-    return {
-      ...others,
-      followers: 42,
-      following: 42,
-    };
+    return Object.assign(user, { followers: 42, following: 42 });
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -57,12 +50,7 @@ export class UsersController {
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUser> {
     const user = await this.usersService.updateUser(id, userData);
-    const { password, ...others } = user;
-    return {
-      ...others,
-      followers: 42,
-      following: 42,
-    };
+    return Object.assign(user, { followers: 42, following: 42 });
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -70,12 +58,7 @@ export class UsersController {
   async index(): Promise<ResponseUser[]> {
     const users = await this.usersService.findAll();
     const res = users.map((user) => {
-      const { password, ...others } = user;
-      return {
-        ...others,
-        followers: 42,
-        following: 42,
-      };
+      return Object.assign(user, { followers: 42, following: 42 });
     });
     return res;
   }
@@ -86,11 +69,6 @@ export class UsersController {
       throw new BadRequestException('password required');
     }
     const user = await this.usersService.createUser(userData);
-    const { password, ...others } = user;
-    return {
-      ...others,
-      followers: 42,
-      following: 42,
-    };
+    return Object.assign(user, { followers: 42, following: 42 });
   }
 }
