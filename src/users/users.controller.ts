@@ -7,14 +7,12 @@ import {
   Param,
   Post,
   Put,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { ResponseUser } from '../generated/model/models';
-import { User } from '../entities/user.entity';
 
 @Controller('users')
 export class UsersController {
