@@ -15,17 +15,27 @@ import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { ResponseUser } from '../generated/model/models';
+import { FollowsService } from '../follows/follows.service';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly followsService: FollowsService,
+  ) {}
 
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
   async getUser(@Param('id') id: number): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(id);
-    return Object.assign(user, { followers: 42, following: 42 });
+    const followewrIds = await this.followsService.findFollowers(id);
+    const followingIds = await this.followsService.findFollowing(id);
+    return {
+      ...user,
+      following: followingIds.length,
+      followers: followewrIds.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -34,7 +44,13 @@ export class UsersController {
     @Param('username') username: string,
   ): Promise<ResponseUser> {
     const user = await this.usersService.findUserByUsername(username);
-    return Object.assign(user, { followers: 42, following: 42 });
+    const followewrIds = await this.followsService.findFollowers(user.id);
+    const followingIds = await this.followsService.findFollowing(user.id);
+    return {
+      ...user,
+      following: followingIds.length,
+      followers: followewrIds.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -50,17 +66,30 @@ export class UsersController {
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUser> {
     const user = await this.usersService.updateUser(id, userData);
-    return Object.assign(user, { followers: 42, following: 42 });
+    const followerIds = await this.followsService.findFollowers(user.id);
+    const followingIds = await this.followsService.findFollowing(user.id);
+    return {
+      ...user,
+      following: followingIds.length,
+      followers: followerIds.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get()
   async index(): Promise<ResponseUser[]> {
     const users = await this.usersService.findAll();
-    const res = users.map((user) => {
-      return Object.assign(user, { followers: 42, following: 42 });
-    });
-    return res;
+    return await Promise.all(
+      users.map(async (user) => {
+        const followerIds = await this.followsService.findFollowers(user.id);
+        const followingIds = await this.followsService.findFollowing(user.id);
+        return {
+          ...user,
+          following: followingIds.length,
+          followers: followerIds.length,
+        };
+      }),
+    );
   }
 
   @Post()
@@ -69,6 +98,68 @@ export class UsersController {
       throw new BadRequestException('password required');
     }
     const user = await this.usersService.createUser(userData);
-    return Object.assign(user, { followers: 42, following: 42 });
+    const followewrIds = await this.followsService.findFollowers(user.id);
+    const followingIds = await this.followsService.findFollowing(user.id);
+    return {
+      ...user,
+      following: followingIds.length,
+      followers: followewrIds.length,
+    };
+  }
+
+  @Get(':id/follows')
+  async getFollowings(@Param('id') id: number): Promise<ResponseUser[]> {
+    const followingIds = await this.followsService.findFollowing(id);
+    const users = await this.usersService.findUsersByIds(followingIds);
+    return await Promise.all(
+      users.map(async (user) => {
+        const followerIds = await this.followsService.findFollowers(user.id);
+        const followingIds = await this.followsService.findFollowing(user.id);
+        return {
+          ...user,
+          following: followingIds.length,
+          followers: followerIds.length,
+        };
+      }),
+    );
+  }
+
+  @Get(':id/following')
+  async getFollowing(@Param('id') id: number): Promise<ResponseUser[]> {
+    const follwerIds = await this.followsService.findFollowers(id);
+    const users = await this.usersService.findUsersByIds(follwerIds);
+    return await Promise.all(
+      users.map(async (user) => {
+        const followerIds = await this.followsService.findFollowers(user.id);
+        const followingIds = await this.followsService.findFollowing(user.id);
+        return {
+          ...user,
+          following: followingIds.length,
+          followers: followerIds.length,
+        };
+      }),
+    );
+  }
+
+  @Put('following/:id')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async follow(@Param('id') id: number): Promise<void> {
+    return;
+  }
+
+  @Delete('following/:id')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async unfollow(@Param('id') id: number): Promise<void> {
+    return;
+  }
+
+  @Get(':id/following/:targetId')
+  async isFollowing(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Param('id') userId: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Param('targetId') targetUserId: number,
+  ): Promise<void> {
+    return;
   }
 }
