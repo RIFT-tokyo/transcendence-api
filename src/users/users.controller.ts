@@ -5,9 +5,11 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -70,5 +72,41 @@ export class UsersController {
     }
     const user = await this.usersService.createUser(userData);
     return Object.assign(user, { followers: 42, following: 42 });
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('/users/:id/followers')
+  async getFollowers(@Param('id') id: number): Promise<ResponseUser[]> {
+    return [];
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('/users/:id/following')
+  async getFollowing(@Param('id') id: number): Promise<ResponseUser[]> {
+    return [];
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Put('/users/following/:id')
+  @HttpCode(204)
+  async followUser(@Req() request, @Param('id') id: number): Promise<void> {
+    return;
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Delete('/users/following/:id')
+  @HttpCode(204)
+  async unfollowUser(@Req() request, @Param('id') id: number): Promise<void> {
+    return;
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('/users/:id/following/:targetId')
+  @HttpCode(204)
+  async isFollowing(
+    @Param('id') id: number,
+    @Param('targetId') targetId: number,
+  ): Promise<void> {
+    return;
   }
 }
