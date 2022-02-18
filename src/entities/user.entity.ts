@@ -38,6 +38,7 @@ export class User {
   @Column({ nullable: true })
   status_message: string;
 
+  // https://github.com/typeorm/typeorm/issues/1511#issuecomment-360707084
   @ManyToMany(() => User, (user) => user.following)
   @JoinTable()
   followers: User[];

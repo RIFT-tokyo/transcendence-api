@@ -24,8 +24,11 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-
-    return user;
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   async findUserByUsername(username: string) {
@@ -33,11 +36,20 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return user;
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   async findAll() {
-    return await this.userRepository.find();
+    const users = await this.userRepository.find();
+    return users.map((user) => ({
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    }));
   }
 
   async deleteUser(id: number) {
@@ -45,17 +57,20 @@ export class UsersService {
     if (result.affected == 0) {
       throw new NotFoundException();
     }
-
     return;
   }
 
-  async updateUser(id: number, user: UpdateUserDTO) {
-    const result = await this.userRepository.update(id, user);
+  async updateUser(id: number, userData: UpdateUserDTO) {
+    const result = await this.userRepository.update(id, userData);
     if (result.affected == 0) {
       throw new NotFoundException();
     }
-
-    return await this.userRepository.findOne(id);
+    const user = await this.userRepository.findOne(id);
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   async createUser(userData: CreateUserDTO) {
@@ -64,7 +79,67 @@ export class UsersService {
       password: await this.createHashedPassword(userData.password),
     });
     const id = result.identifiers[0].id;
+    const user = await this.userRepository.findOne(id);
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
+  }
 
-    return await this.userRepository.findOne(id);
+  async getFollowers(id: number) {
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return user.followers.map((u) => ({
+      ...u,
+      followers: u.followers.length,
+      following: u.following.length,
+    }));
+  }
+
+  async getFollowing(id: number) {
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return user.following.map((u) => ({
+      ...u,
+      followers: u.followers.length,
+      following: u.following.length,
+    }));
+  }
+
+  async follow(id: number, targetId: number) {
+    const user = await this.userRepository.findOne(id);
+    const targetUser = await this.userRepository.findOne(targetId);
+    if (!user || !targetUser) {
+      throw new NotFoundException();
+    }
+    user.following.push(targetUser);
+    const ret = await this.userRepository.save(user);
+    return ret ? true : false;
+  }
+
+  async unFollow(id: number, targetId: number) {
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    const [targetUser] = user.following.filter((u) => u.id === targetId);
+    if (!targetUser) {
+      throw new NotFoundException();
+    }
+    const ret = user.following.splice(user.following.indexOf(targetUser), 1);
+    return ret.length > 0;
+  }
+
+  async isFollowing(id: number, targetId: number) {
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return user.following.some((u) => u.id === targetId);
   }
 }
