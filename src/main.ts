@@ -23,6 +23,8 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  app.setGlobalPrefix('api');
+
   await app.listen(3000);
 }
 bootstrap();
