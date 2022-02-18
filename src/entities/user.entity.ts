@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { IsDate } from 'class-validator';
 import { Exclude } from 'class-transformer';
@@ -35,6 +37,13 @@ export class User {
 
   @Column({ nullable: true })
   status_message: string;
+
+  @ManyToMany(() => User, (user) => user.following)
+  @JoinTable()
+  followers: User[];
+
+  @ManyToMany(() => User, (user) => user.followers)
+  following: User[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
