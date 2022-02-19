@@ -21,8 +21,8 @@ export interface ResponseUser {
     profile_image: string;
     status: ResponseUser.StatusEnum;
     status_message: string;
-    followers: number;
-    following: number;
+    followers?: number;
+    following?: number;
     created_at: string;
     updated_at: string;
 }
