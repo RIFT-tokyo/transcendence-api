@@ -102,6 +102,9 @@ export class UsersService {
   }
 
   async follow(id: number, targetId: number) {
+    if (id === targetId) {
+      throw new NotFoundException();
+    }
     const user = await this.userRepository.findOne(
       { id },
       { relations: ['following'] },
