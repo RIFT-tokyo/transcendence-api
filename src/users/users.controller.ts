@@ -29,8 +29,8 @@ export class UsersController {
     const user = await this.usersService.findUserById(id);
     return {
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     };
   }
 
@@ -42,8 +42,8 @@ export class UsersController {
     const user = await this.usersService.findUserByUsername(username);
     return {
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     };
   }
 
@@ -62,8 +62,8 @@ export class UsersController {
     const user = await this.usersService.updateUser(id, userData);
     return {
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     }
   }
 
@@ -73,8 +73,8 @@ export class UsersController {
     const users = await this.usersService.findAll();
     return users.map((user) => ({
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     }));
   }
 
@@ -86,8 +86,8 @@ export class UsersController {
     const user = await this.usersService.createUser(userData);
     return {
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     };
   }
 
@@ -97,8 +97,8 @@ export class UsersController {
     const users = await this.usersService.getFollowers(id);
     return users.map((user) => ({
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     }));
   }
 
@@ -108,8 +108,8 @@ export class UsersController {
     const users = await this.usersService.getFollowing(id);
     return users.map((user) => ({
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     }));
   }
 
