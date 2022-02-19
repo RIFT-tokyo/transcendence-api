@@ -20,11 +20,11 @@ export class User {
 
   @Column({ nullable: true })
   @Exclude()
-  password: string;
+  password: string | null;
 
   @Column({ unique: true, nullable: true })
   @Exclude()
-  intra_id: number;
+  intra_id: number | null;
 
   @Column({ nullable: true })
   display_name: string;
