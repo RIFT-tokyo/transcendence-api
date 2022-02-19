@@ -7,6 +7,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Req,
@@ -25,7 +26,7 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
-  async getUser(@Param('id') id: number): Promise<ResponseUser> {
+  async getUser(@Param('id', ParseIntPipe) id: number): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(id);
     return {
       ...user,
@@ -49,14 +50,14 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Delete(':id')
-  async deleteUser(@Param('id') id: number): Promise<void> {
+  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.deleteUser(id);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Put(':id')
   async updateUser(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUser> {
     const user = await this.usersService.updateUser(id, userData);
@@ -92,47 +93,57 @@ export class UsersController {
   }
 
   @UseGuards(AuthenticatedGuard)
-  @Get('/users/:id/followers')
-  async getFollowers(@Param('id') id: number): Promise<ResponseUser[]> {
+  @Get(':id/followers')
+  async getFollowers(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseUser[]> {
     const users = await this.usersService.getFollowers(id);
     return users.map((user) => ({
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     }));
   }
 
   @UseGuards(AuthenticatedGuard)
-  @Get('/users/:id/following')
-  async getFollowing(@Param('id') id: number): Promise<ResponseUser[]> {
+  @Get(':id/following')
+  async getFollowing(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseUser[]> {
     const users = await this.usersService.getFollowing(id);
     return users.map((user) => ({
       ...user,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers?.length,
+      following: user.following?.length,
     }));
   }
 
   @UseGuards(AuthenticatedGuard)
-  @Put('/users/following/:id')
+  @Put('following/:id')
   @HttpCode(204)
-  async followUser(@Req() request, @Param('id') id: number): Promise<void> {
+  async followUser(
+    @Req() request,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
     await this.usersService.follow(request.user, id);
   }
 
   @UseGuards(AuthenticatedGuard)
-  @Delete('/users/following/:id')
+  @Delete('following/:id')
   @HttpCode(204)
-  async unfollowUser(@Req() request, @Param('id') id: number): Promise<void> {
+  async unfollowUser(
+    @Req() request,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
     await this.usersService.unFollow(request.user, id);
   }
 
   @UseGuards(AuthenticatedGuard)
-  @Get('/users/:id/following/:targetId')
+  @Get(':id/following/:targetId')
   @HttpCode(204)
   async isFollowing(
-    @Param('id') id: number,
-    @Param('targetId') targetId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('targetId', ParseIntPipe) targetId: number,
   ): Promise<void> {
     await this.usersService.isFollowing(id, targetId);
   }
