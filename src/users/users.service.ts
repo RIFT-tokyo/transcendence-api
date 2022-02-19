@@ -140,6 +140,9 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return user.following.some((u) => u.id === targetId);
+    const ret = user.following.some((u) => u.id === targetId);
+    if (!ret) {
+      throw new NotFoundException();
+    }
   }
 }
