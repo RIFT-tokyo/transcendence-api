@@ -22,7 +22,7 @@ import { Configuration } from '../configuration';
 @Injectable()
 export class UserService {
 
-    protected basePath = 'http://localhost:4211';
+    protected basePath = 'http://localhost:4211/api';
     public defaultHeaders: Record<string,string> = {};
     public configuration = new Configuration();
 
