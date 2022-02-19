@@ -123,16 +123,20 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    const [targetUser] = user.following.filter((u) => u.id === targetId);
-    if (!targetUser) {
+    const targetUserIndex = user.following.findIndex((u) => u.id === targetId);
+    if (targetUserIndex < 0) {
       throw new NotFoundException();
     }
-    const ret = user.following.splice(user.following.indexOf(targetUser), 1);
-    return ret.length > 0;
+    user.following.splice(targetUserIndex, 1);
+    const ret = await this.userRepository.save(user);
+    return !!ret;
   }
 
   async isFollowing(id: number, targetId: number) {
-    const user = await this.userRepository.findOne(id);
+    const user = await this.userRepository.findOne(
+      { id },
+      { relations: ['following'] },
+    );
     if (!user) {
       throw new NotFoundException();
     }
