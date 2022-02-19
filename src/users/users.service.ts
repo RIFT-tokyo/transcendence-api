@@ -24,11 +24,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return user;
   }
 
   async findUserByUsername(username: string) {
@@ -36,20 +32,12 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return user;
   }
 
   async findAll() {
     const users = await this.userRepository.find();
-    return users.map((user) => ({
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    }));
+    return users;
   }
 
   async deleteUser(id: number) {
@@ -65,12 +53,7 @@ export class UsersService {
     if (result.affected == 0) {
       throw new NotFoundException();
     }
-    const user = await this.userRepository.findOne(id);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return await this.userRepository.findOne(id);
   }
 
   async createUser(userData: CreateUserDTO) {
@@ -79,12 +62,7 @@ export class UsersService {
       password: await this.createHashedPassword(userData.password),
     });
     const id = result.identifiers[0].id;
-    const user = await this.userRepository.findOne(id);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return await this.userRepository.findOne(id);
   }
 
   async getFollowers(id: number) {
@@ -92,11 +70,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return user.followers.map((u) => ({
-      ...u,
-      followers: u.followers.length,
-      following: u.following.length,
-    }));
+    return user.followers;
   }
 
   async getFollowing(id: number) {
@@ -104,11 +78,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return user.following.map((u) => ({
-      ...u,
-      followers: u.followers.length,
-      following: u.following.length,
-    }));
+    return user.following;
   }
 
   async follow(id: number, targetId: number) {
@@ -119,7 +89,7 @@ export class UsersService {
     }
     user.following.push(targetUser);
     const ret = await this.userRepository.save(user);
-    return ret ? true : false;
+    return !!ret;
   }
 
   async unFollow(id: number, targetId: number) {

@@ -26,7 +26,12 @@ export class UsersController {
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
   async getUser(@Param('id') id: number): Promise<ResponseUser> {
-    return await this.usersService.findUserById(id);
+    const user = await this.usersService.findUserById(id);
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -34,7 +39,12 @@ export class UsersController {
   async getUserByUsername(
     @Param('username') username: string,
   ): Promise<ResponseUser> {
-    return await this.usersService.findUserByUsername(username);
+    const user = await this.usersService.findUserByUsername(username);
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -49,13 +59,23 @@ export class UsersController {
     @Param('id') id: number,
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUser> {
-    return this.usersService.updateUser(id, userData);
+    const user = await this.usersService.updateUser(id, userData);
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get()
   async index(): Promise<ResponseUser[]> {
-    return await this.usersService.findAll();
+    const users = await this.usersService.findAll();
+    return users.map((user) => ({
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    }));
   }
 
   @Post()
@@ -63,19 +83,34 @@ export class UsersController {
     if (userData.password === undefined) {
       throw new BadRequestException('password required');
     }
-    return await this.usersService.createUser(userData);
+    const user = await this.usersService.createUser(userData);
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get('/users/:id/followers')
   async getFollowers(@Param('id') id: number): Promise<ResponseUser[]> {
-    return await this.usersService.getFollowers(id);
+    const users = await this.usersService.getFollowers(id);
+    return users.map((user) => ({
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    }));
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get('/users/:id/following')
   async getFollowing(@Param('id') id: number): Promise<ResponseUser[]> {
-    return await this.usersService.getFollowing(id);
+    const users = await this.usersService.getFollowing(id);
+    return users.map((user) => ({
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    }));
   }
 
   @UseGuards(AuthenticatedGuard)
