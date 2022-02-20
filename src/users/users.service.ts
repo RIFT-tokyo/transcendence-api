@@ -136,14 +136,8 @@ export class UsersService {
   }
 
   async isFollowing(id: number, targetId: number) {
-    const user = await this.userRepository.findOne(
-      { id },
-      { relations: ['following'] },
-    );
-    if (!user) {
-      throw new NotFoundException();
-    }
-    const ret = user.following.some((u) => u.id === targetId);
+    const followingUsers = await this.getFollowing(id);
+    const ret = followingUsers.some((u) => u.id === targetId);
     if (!ret) {
       throw new NotFoundException();
     }
