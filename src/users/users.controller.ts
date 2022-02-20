@@ -5,9 +5,12 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
+  ParseIntPipe,
   Post,
   Put,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -23,9 +26,13 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
-  async getUser(@Param('id') id: number): Promise<ResponseUser> {
+  async getUser(@Param('id', ParseIntPipe) id: number): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(id);
-    return Object.assign(user, { followers: 42, following: 42 });
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -34,33 +41,42 @@ export class UsersController {
     @Param('username') username: string,
   ): Promise<ResponseUser> {
     const user = await this.usersService.findUserByUsername(username);
-    return Object.assign(user, { followers: 42, following: 42 });
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
   @Delete(':id')
-  async deleteUser(@Param('id') id: number): Promise<void> {
+  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.deleteUser(id);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Put(':id')
   async updateUser(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUser> {
     const user = await this.usersService.updateUser(id, userData);
-    return Object.assign(user, { followers: 42, following: 42 });
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get()
   async index(): Promise<ResponseUser[]> {
     const users = await this.usersService.findAll();
-    const res = users.map((user) => {
-      return Object.assign(user, { followers: 42, following: 42 });
-    });
-    return res;
+    return users.map((user) => ({
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    }));
   }
 
   @Post()
@@ -69,6 +85,66 @@ export class UsersController {
       throw new BadRequestException('password required');
     }
     const user = await this.usersService.createUser(userData);
-    return Object.assign(user, { followers: 42, following: 42 });
+    return {
+      ...user,
+      followers: user.followers.length,
+      following: user.following.length,
+    };
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get(':id/followers')
+  async getFollowers(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseUser[]> {
+    const users = await this.usersService.getFollowers(id);
+    return users.map((user) => ({
+      ...user,
+      followers: user.followers?.length,
+      following: user.following?.length,
+    }));
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get(':id/following')
+  async getFollowing(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseUser[]> {
+    const users = await this.usersService.getFollowing(id);
+    return users.map((user) => ({
+      ...user,
+      followers: user.followers?.length,
+      following: user.following?.length,
+    }));
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Put('following/:id')
+  @HttpCode(204)
+  async followUser(
+    @Req() request,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.usersService.follow(request.user, id);
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Delete('following/:id')
+  @HttpCode(204)
+  async unfollowUser(
+    @Req() request,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.usersService.unFollow(request.user, id);
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get(':id/following/:targetId')
+  @HttpCode(204)
+  async isFollowing(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ): Promise<void> {
+    await this.usersService.isFollowing(id, targetId);
   }
 }

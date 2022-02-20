@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { IsDate } from 'class-validator';
 import { Exclude } from 'class-transformer';
@@ -18,11 +20,11 @@ export class User {
 
   @Column({ nullable: true })
   @Exclude()
-  password: string;
+  password: string | null;
 
   @Column({ unique: true, nullable: true })
   @Exclude()
-  intra_id: number;
+  intra_id: number | null;
 
   @Column({ nullable: true })
   display_name: string;
@@ -35,6 +37,14 @@ export class User {
 
   @Column({ nullable: true })
   status_message: string;
+
+  // https://github.com/typeorm/typeorm/issues/1511#issuecomment-360707084
+  @ManyToMany(() => User, (user) => user.following)
+  @JoinTable()
+  followers: User[];
+
+  @ManyToMany(() => User, (user) => user.followers)
+  following: User[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
