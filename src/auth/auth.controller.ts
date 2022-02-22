@@ -6,7 +6,7 @@ import { FtOauthGuard } from '../common/guards/ft-oauth.guard';
 export class AuthController {
   @UseGuards(LoginGuard)
   @Post('login')
-  @Redirect(process.env.FRONT_HOME_URL, 307)
+  @Redirect(process.env.FRONT_INDEX_URL, 307)
   login() {
     // redirect client home
   }
@@ -19,7 +19,7 @@ export class AuthController {
 
   @UseGuards(FtOauthGuard)
   @Get('callback')
-  @Redirect(process.env.FRONT_HOME_URL, 307)
+  @Redirect(process.env.FRONT_INDEX_URL, 307)
   async ftCallback() {
     // redirect client home
   }
