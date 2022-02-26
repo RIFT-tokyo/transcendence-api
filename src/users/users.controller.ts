@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -8,13 +7,12 @@ import {
   HttpCode,
   Param,
   ParseIntPipe,
-  Post,
   Put,
   Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateUserDTO, UpdateUserDTO } from './users.dto';
+import { UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { User as ResponseUser } from '../generated/model/models';
@@ -70,15 +68,6 @@ export class UsersController {
   async index(): Promise<ResponseUser[]> {
     const users = await this.usersService.findAll();
     return users.map(this.responseUser);
-  }
-
-  @Post()
-  async create(@Body() userData: CreateUserDTO): Promise<ResponseUser> {
-    if (userData.password === undefined) {
-      throw new BadRequestException('password required');
-    }
-    const user = await this.usersService.createUser(userData);
-    return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
