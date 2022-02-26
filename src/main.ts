@@ -7,8 +7,9 @@ import * as passport from 'passport';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: '*',
+    origin: 'http://localhost:4212',
     allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept',
+    credentials: true,
   });
 
   app.use(
