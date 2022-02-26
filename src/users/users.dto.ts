@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { RequestUser } from '../generated/model/models';
+import { User } from '../generated/model/models';
 
-export class CreateUserDTO implements RequestUser {
+export class CreateUserDTO implements User {
   username: string;
   display_name: string;
   profile_image: string;

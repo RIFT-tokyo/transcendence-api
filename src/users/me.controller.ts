@@ -7,7 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { ResponseUser } from '../generated/model/models';
+import { User as ResponseUser } from '../generated/model/models';
 import { UsersService } from './users.service';
 
 @Controller('me')

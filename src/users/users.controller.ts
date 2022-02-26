@@ -17,22 +17,27 @@ import {
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { ResponseUser } from '../generated/model/models';
+import { User as ResponseUser } from '../generated/model/models';
+import { User } from '../entities/user.entity';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  private responseUser(user: User): ResponseUser {
+    return {
+      ...user,
+      followers: user.followers?.length,
+      following: user.following?.length,
+    };
+  }
+
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(id);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -41,11 +46,7 @@ export class UsersController {
     @Param('username') username: string,
   ): Promise<ResponseUser> {
     const user = await this.usersService.findUserByUsername(username);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -61,22 +62,14 @@ export class UsersController {
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUser> {
     const user = await this.usersService.updateUser(id, userData);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get()
   async index(): Promise<ResponseUser[]> {
     const users = await this.usersService.findAll();
-    return users.map((user) => ({
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    }));
+    return users.map(this.responseUser);
   }
 
   @Post()
@@ -85,11 +78,7 @@ export class UsersController {
       throw new BadRequestException('password required');
     }
     const user = await this.usersService.createUser(userData);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -98,11 +87,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseUser[]> {
     const users = await this.usersService.getFollowers(id);
-    return users.map((user) => ({
-      ...user,
-      followers: user.followers?.length,
-      following: user.following?.length,
-    }));
+    return users.map(this.responseUser);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -111,11 +96,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseUser[]> {
     const users = await this.usersService.getFollowing(id);
-    return users.map((user) => ({
-      ...user,
-      followers: user.followers?.length,
-      following: user.following?.length,
-    }));
+    return users.map(this.responseUser);
   }
 
   @UseGuards(AuthenticatedGuard)

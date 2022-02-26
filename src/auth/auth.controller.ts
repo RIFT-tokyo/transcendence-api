@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Redirect, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { LoginGuard } from '../common/guards/login.guard';
 import { FtOauthGuard } from '../common/guards/ft-oauth.guard';
 
@@ -6,7 +6,7 @@ import { FtOauthGuard } from '../common/guards/ft-oauth.guard';
 export class AuthController {
   @UseGuards(LoginGuard)
   @Post('login')
-  @Redirect(process.env.FRONT_INDEX_URL, 307)
+  @HttpCode(204)
   login() {
     // redirect client home
   }
@@ -19,7 +19,7 @@ export class AuthController {
 
   @UseGuards(FtOauthGuard)
   @Get('callback')
-  @Redirect(process.env.FRONT_INDEX_URL, 307)
+  @HttpCode(204)
   async ftCallback() {
     // redirect client home
   }
