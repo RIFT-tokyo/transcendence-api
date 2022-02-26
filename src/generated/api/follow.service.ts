@@ -14,7 +14,7 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
-import { ResponseUser } from '../model/responseUser';
+import { User } from '../model/user';
 import { Configuration } from '../configuration';
 
 
@@ -46,7 +46,7 @@ export class FollowService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public deleteUsersFollowingUserID(userID: number, ): Observable<AxiosResponse<Error>>;
+    public deleteUsersFollowingUserID(userID: number, ): Observable<AxiosResponse<any>>;
     public deleteUsersFollowingUserID(userID: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -55,7 +55,6 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -68,7 +67,7 @@ export class FollowService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.delete<Error>(`${this.basePath}/users/following/${encodeURIComponent(String(userID))}`,
+        return this.httpClient.delete<any>(`${this.basePath}/users/following/${encodeURIComponent(String(userID))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -84,7 +83,7 @@ export class FollowService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserIDFollowing(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<Array<ResponseUser>>>;
+    public getUsersUserIDFollowing(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<Array<User>>>;
     public getUsersUserIDFollowing(userID: number, limit?: number, offset?: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -103,7 +102,6 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -116,7 +114,7 @@ export class FollowService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<ResponseUser>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/following`,
+        return this.httpClient.get<Array<User>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/following`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -132,7 +130,7 @@ export class FollowService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserIDFollowingTargetUserID(userID: number, targetUserID: number, ): Observable<AxiosResponse<object>>;
+    public getUsersUserIDFollowingTargetUserID(userID: number, targetUserID: number, ): Observable<AxiosResponse<any>>;
     public getUsersUserIDFollowingTargetUserID(userID: number, targetUserID: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -145,7 +143,6 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -158,7 +155,7 @@ export class FollowService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<object>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/following/${encodeURIComponent(String(targetUserID))}`,
+        return this.httpClient.get<any>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/following/${encodeURIComponent(String(targetUserID))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -174,7 +171,7 @@ export class FollowService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserIdFriends(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<Array<ResponseUser>>>;
+    public getUsersUserIdFriends(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<Array<User>>>;
     public getUsersUserIdFriends(userID: number, limit?: number, offset?: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -193,7 +190,6 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -206,7 +202,7 @@ export class FollowService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<ResponseUser>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/followers`,
+        return this.httpClient.get<Array<User>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/followers`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -230,7 +226,6 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
