@@ -2,6 +2,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  InternalServerErrorException,
   Req,
   UseGuards,
   UseInterceptors,
@@ -19,6 +20,9 @@ export class MeController {
   @Get()
   async getMe(@Req() request): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(request.user);
+    if (!user) {
+      throw new InternalServerErrorException('User not found');
+    }
     return {
       ...user,
       followers: user.followers.length,

@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Put,
@@ -35,6 +37,9 @@ export class UsersController {
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return this.responseUser(user);
   }
 
@@ -44,13 +49,19 @@ export class UsersController {
     @Param('username') username: string,
   ): Promise<ResponseUser> {
     const user = await this.usersService.findUserByUsername(username);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Delete(':id')
   async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.usersService.deleteUser(id);
+    const ret = await this.usersService.deleteUser(id);
+    if (ret.affected === 0) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -60,6 +71,9 @@ export class UsersController {
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUser> {
     const user = await this.usersService.updateUser(id, userData);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return this.responseUser(user);
   }
 
@@ -76,6 +90,9 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseUser[]> {
     const users = await this.usersService.getFollowers(id);
+    if (!users) {
+      throw new NotFoundException('User not found');
+    }
     return users.map(this.responseUser);
   }
 
@@ -85,6 +102,9 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseUser[]> {
     const users = await this.usersService.getFollowing(id);
+    if (!users) {
+      throw new NotFoundException('User not found');
+    }
     return users.map(this.responseUser);
   }
 
@@ -95,7 +115,13 @@ export class UsersController {
     @Req() request,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {
-    await this.usersService.follow(request.user, id);
+    if (request.user === id) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+    const ret = await this.usersService.follow(request.user, id);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -105,7 +131,13 @@ export class UsersController {
     @Req() request,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {
-    await this.usersService.unFollow(request.user, id);
+    if (request.user === id) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+    const ret = await this.usersService.unFollow(request.user, id);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -115,6 +147,12 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Param('targetId', ParseIntPipe) targetId: number,
   ): Promise<void> {
-    await this.usersService.isFollowing(id, targetId);
+    if (id === targetId) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+    const ret = await this.usersService.isFollowing(id, targetId);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
   }
 }
