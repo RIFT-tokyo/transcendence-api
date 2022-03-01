@@ -11,13 +11,17 @@ import {
   Post,
   Put,
   Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { ResponseUser } from '../generated/model/models';
+import { S3 } from 'aws-sdk';
+import { v4 as uuid } from 'uuid';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -90,6 +94,26 @@ export class UsersController {
       followers: user.followers.length,
       following: user.following.length,
     };
+  }
+
+  @Post(':id/images')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfileImage(@UploadedFile() file: Express.Multer.File) {
+    const s3 = new S3({
+      accessKeyId: 'minio',
+      secretAccessKey: 'minio123',
+      endpoint: 'http://minio:9000',
+      s3ForcePathStyle: true,
+    });
+    console.log(file);
+    const uploadResult = await s3
+      .upload({
+        Bucket: 'static',
+        Body: file.buffer,
+        Key: `${uuid()}-${file.originalname}`,
+      })
+      .promise();
+    console.log(uploadResult);
   }
 
   @UseGuards(AuthenticatedGuard)
