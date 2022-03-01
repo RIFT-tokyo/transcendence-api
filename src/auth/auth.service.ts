@@ -8,19 +8,34 @@ import { Login } from '../generated/model/login';
 export class AuthService {
   constructor(private readonly usersService: UsersService) {}
 
-  private async createHashedPassword(password: string) {
-    if (password === undefined) {
+  async signup(login: Login) {
+    const user = await this.usersService.findUserByUsername(login.username);
+    if (user) {
       return null;
     }
-    return await bcrypt.hash(password, Number(process.env.HASH_SALT));
-  }
 
-  async signup(login: Login) {
+    const password = await bcrypt.hash(
+      login.password,
+      Number(process.env.HASH_SALT),
+    );
+
     const userData: CreateUserDTO = {
       username: login.username,
-      password: await this.createHashedPassword(login.password),
+      password: password,
     };
     return await this.usersService.createUser(userData);
+  }
+
+  async login(login: Login) {
+    const user = await this.usersService.findUserByUsername(login.username);
+    if (!user) {
+      return null;
+    }
+    if (await bcrypt.compare(login.password, user.password)) {
+      user.password = undefined;
+      return user;
+    }
+    return null;
   }
 
   async validateUser(username: string, password: string) {
