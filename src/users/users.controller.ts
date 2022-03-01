@@ -10,7 +10,7 @@ import {
   Param,
   ParseIntPipe,
   Put,
-  Req,
+  Session,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -112,13 +112,13 @@ export class UsersController {
   @Put('following/:id')
   @HttpCode(204)
   async followUser(
-    @Req() request,
     @Param('id', ParseIntPipe) id: number,
+    @Session() session: any,
   ): Promise<void> {
-    if (request.user === id) {
+    if (session.userId === id) {
       throw new BadRequestException('You cannot follow yourself');
     }
-    const ret = await this.usersService.follow(request.user, id);
+    const ret = await this.usersService.follow(session.userId, id);
     if (!ret) {
       throw new NotFoundException('User not found');
     }
@@ -128,13 +128,13 @@ export class UsersController {
   @Delete('following/:id')
   @HttpCode(204)
   async unfollowUser(
-    @Req() request,
     @Param('id', ParseIntPipe) id: number,
+    @Session() session: any,
   ): Promise<void> {
-    if (request.user === id) {
+    if (session.userId === id) {
       throw new BadRequestException('You cannot follow yourself');
     }
-    const ret = await this.usersService.unFollow(request.user, id);
+    const ret = await this.usersService.unFollow(session.userId, id);
     if (!ret) {
       throw new NotFoundException('User not found');
     }
