@@ -24,7 +24,6 @@ import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { User as ResponseUser } from '../generated/model/models';
 import { User } from '../entities/user.entity';
 import { S3 } from 'aws-sdk';
-import { v4 as uuid } from 'uuid';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
