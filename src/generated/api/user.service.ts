@@ -14,8 +14,7 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
-import { RequestUser } from '../model/requestUser';
-import { ResponseUser } from '../model/responseUser';
+import { User } from '../model/user';
 import { Configuration } from '../configuration';
 
 
@@ -56,7 +55,6 @@ export class UserService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -92,7 +90,6 @@ export class UserService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -118,12 +115,11 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getMe(): Observable<AxiosResponse<ResponseUser>>;
+    public getMe(): Observable<AxiosResponse<User>>;
     public getMe(): Observable<any> {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -136,7 +132,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<ResponseUser>(`${this.basePath}/me`,
+        return this.httpClient.get<User>(`${this.basePath}/me`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -151,7 +147,7 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsers(limit?: number, offset?: number, ): Observable<AxiosResponse<Array<ResponseUser>>>;
+    public getUsers(limit?: number, offset?: number, ): Observable<AxiosResponse<Array<User>>>;
     public getUsers(limit?: number, offset?: number, ): Observable<any> {
 
 
@@ -166,7 +162,6 @@ export class UserService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -179,7 +174,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<ResponseUser>>(`${this.basePath}/users`,
+        return this.httpClient.get<Array<User>>(`${this.basePath}/users`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -194,7 +189,7 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserId(userID: number, ): Observable<AxiosResponse<ResponseUser>>;
+    public getUsersUserId(userID: number, ): Observable<AxiosResponse<User>>;
     public getUsersUserId(userID: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -203,7 +198,6 @@ export class UserService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -216,7 +210,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<ResponseUser>(`${this.basePath}/users/${encodeURIComponent(String(userID))}`,
+        return this.httpClient.get<User>(`${this.basePath}/users/${encodeURIComponent(String(userID))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -230,7 +224,7 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUsername(username: string, ): Observable<AxiosResponse<ResponseUser>>;
+    public getUsersUsername(username: string, ): Observable<AxiosResponse<User>>;
     public getUsersUsername(username: string, ): Observable<any> {
 
         if (username === null || username === undefined) {
@@ -239,7 +233,6 @@ export class UserService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -252,46 +245,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<ResponseUser>(`${this.basePath}/users/by/${encodeURIComponent(String(username))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers
-            }
-        );
-    }
-    /**
-     * Create new user
-     * 
-     * @param requestUser 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public postUsers(requestUser?: RequestUser, ): Observable<AxiosResponse<ResponseUser>>;
-    public postUsers(requestUser?: RequestUser, ): Observable<any> {
-
-
-        let headers = this.defaultHeaders;
-
-        // authentication (sessionAuth) required
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers['Accept'] = httpHeaderAcceptSelected;
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers['Content-Type'] = httpContentTypeSelected;
-        }
-        return this.httpClient.post<ResponseUser>(`${this.basePath}/users`,
-            requestUser,
+        return this.httpClient.get<User>(`${this.basePath}/users/by/${encodeURIComponent(String(username))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -314,7 +268,6 @@ export class UserService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -340,12 +293,12 @@ export class UserService {
      * Update a user
      * 
      * @param userID 
-     * @param requestUser 
+     * @param user 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public putUsersUserId(userID: number, requestUser?: RequestUser, ): Observable<AxiosResponse<ResponseUser>>;
-    public putUsersUserId(userID: number, requestUser?: RequestUser, ): Observable<any> {
+    public putUsersUserId(userID: number, user?: User, ): Observable<AxiosResponse<User>>;
+    public putUsersUserId(userID: number, user?: User, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
             throw new Error('Required parameter userID was null or undefined when calling putUsersUserId.');
@@ -354,7 +307,6 @@ export class UserService {
 
         let headers = this.defaultHeaders;
 
-        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -372,8 +324,8 @@ export class UserService {
         if (httpContentTypeSelected != undefined) {
             headers['Content-Type'] = httpContentTypeSelected;
         }
-        return this.httpClient.put<ResponseUser>(`${this.basePath}/users/${encodeURIComponent(String(userID))}`,
-            requestUser,
+        return this.httpClient.put<User>(`${this.basePath}/users/${encodeURIComponent(String(userID))}`,
+            user,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers

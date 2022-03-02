@@ -1,24 +1,28 @@
 import {
-  ClassSerializerInterceptor,
   Controller,
   Get,
-  Req,
+  InternalServerErrorException,
+  Session,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { ResponseUser } from '../generated/model/models';
+import { User as ResponseUser } from '../generated/model/models';
 import { UsersService } from './users.service';
+import { CurrentUserInterceptor } from '../common/guards/current-user.interceptor';
 
 @Controller('me')
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(CurrentUserInterceptor)
 export class MeController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  async getMe(@Req() request): Promise<ResponseUser> {
-    const user = await this.usersService.findUserById(request.user);
+  async getMe(@Session() session: any): Promise<ResponseUser> {
+    const user = await this.usersService.findUserById(session.userId);
+    if (!user) {
+      throw new InternalServerErrorException('User not found');
+    }
     return {
       ...user,
       followers: user.followers.length,

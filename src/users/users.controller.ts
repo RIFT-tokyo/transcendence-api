@@ -6,33 +6,41 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   ParseIntPipe,
-  Post,
   Put,
-  Req,
+  Session,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateUserDTO, UpdateUserDTO } from './users.dto';
+import { UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { ResponseUser } from '../generated/model/models';
+import { User as ResponseUser } from '../generated/model/models';
+import { User } from '../entities/user.entity';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  private responseUser(user: User): ResponseUser {
+    return {
+      ...user,
+      followers: user.followers?.length,
+      following: user.following?.length,
+    };
+  }
+
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(id);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -41,17 +49,19 @@ export class UsersController {
     @Param('username') username: string,
   ): Promise<ResponseUser> {
     const user = await this.usersService.findUserByUsername(username);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Delete(':id')
   async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.usersService.deleteUser(id);
+    const ret = await this.usersService.deleteUser(id);
+    if (ret.affected === 0) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -61,35 +71,17 @@ export class UsersController {
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUser> {
     const user = await this.usersService.updateUser(id, userData);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return this.responseUser(user);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get()
   async index(): Promise<ResponseUser[]> {
     const users = await this.usersService.findAll();
-    return users.map((user) => ({
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    }));
-  }
-
-  @Post()
-  async create(@Body() userData: CreateUserDTO): Promise<ResponseUser> {
-    if (userData.password === undefined) {
-      throw new BadRequestException('password required');
-    }
-    const user = await this.usersService.createUser(userData);
-    return {
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    };
+    return users.map(this.responseUser);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -98,11 +90,10 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseUser[]> {
     const users = await this.usersService.getFollowers(id);
-    return users.map((user) => ({
-      ...user,
-      followers: user.followers?.length,
-      following: user.following?.length,
-    }));
+    if (!users) {
+      throw new NotFoundException('User not found');
+    }
+    return users.map(this.responseUser);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -111,31 +102,42 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseUser[]> {
     const users = await this.usersService.getFollowing(id);
-    return users.map((user) => ({
-      ...user,
-      followers: user.followers?.length,
-      following: user.following?.length,
-    }));
+    if (!users) {
+      throw new NotFoundException('User not found');
+    }
+    return users.map(this.responseUser);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Put('following/:id')
   @HttpCode(204)
   async followUser(
-    @Req() request,
     @Param('id', ParseIntPipe) id: number,
+    @Session() session: any,
   ): Promise<void> {
-    await this.usersService.follow(request.user, id);
+    if (session.userId === id) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+    const ret = await this.usersService.follow(session.userId, id);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
   @Delete('following/:id')
   @HttpCode(204)
   async unfollowUser(
-    @Req() request,
     @Param('id', ParseIntPipe) id: number,
+    @Session() session: any,
   ): Promise<void> {
-    await this.usersService.unFollow(request.user, id);
+    if (session.userId === id) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+    const ret = await this.usersService.unFollow(session.userId, id);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -145,6 +147,12 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Param('targetId', ParseIntPipe) targetId: number,
   ): Promise<void> {
-    await this.usersService.isFollowing(id, targetId);
+    if (id === targetId) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+    const ret = await this.usersService.isFollowing(id, targetId);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
   }
 }
