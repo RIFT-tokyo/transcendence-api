@@ -97,23 +97,28 @@ export class UsersController {
   }
 
   @Post(':id/images')
+  @HttpCode(204)
   @UseInterceptors(FileInterceptor('file'))
-  async uploadProfileImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadProfileImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     const s3 = new S3({
-      accessKeyId: 'minio',
-      secretAccessKey: 'minio123',
-      endpoint: 'http://minio:9000',
+      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
+      endpoint: process.env.AWS_S3_ENDPOINT_URL,
       s3ForcePathStyle: true,
     });
-    console.log(file);
     const uploadResult = await s3
       .upload({
-        Bucket: 'static',
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
         Body: file.buffer,
         Key: `${uuid()}-${file.originalname}`,
       })
       .promise();
-    console.log(uploadResult);
+    await this.usersService.updateUser(id, {
+      profile_image: uploadResult.Location,
+    });
   }
 
   @UseGuards(AuthenticatedGuard)
