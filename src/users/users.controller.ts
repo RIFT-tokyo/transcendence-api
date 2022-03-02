@@ -14,7 +14,8 @@ import {
   UseGuards,
   UseInterceptors,
   Session,
-  Post
+  Post,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserDTO } from './users.dto';
@@ -89,13 +90,18 @@ export class UsersController {
     return users.map(this.responseUser);
   }
 
+  @UseGuards(AuthenticatedGuard)
   @Post(':id/images')
   @HttpCode(204)
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfileImage(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile() file: Express.Multer.File,
+    @Session() session: any,
   ) {
+    if (session.userId !== id) {
+      throw new BadRequestException('Not Authorized');
+    }
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
@@ -103,14 +109,61 @@ export class UsersController {
       s3ForcePathStyle: true,
     });
     const uploadResult = await s3
-      .upload({
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
-        Body: file.buffer,
-        Key: `${uuid()}-${file.originalname}`,
-      })
+      .upload(
+        {
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Body: file.buffer,
+          Key: `${id}-profile`,
+        },
+        function (err) {
+          if (err) {
+            throw new InternalServerErrorException(
+              'file upload failed: ' + err,
+            );
+          }
+        },
+      )
       .promise();
+
     await this.usersService.updateUser(id, {
       profile_image: uploadResult.Location,
+    });
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Delete(':id/images')
+  @HttpCode(204)
+  async deleteProfileImage(
+    @Param('id', ParseIntPipe) id: number,
+    @Session() session: any,
+  ) {
+    if (session.userId !== id) {
+      throw new BadRequestException('Not Authorized');
+    }
+    const s3 = new S3({
+      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
+      endpoint: process.env.AWS_S3_ENDPOINT_URL,
+      s3ForcePathStyle: true,
+    });
+    await s3
+      .deleteObject(
+        {
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: `${id}-profile`,
+        },
+        function (err) {
+          if (err) {
+            throw new InternalServerErrorException(
+              'file delete failed: ' + err,
+            );
+          }
+        },
+      )
+      .promise();
+
+    await this.usersService.updateUser(id, {
+      profile_image: null,
     });
   }
 

@@ -36,12 +36,8 @@
     "@types/connect-flash": "^0.0.37",
     "@types/cookie-session": "^2.0.44",
     "@types/express-handlebars": "^6.0.0",
-<<<<<<< HEAD
-    "@types/express-session": "^1.17.4",
     "@types/multer": "^1.4.7",
     "@types/uuid": "^8.3.4",
-=======
->>>>>>> main
     "all": "^0.0.0",
     "aws-sdk": "^2.1083.0",
     "bcrypt": "^5.0.1",
