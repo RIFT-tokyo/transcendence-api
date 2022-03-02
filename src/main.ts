@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
-import * as session from 'express-session';
-import * as passport from 'passport';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cookieSession = require('cookie-session');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,16 +13,12 @@ async function bootstrap() {
   });
 
   app.use(
-    session({
-      secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-      cookie: { maxAge: Number(process.env.SESSION_COOKIE_MAX_AGE) },
+    cookieSession({
+      name: 'session',
+      keys: [process.env.SESSION_SECRET],
+      maxAge: Number(process.env.SESSION_COOKIE_MAX_AGE),
     }),
   );
-
-  app.use(passport.initialize());
-  app.use(passport.session());
 
   app.setGlobalPrefix('api');
 

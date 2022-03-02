@@ -13,6 +13,6 @@
 
 export interface ModelError { 
     status_code?: number;
-    mesasge?: string;
+    message?: string;
 }
 
