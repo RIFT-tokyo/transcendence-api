@@ -101,6 +101,9 @@ export class UsersController {
     if (session.userId !== id) {
       throw new BadRequestException('Not Authorized');
     }
+    const mimeTypeSplited = file.mimetype.split('/');
+    const ext = mimeTypeSplited[mimeTypeSplited.length - 1];
+
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
@@ -112,7 +115,7 @@ export class UsersController {
         {
           Bucket: process.env.AWS_S3_BUCKET_NAME,
           Body: file.buffer,
-          Key: `${id}-profile`,
+          Key: `${id}-profile.${ext}`,
         },
         function (err) {
           if (err) {
@@ -139,6 +142,13 @@ export class UsersController {
     if (session.userId !== id) {
       throw new BadRequestException('Not Authorized');
     }
+    const user = await this.usersService.findUserById(id);
+    if (!user || !user.profile_image) {
+      throw new NotFoundException('user profile not found');
+    }
+    const profileImageSplited = user.profile_image.split('/');
+    const key = profileImageSplited[profileImageSplited.length - 1];
+
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
@@ -149,7 +159,7 @@ export class UsersController {
       .deleteObject(
         {
           Bucket: process.env.AWS_S3_BUCKET_NAME,
-          Key: `${id}-profile`,
+          Key: key,
         },
         function (err) {
           if (err) {
