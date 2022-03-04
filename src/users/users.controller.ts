@@ -10,15 +10,20 @@ import {
   Param,
   ParseIntPipe,
   Put,
-  Session,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
+  Session,
+  Post,
+  InternalServerErrorException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { User as ResponseUser } from '../generated/model/models';
 import { User } from '../entities/user.entity';
+import { S3 } from 'aws-sdk';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -31,6 +36,30 @@ export class UsersController {
       followers: user.followers?.length,
       following: user.following?.length,
     };
+  }
+
+  private async deleteS3Object(key: string) {
+    const s3 = new S3({
+      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
+      endpoint: process.env.AWS_S3_DOCKER_ENDPOINT_URL,
+      s3ForcePathStyle: true,
+    });
+    await s3
+      .deleteObject(
+        {
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: key,
+        },
+        function (err) {
+          if (err) {
+            throw new InternalServerErrorException(
+              'file delete failed: ' + err,
+            );
+          }
+        },
+      )
+      .promise();
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -82,6 +111,88 @@ export class UsersController {
   async index(): Promise<ResponseUser[]> {
     const users = await this.usersService.findAll();
     return users.map(this.responseUser);
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Post(':id/images')
+  @HttpCode(204)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfileImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Session() session: any,
+  ) {
+    if (session.userId !== id || !file) {
+      throw new BadRequestException();
+    }
+    const user = await this.usersService.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('user profile not found');
+    }
+    if (user.profile_image) {
+      const profileImageSplited = user.profile_image.split('/');
+      const key = profileImageSplited[profileImageSplited.length - 1];
+      this.deleteS3Object(key);
+    }
+    const mimeTypeSplited = file.mimetype.split('/');
+    const ext = mimeTypeSplited[mimeTypeSplited.length - 1];
+    const key = id.toString() + '-profile.' + ext;
+
+    const s3 = new S3({
+      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
+      endpoint: process.env.AWS_S3_DOCKER_ENDPOINT_URL,
+      s3ForcePathStyle: true,
+    });
+    await s3
+      .upload(
+        {
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Body: file.buffer,
+          Key: key,
+        },
+        function (err) {
+          if (err) {
+            throw new InternalServerErrorException(
+              'file upload failed: ' + err,
+            );
+          }
+        },
+      )
+      .promise();
+
+    await this.usersService.updateUser(id, {
+      profile_image:
+        process.env.AWS_S3_HOST_ENDPOINT_URL +
+        '/' +
+        process.env.AWS_S3_BUCKET_NAME +
+        '/' +
+        key,
+    });
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Delete(':id/images')
+  @HttpCode(204)
+  async deleteProfileImage(
+    @Param('id', ParseIntPipe) id: number,
+    @Session() session: any,
+  ) {
+    if (session.userId !== id) {
+      throw new BadRequestException('Not Authorized');
+    }
+    const user = await this.usersService.findUserById(id);
+    if (!user || !user.profile_image) {
+      throw new NotFoundException('user profile not found');
+    }
+    const profileImageSplited = user.profile_image.split('/');
+    const key = profileImageSplited[profileImageSplited.length - 1];
+
+    this.deleteS3Object(key);
+
+    await this.usersService.updateUser(id, {
+      profile_image: null,
+    });
   }
 
   @UseGuards(AuthenticatedGuard)
