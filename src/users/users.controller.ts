@@ -42,7 +42,7 @@ export class UsersController {
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
-      endpoint: process.env.AWS_S3_ENDPOINT_URL,
+      endpoint: process.env.AWS_S3_DOCKER_ENDPOINT_URL,
       s3ForcePathStyle: true,
     });
     await s3
@@ -122,8 +122,8 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Session() session: any,
   ) {
-    if (session.userId !== id) {
-      throw new BadRequestException('Not Authorized');
+    if (session.userId !== id || !file) {
+      throw new BadRequestException();
     }
     const user = await this.usersService.findUserById(id);
     if (!user) {
@@ -136,19 +136,20 @@ export class UsersController {
     }
     const mimeTypeSplited = file.mimetype.split('/');
     const ext = mimeTypeSplited[mimeTypeSplited.length - 1];
+    const key = id.toString() + '-profile.' + ext;
 
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
-      endpoint: process.env.AWS_S3_ENDPOINT_URL,
+      endpoint: process.env.AWS_S3_DOCKER_ENDPOINT_URL,
       s3ForcePathStyle: true,
     });
-    const uploadResult = await s3
+    await s3
       .upload(
         {
           Bucket: process.env.AWS_S3_BUCKET_NAME,
           Body: file.buffer,
-          Key: `${id}-profile.${ext}`,
+          Key: key,
         },
         function (err) {
           if (err) {
@@ -161,7 +162,12 @@ export class UsersController {
       .promise();
 
     await this.usersService.updateUser(id, {
-      profile_image: uploadResult.Location,
+      profile_image:
+        process.env.AWS_S3_HOST_ENDPOINT_URL +
+        '/' +
+        process.env.AWS_S3_BUCKET_NAME +
+        '/' +
+        key,
     });
   }
 
