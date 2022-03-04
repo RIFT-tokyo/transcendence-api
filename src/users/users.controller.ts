@@ -38,6 +38,30 @@ export class UsersController {
     };
   }
 
+  private async deleteS3Object(key: string) {
+    const s3 = new S3({
+      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
+      endpoint: process.env.AWS_S3_ENDPOINT_URL,
+      s3ForcePathStyle: true,
+    });
+    await s3
+      .deleteObject(
+        {
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: key,
+        },
+        function (err) {
+          if (err) {
+            throw new InternalServerErrorException(
+              'file delete failed: ' + err,
+            );
+          }
+        },
+      )
+      .promise();
+  }
+
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number): Promise<ResponseUser> {
@@ -101,6 +125,15 @@ export class UsersController {
     if (session.userId !== id) {
       throw new BadRequestException('Not Authorized');
     }
+    const user = await this.usersService.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('user profile not found');
+    }
+    if (user.profile_image) {
+      const profileImageSplited = user.profile_image.split('/');
+      const key = profileImageSplited[profileImageSplited.length - 1];
+      this.deleteS3Object(key);
+    }
     const mimeTypeSplited = file.mimetype.split('/');
     const ext = mimeTypeSplited[mimeTypeSplited.length - 1];
 
@@ -149,27 +182,7 @@ export class UsersController {
     const profileImageSplited = user.profile_image.split('/');
     const key = profileImageSplited[profileImageSplited.length - 1];
 
-    const s3 = new S3({
-      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
-      endpoint: process.env.AWS_S3_ENDPOINT_URL,
-      s3ForcePathStyle: true,
-    });
-    await s3
-      .deleteObject(
-        {
-          Bucket: process.env.AWS_S3_BUCKET_NAME,
-          Key: key,
-        },
-        function (err) {
-          if (err) {
-            throw new InternalServerErrorException(
-              'file delete failed: ' + err,
-            );
-          }
-        },
-      )
-      .promise();
+    this.deleteS3Object(key);
 
     await this.usersService.updateUser(id, {
       profile_image: null,
