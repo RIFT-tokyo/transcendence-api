@@ -70,7 +70,7 @@ export class AuthService {
         );
     }
     /**
-     * Oauth login request
+     * Login with 42 intra account
      * The first client request by 42 for oauth2.0. After this, you will be redirected to 42\&#39;s confirm browser.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -100,7 +100,7 @@ export class AuthService {
         );
     }
     /**
-     * username and password login
+     * Login with username and password
      * username and password auth without using auth.
      * @param login 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -131,6 +131,37 @@ export class AuthService {
         }
         return this.httpClient.post<any>(`${this.basePath}/auth/login`,
             login,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * Logout from transcendence
+     * logout from transcendence
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public postAuthLogout(): Observable<AxiosResponse<any>>;
+    public postAuthLogout(): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        return this.httpClient.get<any>(`${this.basePath}/auth/logout`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers

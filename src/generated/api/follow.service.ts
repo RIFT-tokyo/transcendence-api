@@ -55,6 +55,7 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
+        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -102,6 +103,7 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
+        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -143,6 +145,7 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
+        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -190,6 +193,7 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
+        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
@@ -226,6 +230,7 @@ export class FollowService {
 
         let headers = this.defaultHeaders;
 
+        // authentication (sessionAuth) required
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
             'application/json'
