@@ -5,12 +5,14 @@ import {
   Get,
   HttpCode,
   Post,
+  Redirect,
+  Req,
   Session,
   UseGuards,
 } from '@nestjs/common';
-import { FtOauthGuard } from '../common/guards/ft-oauth.guard';
 import { AuthService } from './auth.service';
 import { Login } from '../generated/model/login';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -41,16 +43,16 @@ export class AuthController {
   //   session.userId = null;
   // }
 
-  @UseGuards(FtOauthGuard)
+  @UseGuards(AuthGuard('42'))
   @Get('login')
-  ftOauthLogin() {
+  loginWith42() {
     // Guard redirects
   }
 
-  @UseGuards(FtOauthGuard)
+  @UseGuards(AuthGuard('42'))
   @Get('callback')
-  @HttpCode(204)
-  async ftCallback() {
-    // redirect client home
+  @Redirect(process.env.FRONT_INDEX_URL)
+  async callbackWith42(@Req() request, @Session() session: any) {
+    session.userId = request.user.id;
   }
 }
