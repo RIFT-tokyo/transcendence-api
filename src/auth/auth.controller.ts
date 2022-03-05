@@ -13,6 +13,7 @@ import {
 import { AuthService } from './auth.service';
 import { Login } from '../generated/model/login';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -38,10 +39,12 @@ export class AuthController {
     session.userId = user.id;
   }
 
-  // @Post('logout')
-  // logout(@Session() session: any) {
-  //   session.userId = null;
-  // }
+  @UseGuards(AuthenticatedGuard)
+  @Get('logout')
+  @HttpCode(204)
+  logout(@Req() request: any) {
+    request.session = null;
+  }
 
   @UseGuards(AuthGuard('42'))
   @Get('login')
@@ -52,7 +55,7 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   @Get('callback')
   @Redirect(process.env.FRONT_INDEX_URL)
-  async callbackWith42(@Req() request, @Session() session: any) {
+  async callbackWith42(@Req() request: any, @Session() session: any) {
     session.userId = request.user.id;
   }
 }
