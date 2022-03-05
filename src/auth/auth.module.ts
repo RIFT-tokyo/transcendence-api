@@ -4,7 +4,6 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { FtOauthStrategy } from './ft-oauth.strategy';
-import { SessionSerializer } from './session.serializer';
 
 @Module({
   imports: [
@@ -14,6 +13,6 @@ import { SessionSerializer } from './session.serializer';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, FtOauthStrategy, SessionSerializer],
+  providers: [AuthService, FtOauthStrategy],
 })
 export class AuthModule {}
