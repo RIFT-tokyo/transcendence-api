@@ -5,6 +5,8 @@ import {
   Get,
   HttpCode,
   Post,
+  Redirect,
+  Req,
   Session,
   UseGuards,
 } from '@nestjs/common';
@@ -49,8 +51,8 @@ export class AuthController {
 
   @UseGuards(AuthGuard('42'))
   @Get('callback')
-  async callbackWith42(@Session() session: any) {
-    return session;
-    // throw new BadRequestException('Method not implemented.');
+  @Redirect(process.env.FRONT_INDEX_URL)
+  async callbackWith42(@Req() request, @Session() session: any) {
+    session.userId = request.user.id;
   }
 }
