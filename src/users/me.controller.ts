@@ -9,7 +9,7 @@ import {
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { User as ResponseUser } from '../generated/model/models';
 import { UsersService } from './users.service';
-import { CurrentUserInterceptor } from '../common/guards/current-user.interceptor';
+import { CurrentUserInterceptor } from '../common/interceptor/current-user.interceptor';
 
 @Controller('me')
 @UseInterceptors(CurrentUserInterceptor)

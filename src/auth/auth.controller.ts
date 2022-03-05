@@ -8,9 +8,9 @@ import {
   Session,
   UseGuards,
 } from '@nestjs/common';
-import { FtOauthGuard } from '../common/guards/ft-oauth.guard';
 import { AuthService } from './auth.service';
 import { Login } from '../generated/model/login';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -41,16 +41,16 @@ export class AuthController {
   //   session.userId = null;
   // }
 
-  @UseGuards(FtOauthGuard)
+  @UseGuards(AuthGuard('42'))
   @Get('login')
-  ftOauthLogin() {
+  loginWith42() {
     // Guard redirects
   }
 
-  @UseGuards(FtOauthGuard)
+  @UseGuards(AuthGuard('42'))
   @Get('callback')
-  @HttpCode(204)
-  async ftCallback() {
-    // redirect client home
+  async callbackWith42(@Session() session: any) {
+    return session;
+    // throw new BadRequestException('Method not implemented.');
   }
 }

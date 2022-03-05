@@ -38,18 +38,6 @@ export class AuthService {
     return null;
   }
 
-  async validateUser(username: string, password: string) {
-    const user = await this.usersService.findUserByUsername(username);
-    if (!user) {
-      return null;
-    }
-    if (await bcrypt.compare(password, user.password)) {
-      user.password = undefined;
-      return user;
-    }
-    return null;
-  }
-
   async validateFtUser(userData: CreateUserDTO) {
     const user = await this.usersService.findUserByUsername(userData.username);
     if (user) {
