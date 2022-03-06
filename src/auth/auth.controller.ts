@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Get,
   HttpCode,
@@ -24,7 +25,7 @@ export class AuthController {
   async createUser(@Body() body: Login, @Session() session: any) {
     const user = await this.authService.signup(body);
     if (!user) {
-      throw new BadRequestException('User already exists');
+      throw new ConflictException('User already exists');
     }
     session.userId = user.id;
   }
