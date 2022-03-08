@@ -15,6 +15,7 @@ import { AuthService } from './auth.service';
 import { Login } from '../generated/model/login';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
+import { UserSession } from 'src/types/user-session';
 
 @Controller('auth')
 export class AuthController {
@@ -43,7 +44,7 @@ export class AuthController {
   @UseGuards(AuthenticatedGuard)
   @Get('logout')
   @HttpCode(204)
-  logout(@Req() request: any) {
+  logout(@Req() request: { session: UserSession }) {
     request.session = null;
   }
 
@@ -56,7 +57,10 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   @Get('callback')
   @Redirect(process.env.FRONT_INDEX_URL)
-  async callbackWith42(@Req() request: any, @Session() session: any) {
+  async callbackWith42(
+    @Req() request: { user: User },
+    @Session() session: any,
+  ) {
     session.userId = request.user.id;
   }
 }
