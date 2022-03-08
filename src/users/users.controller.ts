@@ -24,6 +24,7 @@ import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { User as ResponseUser } from '../generated/model/models';
 import { User } from '../entities/user.entity';
 import { S3 } from 'aws-sdk';
+import { UserSession } from 'src/types/user-session';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -120,7 +121,7 @@ export class UsersController {
   async uploadProfileImage(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile() file: Express.Multer.File,
-    @Session() session: any,
+    @Session() session: UserSession,
   ) {
     if (session.userId !== id || !file) {
       throw new BadRequestException();
@@ -176,7 +177,7 @@ export class UsersController {
   @HttpCode(204)
   async deleteProfileImage(
     @Param('id', ParseIntPipe) id: number,
-    @Session() session: any,
+    @Session() session: UserSession,
   ) {
     if (session.userId !== id) {
       throw new BadRequestException('Not Authorized');
@@ -224,7 +225,7 @@ export class UsersController {
   @HttpCode(204)
   async followUser(
     @Param('id', ParseIntPipe) id: number,
-    @Session() session: any,
+    @Session() session: UserSession,
   ): Promise<void> {
     if (session.userId === id) {
       throw new BadRequestException('You cannot follow yourself');
@@ -240,7 +241,7 @@ export class UsersController {
   @HttpCode(204)
   async unfollowUser(
     @Param('id', ParseIntPipe) id: number,
-    @Session() session: any,
+    @Session() session: UserSession,
   ): Promise<void> {
     if (session.userId === id) {
       throw new BadRequestException('You cannot follow yourself');

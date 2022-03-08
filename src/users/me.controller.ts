@@ -10,6 +10,7 @@ import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { User as ResponseUser } from '../generated/model/models';
 import { UsersService } from './users.service';
 import { CurrentUserInterceptor } from '../common/interceptor/current-user.interceptor';
+import { UserSession } from 'src/types/user-session';
 
 @Controller('me')
 @UseInterceptors(CurrentUserInterceptor)
@@ -18,7 +19,7 @@ export class MeController {
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  async getMe(@Session() session: any): Promise<ResponseUser> {
+  async getMe(@Session() session: UserSession): Promise<ResponseUser> {
     const user = await this.usersService.findUserById(session.userId);
     if (!user) {
       throw new InternalServerErrorException('User not found');
