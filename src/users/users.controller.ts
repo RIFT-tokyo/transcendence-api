@@ -16,6 +16,7 @@ import {
   Session,
   Post,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserDTO } from './users.dto';
@@ -29,6 +30,7 @@ import { UserSession } from 'src/types/user-session';
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
+  private readonly logger = new Logger('UsersController');
   constructor(private readonly usersService: UsersService) {}
 
   private responseUser(user: User): ResponseUser {
@@ -129,14 +131,16 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('user profile not found');
     }
-    if (user.profile_image) {
-      const profileImageSplited = user.profile_image.split('/');
-      const key = profileImageSplited[profileImageSplited.length - 1];
-      this.deleteS3Object(key);
-    }
     const mimeTypeSplited = file.mimetype.split('/');
     const ext = mimeTypeSplited[mimeTypeSplited.length - 1];
     const key = id.toString() + '-profile.' + ext;
+    if (user.profile_image) {
+      const profileImageSplited = user.profile_image.split('/');
+      const old_key = profileImageSplited[profileImageSplited.length - 1];
+      if (key !== old_key) {
+        this.deleteS3Object(old_key);
+      }
+    }
 
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
