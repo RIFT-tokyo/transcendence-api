@@ -116,7 +116,6 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Post(':id/images')
-  @HttpCode(204)
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfileImage(
     @Param('id', ParseIntPipe) id: number,
@@ -162,14 +161,14 @@ export class UsersController {
       )
       .promise();
 
-    await this.usersService.updateUser(id, {
-      profile_image:
-        process.env.AWS_S3_HOST_ENDPOINT_URL +
-        '/' +
-        process.env.AWS_S3_BUCKET_NAME +
-        '/' +
-        key,
-    });
+    const new_path =
+      process.env.AWS_S3_HOST_ENDPOINT_URL +
+      '/' +
+      process.env.AWS_S3_BUCKET_NAME +
+      '/' +
+      key;
+    await this.usersService.updateUser(id, { profile_image: new_path });
+    return { file_path: new_path };
   }
 
   @UseGuards(AuthenticatedGuard)
