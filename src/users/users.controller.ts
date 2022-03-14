@@ -26,6 +26,7 @@ import { User as ResponseUser } from '../generated/model/models';
 import { User } from '../entities/user.entity';
 import { S3 } from 'aws-sdk';
 import { UserSession } from 'src/types/user-session';
+import { v4 as uuidv4 } from 'uuid';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -131,12 +132,12 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('user profile not found');
     }
-    const mimeTypeSplited = file.mimetype.split('/');
-    const ext = mimeTypeSplited[mimeTypeSplited.length - 1];
-    const key = id.toString() + '-profile.' + ext;
+    const mimeTypeSplitted = file.mimetype.split('/');
+    const ext = mimeTypeSplitted[mimeTypeSplitted.length - 1];
+    const key = id.toString() + '-profile-' + uuidv4() + '.' + ext;
     if (user.profile_image) {
-      const profileImageSplited = user.profile_image.split('/');
-      const old_key = profileImageSplited[profileImageSplited.length - 1];
+      const profileImageSplitted = user.profile_image.split('/');
+      const old_key = profileImageSplitted[profileImageSplitted.length - 1];
       if (key !== old_key) {
         this.deleteS3Object(old_key);
       }
