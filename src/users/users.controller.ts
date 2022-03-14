@@ -138,9 +138,7 @@ export class UsersController {
     if (user.profile_image) {
       const profileImageSplitted = user.profile_image.split('/');
       const old_key = profileImageSplitted[profileImageSplitted.length - 1];
-      if (key !== old_key) {
-        this.deleteS3Object(old_key);
-      }
+      this.deleteS3Object(old_key);
     }
 
     const s3 = new S3({
