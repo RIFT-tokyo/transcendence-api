@@ -16,6 +16,7 @@ import {
   Session,
   Post,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserDTO } from './users.dto';
@@ -25,10 +26,12 @@ import { User as ResponseUser } from '../generated/model/models';
 import { User } from '../entities/user.entity';
 import { S3 } from 'aws-sdk';
 import { UserSession } from 'src/types/user-session';
+import { v4 as uuidv4 } from 'uuid';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
+  private readonly logger = new Logger('UsersController');
   constructor(private readonly usersService: UsersService) {}
 
   private responseUser(user: User): ResponseUser {
@@ -116,7 +119,6 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Post(':id/images')
-  @HttpCode(204)
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfileImage(
     @Param('id', ParseIntPipe) id: number,
@@ -130,14 +132,14 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('user profile not found');
     }
+    const mimeTypeSplitted = file.mimetype.split('/');
+    const ext = mimeTypeSplitted[mimeTypeSplitted.length - 1];
+    const key = id.toString() + '-profile-' + uuidv4() + '.' + ext;
     if (user.profile_image) {
-      const profileImageSplited = user.profile_image.split('/');
-      const key = profileImageSplited[profileImageSplited.length - 1];
-      this.deleteS3Object(key);
+      const profileImageSplitted = user.profile_image.split('/');
+      const old_key = profileImageSplitted[profileImageSplitted.length - 1];
+      this.deleteS3Object(old_key);
     }
-    const mimeTypeSplited = file.mimetype.split('/');
-    const ext = mimeTypeSplited[mimeTypeSplited.length - 1];
-    const key = id.toString() + '-profile.' + ext;
 
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
@@ -162,14 +164,14 @@ export class UsersController {
       )
       .promise();
 
-    await this.usersService.updateUser(id, {
-      profile_image:
-        process.env.AWS_S3_HOST_ENDPOINT_URL +
-        '/' +
-        process.env.AWS_S3_BUCKET_NAME +
-        '/' +
-        key,
-    });
+    const new_path =
+      process.env.AWS_S3_HOST_ENDPOINT_URL +
+      '/' +
+      process.env.AWS_S3_BUCKET_NAME +
+      '/' +
+      key;
+    await this.usersService.updateUser(id, { profile_image: new_path });
+    return { file_path: new_path };
   }
 
   @UseGuards(AuthenticatedGuard)

@@ -14,6 +14,7 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
+import { FilePath } from '../model/filePath';
 import { User } from '../model/user';
 import { Configuration } from '../configuration';
 
@@ -265,7 +266,7 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public postUsersUserIDImages(userID: number, ): Observable<AxiosResponse<any>>;
+    public postUsersUserIDImages(userID: number, ): Observable<AxiosResponse<FilePath>>;
     public postUsersUserIDImages(userID: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -288,7 +289,7 @@ export class UserService {
         const consumes: string[] = [
             'multipart/form-data'
         ];
-        return this.httpClient.post<any>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/images`,
+        return this.httpClient.post<FilePath>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/images`,
             null,
             {
                 withCredentials: this.configuration.withCredentials,
