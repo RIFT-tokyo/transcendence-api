@@ -9,12 +9,12 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class UserPasswordInterceptor implements NestInterceptor {
-  private removePassword(obj) {
+  private removeProps(obj: any, props: string[]) {
     for (const prop in obj) {
-      if (prop === 'password') {
+      if (props.indexOf(prop) !== -1) {
         delete obj[prop];
       } else if (typeof obj[prop] === 'object') {
-        this.removePassword(obj[prop]);
+        this.removeProps(obj[prop], props);
       }
     }
   }
@@ -25,7 +25,7 @@ export class UserPasswordInterceptor implements NestInterceptor {
         if (!data) {
           return data;
         }
-        this.removePassword(data);
+        this.removeProps(data, ['password', 'intra_id']);
         return data;
       }),
     );
