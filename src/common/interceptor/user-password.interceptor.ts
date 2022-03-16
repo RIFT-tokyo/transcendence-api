@@ -7,25 +7,25 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-export interface Response<T> {
-  data: T;
-}
-
 @Injectable()
-export class UserPasswordInterceptor<T>
-  implements NestInterceptor<T, Response<T>>
-{
-  intercept(
-    context: ExecutionContext,
-    next: CallHandler,
-  ): Observable<Response<T>> {
+export class UserPasswordInterceptor implements NestInterceptor {
+  private removePassword(obj) {
+    for (const prop in obj) {
+      if (prop === 'password') {
+        delete obj[prop];
+      } else if (typeof obj[prop] === 'object') {
+        this.removePassword(obj[prop]);
+      }
+    }
+  }
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((data) => {
-        if (data.password) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { password, ...response } = data;
-          return response;
+        if (!data) {
+          return data;
         }
+        this.removePassword(data);
         return data;
       }),
     );
