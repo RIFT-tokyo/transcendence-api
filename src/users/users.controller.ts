@@ -19,10 +19,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UpdateUserDTO } from './users.dto';
+import { UpdateUserDTO, ResponseUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { User as ResponseUser } from '../generated/model/models';
 import { User } from '../entities/user.entity';
 import { S3 } from 'aws-sdk';
 import { UserSession } from 'src/types/user-session';
@@ -34,12 +33,12 @@ export class UsersController {
   private readonly logger = new Logger('UsersController');
   constructor(private readonly usersService: UsersService) {}
 
-  private responseUser(user: User): ResponseUser {
-    return {
+  private responseUser(user: User): ResponseUserDTO {
+    return new ResponseUserDTO({
       ...user,
       followers: user.followers?.length,
       following: user.following?.length,
-    };
+    });
   }
 
   private async deleteS3Object(key: string) {
@@ -68,7 +67,9 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Get(':id')
-  async getUser(@Param('id', ParseIntPipe) id: number): Promise<ResponseUser> {
+  async getUser(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseUserDTO> {
     const user = await this.usersService.findUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -80,7 +81,7 @@ export class UsersController {
   @Get('/by/:username')
   async getUserByUsername(
     @Param('username') username: string,
-  ): Promise<ResponseUser> {
+  ): Promise<ResponseUserDTO> {
     const user = await this.usersService.findUserByUsername(username);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -102,7 +103,7 @@ export class UsersController {
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() userData: UpdateUserDTO,
-  ): Promise<ResponseUser> {
+  ): Promise<ResponseUserDTO> {
     const user = await this.usersService.updateUser(id, userData);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -112,7 +113,7 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  async index(): Promise<ResponseUser[]> {
+  async index(): Promise<ResponseUserDTO[]> {
     const users = await this.usersService.findAll();
     return users.map(this.responseUser);
   }
@@ -202,7 +203,7 @@ export class UsersController {
   @Get(':id/followers')
   async getFollowers(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ResponseUser[]> {
+  ): Promise<ResponseUserDTO[]> {
     const users = await this.usersService.getFollowers(id);
     if (!users) {
       throw new NotFoundException('User not found');
@@ -214,7 +215,7 @@ export class UsersController {
   @Get(':id/following')
   async getFollowing(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ResponseUser[]> {
+  ): Promise<ResponseUserDTO[]> {
     const users = await this.usersService.getFollowing(id);
     if (!users) {
       throw new NotFoundException('User not found');
