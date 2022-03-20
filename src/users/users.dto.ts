@@ -13,12 +13,12 @@ export class CreateUserDTO implements User {
 export class UpdateUserDTO extends PartialType(CreateUserDTO) {}
 
 export class ResponseUserDTO {
-  id?: number;
-  username?: string;
-  display_name?: string;
-  profile_image?: string;
-  status?: User.StatusEnum;
-  status_message?: string;
+  id: number;
+  username: string;
+  display_name: string;
+  profile_image: string;
+  status: User.StatusEnum;
+  status_message: string;
   followers?: number;
   following?: number;
   created_at?: Date;
