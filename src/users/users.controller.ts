@@ -22,7 +22,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserDTO, ResponseUserDTO } from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { User } from '../entities/user.entity';
 import { S3 } from 'aws-sdk';
 import { UserSession } from 'src/types/user-session';
 import { v4 as uuidv4 } from 'uuid';
