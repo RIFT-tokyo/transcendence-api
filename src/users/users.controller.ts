@@ -33,12 +33,6 @@ export class UsersController {
   private readonly logger = new Logger('UsersController');
   constructor(private readonly usersService: UsersService) {}
 
-  private responseUser(user: User): ResponseUserDTO {
-    return new ResponseUserDTO({
-      ...user,
-    });
-  }
-
   private async deleteS3Object(key: string) {
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
@@ -72,7 +66,7 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return this.responseUser(user);
+    return new ResponseUserDTO(user);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -84,7 +78,7 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return this.responseUser(user);
+    return new ResponseUserDTO(user);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -106,14 +100,14 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return this.responseUser(user);
+    return new ResponseUserDTO(user);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get()
   async index(): Promise<ResponseUserDTO[]> {
     const users = await this.usersService.findAll();
-    return users.map(this.responseUser);
+    return users.map((user) => new ResponseUserDTO(user));
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -206,7 +200,7 @@ export class UsersController {
     if (!users) {
       throw new NotFoundException('User not found');
     }
-    return users.map(this.responseUser);
+    return users.map((user) => new ResponseUserDTO(user));
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -218,7 +212,7 @@ export class UsersController {
     if (!users) {
       throw new NotFoundException('User not found');
     }
-    return users.map(this.responseUser);
+    return users.map((user) => new ResponseUserDTO(user));
   }
 
   @UseGuards(AuthenticatedGuard)
