@@ -36,8 +36,6 @@ export class UsersController {
   private responseUser(user: User): ResponseUserDTO {
     return new ResponseUserDTO({
       ...user,
-      followers: user.followers?.length,
-      following: user.following?.length,
     });
   }
 

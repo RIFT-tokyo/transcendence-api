@@ -1,5 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { User } from '../generated/model/models';
+import { User as EntityUser } from '../entities/user.entity';
 
 export class CreateUserDTO implements User {
   username: string;
@@ -24,15 +25,15 @@ export class ResponseUserDTO {
   created_at?: Date;
   updated_at?: Date;
 
-  constructor(user: User) {
+  constructor(user: EntityUser) {
     this.id = user.id;
     this.username = user.username;
     this.display_name = user.display_name;
     this.profile_image = user.profile_image;
     this.status = user.status;
     this.status_message = user.status_message;
-    this.followers = user.followers;
-    this.following = user.following;
+    this.followers = user.followers?.length;
+    this.following = user.following?.length;
     this.created_at = new Date(user.created_at);
     this.updated_at = new Date(user.updated_at);
   }

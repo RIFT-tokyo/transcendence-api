@@ -24,10 +24,6 @@ export class MeController {
     if (!user) {
       throw new InternalServerErrorException('User not found');
     }
-    return new ResponseUserDTO({
-      ...user,
-      followers: user.followers.length,
-      following: user.following.length,
-    });
+    return new ResponseUserDTO(user);
   }
 }
