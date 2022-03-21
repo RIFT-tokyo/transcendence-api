@@ -13,7 +13,7 @@ export class CreateUserDTO implements User {
 
 export class UpdateUserDTO extends PartialType(CreateUserDTO) {}
 
-export class ResponseUserDTO {
+export class ResponseUserDTO implements User {
   id: number;
   username: string;
   display_name: string;
@@ -22,8 +22,8 @@ export class ResponseUserDTO {
   status_message: string;
   followers?: number;
   following?: number;
-  created_at?: Date;
-  updated_at?: Date;
+  created_at?: string;
+  updated_at?: string;
 
   constructor(user: EntityUser) {
     this.id = user.id;
@@ -34,7 +34,7 @@ export class ResponseUserDTO {
     this.status_message = user.status_message;
     this.followers = user.followers?.length;
     this.following = user.following?.length;
-    this.created_at = new Date(user.created_at);
-    this.updated_at = new Date(user.updated_at);
+    this.created_at = user.created_at;
+    this.updated_at = user.updated_at;
   }
 }
