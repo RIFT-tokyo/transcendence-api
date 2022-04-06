@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   Post,
+  Put,
   Redirect,
   Req,
   Session,
@@ -17,6 +18,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { UserSession } from 'src/types/user-session';
 import { User } from 'src/entities/user.entity';
+import { Password } from '../generated/model/password';
 
 @Controller('auth')
 export class AuthController {
@@ -63,5 +65,22 @@ export class AuthController {
     @Session() session: UserSession,
   ) {
     session.userId = request.user.id;
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Put('password')
+  @HttpCode(204)
+  async updatePassword(
+    @Body() body: Password,
+    @Session() session: UserSession,
+  ) {
+    const user = await this.authService.updatePassword(
+      session.userId,
+      body.old_password,
+      body.new_password,
+    );
+    if (!user) {
+      throw new BadRequestException('Invalid credentials');
+    }
   }
 }
