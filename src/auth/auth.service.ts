@@ -13,15 +13,9 @@ export class AuthService {
     if (user) {
       return null;
     }
-
-    const password = await bcrypt.hash(
-      login.password,
-      Number(process.env.HASH_SALT),
-    );
-
     const userData: CreateUserDTO = {
       username: login.username,
-      password: password,
+      password: login.password,
     };
     return await this.usersService.createUser(userData);
   }
@@ -32,7 +26,6 @@ export class AuthService {
       return null;
     }
     if (await bcrypt.compare(login.password, user.password)) {
-      user.password = undefined;
       return user;
     }
     return null;
@@ -45,5 +38,22 @@ export class AuthService {
     }
     userData.password = null;
     return await this.usersService.createUser(userData);
+  }
+
+  async updatePassword(
+    userId: number,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    if (await bcrypt.compare(oldPassword, user.password)) {
+      return await this.usersService.updateUser(user.id, {
+        password: newPassword,
+      });
+    }
+    return null;
   }
 }

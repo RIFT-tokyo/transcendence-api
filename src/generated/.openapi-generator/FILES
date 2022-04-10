@@ -12,5 +12,6 @@ model/error.ts
 model/filePath.ts
 model/login.ts
 model/models.ts
+model/password.ts
 model/user.ts
 variables.ts

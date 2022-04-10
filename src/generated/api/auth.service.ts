@@ -15,6 +15,7 @@ import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { Login } from '../model/login';
+import { Password } from '../model/password';
 import { Configuration } from '../configuration';
 
 
@@ -175,8 +176,8 @@ export class AuthService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public postUsers(login?: Login, ): Observable<AxiosResponse<any>>;
-    public postUsers(login?: Login, ): Observable<any> {
+    public postAuthSignup(login?: Login, ): Observable<AxiosResponse<any>>;
+    public postAuthSignup(login?: Login, ): Observable<any> {
 
 
         let headers = this.defaultHeaders;
@@ -200,6 +201,45 @@ export class AuthService {
         }
         return this.httpClient.post<any>(`${this.basePath}/auth/signup`,
             login,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * Update User Password
+     * 
+     * @param password 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public putAuthPassword(password?: Password, ): Observable<AxiosResponse<any>>;
+    public putAuthPassword(password?: Password, ): Observable<any> {
+
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers['Content-Type'] = httpContentTypeSelected;
+        }
+        return this.httpClient.put<any>(`${this.basePath}/auth/password`,
+            password,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
