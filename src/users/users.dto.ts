@@ -34,7 +34,7 @@ export class ResponseUserDTO implements User {
     this.status_message = user.status_message;
     this.followers = user.followers?.length;
     this.following = user.following?.length;
-    this.created_at = user.created_at;
-    this.updated_at = user.updated_at;
+    this.created_at = user.created_at.toISOString();
+    this.updated_at = user.updated_at.toISOString();
   }
 }
