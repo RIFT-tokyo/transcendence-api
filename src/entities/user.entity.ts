@@ -48,9 +48,9 @@ export class User {
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
-  created_at: string;
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
-  updated_at: string;
+  updated_at: Date;
 }

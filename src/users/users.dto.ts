@@ -13,7 +13,7 @@ export class CreateUserDTO implements User {
 
 export class UpdateUserDTO extends PartialType(CreateUserDTO) {}
 
-export class ResponseUserDTO implements User {
+export class ResponseUserDTO {
   id: number;
   username: string;
   display_name: string;
@@ -22,8 +22,8 @@ export class ResponseUserDTO implements User {
   status_message: string;
   followers?: number;
   following?: number;
-  created_at?: string;
-  updated_at?: string;
+  created_at?: Date;
+  updated_at?: Date;
 
   constructor(user: EntityUser) {
     this.id = user.id;
