@@ -20,25 +20,26 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  private userID;
+  // private userID;
 
-  async updateUserStatus(status: User.StatusEnum) {
-    await this.usersService.updateUser(this.userID, { status: status });
+  async updateUserStatus(status: User.StatusEnum, userID: number) {
+    await this.usersService.updateUser(userID, { status: status });
     this.server.emit('userStatus', {
       status: status,
-      userID: this.userID,
+      userID,
     });
   }
 
   handleConnection(@ConnectedSocket() client: Socket) {
-    this.userID = client.handshake.auth.userID;
-    console.log(`Client connected: ${this.userID}`);
-    this.updateUserStatus('online');
+    const userID = client.handshake.auth.userID;
+    console.log(`Client connected: ${userID}`);
+    this.updateUserStatus('online', userID);
   }
 
-  handleDisconnect() {
-    console.log(`Client DISconnected: ${this.userID}`);
-    this.updateUserStatus('offline');
+  handleDisconnect(@ConnectedSocket() client: Socket) {
+    const userID = client.handshake.auth.userID;
+    console.log(`Client DISconnected: ${userID}`);
+    this.updateUserStatus('offline', userID);
   }
 
   @SubscribeMessage('ping')
@@ -47,7 +48,11 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('userStatus')
-  handleUserStatus(@MessageBody() body: any) {
-    this.updateUserStatus(body.status);
+  handleUserStatus(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: any,
+  ) {
+    const userID = client.handshake.auth.userID;
+    this.updateUserStatus(body.status, userID);
   }
 }
