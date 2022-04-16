@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { IsDate } from 'class-validator';
 import { Exclude } from 'class-transformer';
+import { Achievement } from './achievement.entity';
 
 @Entity()
 export class User {
@@ -45,6 +46,10 @@ export class User {
 
   @ManyToMany(() => User, (user) => user.followers)
   following: User[];
+
+  @ManyToMany(() => Achievement)
+  @JoinTable()
+  achievements: Achievement[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
