@@ -26,6 +26,18 @@ export class UsersGateway {
     });
   }
 
+  handleConnection(@ConnectedSocket() client: Socket) {
+    const userID = client.handshake.auth.userID;
+    console.log(`Client connected: ${userID}`);
+    this.updateUserStatus('online', userID);
+  }
+
+  handleDisconnect(@ConnectedSocket() client: Socket) {
+    const userID = client.handshake.auth.userID;
+    console.log(`Client DISconnected: ${userID}`);
+    this.updateUserStatus('offline', userID);
+  }
+
   @SubscribeMessage('userStatus')
   handleUserStatus(
     @ConnectedSocket() client: Socket,

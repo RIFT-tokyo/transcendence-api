@@ -9,9 +9,8 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { UsersService } from './users/users.service';
-import { User } from './generated/model/models';
 
-@WebSocketGateway({ cors: true, namespace: '/' })
+@WebSocketGateway({ cors: true })
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @Inject()
   usersService: UsersService;
@@ -19,25 +18,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  async updateUserStatus(status: User.StatusEnum, userID: number) {
-    await this.usersService.updateUser(userID, { status: status });
-    this.server.emit('userStatus', {
-      status: status,
-      userID,
-    });
-  }
+  handleConnection(@ConnectedSocket() client: Socket) {}
 
-  handleConnection(@ConnectedSocket() client: Socket) {
-    const userID = client.handshake.auth.userID;
-    console.log(`Client connected: ${userID}`);
-    this.updateUserStatus('online', userID);
-  }
-
-  handleDisconnect(@ConnectedSocket() client: Socket) {
-    const userID = client.handshake.auth.userID;
-    console.log(`Client DISconnected: ${userID}`);
-    this.updateUserStatus('offline', userID);
-  }
+  handleDisconnect(@ConnectedSocket() client: Socket) {}
 
   @SubscribeMessage('ping')
   handlePing(@ConnectedSocket() client: Socket) {
