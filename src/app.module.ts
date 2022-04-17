@@ -6,7 +6,6 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -18,12 +17,13 @@ import { AppGateway } from './app.gateway';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       synchronize: false,
+      logging: 'all',
       entities: ['dist/**/*.entity{.js,.ts}'],
     }),
     UsersModule,
     AuthModule,
   ],
   controllers: [AppController, UsersController],
-  providers: [AppService, UsersService, AppGateway],
+  providers: [AppService, UsersService],
 })
 export class AppModule {}
