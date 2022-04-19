@@ -12,18 +12,12 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findUserById(id: number) {
-    return await this.userRepository.findOne(
-      { id },
-      { relations: ['following', 'followers'] },
-    );
+  async findUserById(id: number, relations: Array<string> = []) {
+    return await this.userRepository.findOne({ id }, { relations });
   }
 
-  async findUserByUsername(username: string) {
-    return await this.userRepository.findOne(
-      { username },
-      { relations: ['following', 'followers'] },
-    );
+  async findUserByUsername(username: string, relations: Array<string> = []) {
+    return await this.userRepository.findOne({ username }, { relations });
   }
 
   async findAll() {

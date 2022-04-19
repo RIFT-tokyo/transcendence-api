@@ -20,7 +20,11 @@ export class MeController {
   @UseGuards(AuthenticatedGuard)
   @Get()
   async getMe(@Session() session: UserSession): Promise<ResponseUserDTO> {
-    const user = await this.usersService.findUserById(session.userId);
+    const user = await this.usersService.findUserById(session.userId, [
+      'following',
+      'followers',
+      'achievements',
+    ]);
     if (!user) {
       throw new InternalServerErrorException('User not found');
     }

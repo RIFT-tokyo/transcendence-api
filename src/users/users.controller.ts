@@ -61,7 +61,11 @@ export class UsersController {
   async getUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseUserDTO> {
-    const user = await this.usersService.findUserById(id);
+    const user = await this.usersService.findUserById(id, [
+      'following',
+      'followers',
+      'achievements',
+    ]);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -73,7 +77,11 @@ export class UsersController {
   async getUserByUsername(
     @Param('username') username: string,
   ): Promise<ResponseUserDTO> {
-    const user = await this.usersService.findUserByUsername(username);
+    const user = await this.usersService.findUserByUsername(username, [
+      'following',
+      'followers',
+      'achievements',
+    ]);
     if (!user) {
       throw new NotFoundException('User not found');
     }
