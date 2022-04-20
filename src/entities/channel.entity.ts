@@ -16,6 +16,9 @@ export class Channel {
   @Column()
   name: string;
 
+  @Column()
+  slug: string;
+
   @Column({ nullable: true })
   @Exclude()
   password: string | null;
