@@ -23,8 +23,8 @@ export class UsersGateway {
   @WebSocketServer()
   server: Server;
 
-  async updateUserStatus(status: User.StatusEnum, userID: number) {
-    await this.usersService.updateUser(userID, { status: status });
+  updateUserStatus(status: User.StatusEnum, userID: number) {
+    this.usersService.updateUser(userID, { status: status });
     this.server.emit('userStatus', {
       status: status,
       userID,
