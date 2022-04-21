@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   InternalServerErrorException,
+  Logger,
   Session,
   UseGuards,
   UseInterceptors,
@@ -15,6 +16,7 @@ import { ResponseUserDTO } from './users.dto';
 @Controller('me')
 @UseInterceptors(CurrentUserInterceptor)
 export class MeController {
+  private readonly logger = new Logger('MeController');
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(AuthenticatedGuard)
