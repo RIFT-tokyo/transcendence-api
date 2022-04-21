@@ -2,6 +2,7 @@ import { DynamicModule, HttpService, HttpModule, Module, Global } from '@nestjs/
 import { Configuration } from './configuration';
 
 import { AuthService } from './api/auth.service';
+import { DefaultService } from './api/default.service';
 import { FollowService } from './api/follow.service';
 import { UserService } from './api/user.service';
 
@@ -10,11 +11,13 @@ import { UserService } from './api/user.service';
   imports:      [ HttpModule ],
   exports:      [
     AuthService,
+    DefaultService,
     FollowService,
     UserService
   ],
   providers: [
     AuthService,
+    DefaultService,
     FollowService,
     UserService
   ]

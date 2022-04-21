@@ -9,6 +9,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Achievement } from './achievement';
 
 
 export interface User { 
@@ -25,6 +26,7 @@ export interface User {
     following?: number;
     created_at?: string;
     updated_at?: string;
+    achievements?: Array<Achievement>;
 }
 export namespace User {
     export type StatusEnum = 'online' | 'offline' | 'game';
