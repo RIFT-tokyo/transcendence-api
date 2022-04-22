@@ -6,6 +6,7 @@ import { UsersService } from './users.service';
 import { MeController } from './me.controller';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CurrentUserInterceptor } from '../common/interceptor/current-user.interceptor';
+import { UsersGateway } from './users.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
@@ -16,6 +17,7 @@ import { CurrentUserInterceptor } from '../common/interceptor/current-user.inter
       provide: APP_INTERCEPTOR,
       useClass: CurrentUserInterceptor,
     },
+    UsersGateway,
   ],
   controllers: [UsersController, MeController],
 })

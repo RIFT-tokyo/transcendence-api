@@ -9,6 +9,7 @@ export class CreateUserDTO implements User {
   display_name?: string;
   profile_image?: string;
   status_message?: string;
+  status?: User.StatusEnum;
   password?: string;
   intra_id?: number;
 }
