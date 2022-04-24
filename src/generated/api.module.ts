@@ -2,8 +2,8 @@ import { DynamicModule, HttpService, HttpModule, Module, Global } from '@nestjs/
 import { Configuration } from './configuration';
 
 import { AuthService } from './api/auth.service';
-import { DefaultService } from './api/default.service';
 import { FollowService } from './api/follow.service';
+import { MatchService } from './api/match.service';
 import { UserService } from './api/user.service';
 
 @Global()
@@ -11,14 +11,14 @@ import { UserService } from './api/user.service';
   imports:      [ HttpModule ],
   exports:      [
     AuthService,
-    DefaultService,
     FollowService,
+    MatchService,
     UserService
   ],
   providers: [
     AuthService,
-    DefaultService,
     FollowService,
+    MatchService,
     UserService
   ]
 })

@@ -3,8 +3,8 @@ README.md
 api.module.ts
 api/api.ts
 api/auth.service.ts
-api/default.service.ts
 api/follow.service.ts
+api/match.service.ts
 api/user.service.ts
 configuration.ts
 git_push.sh
