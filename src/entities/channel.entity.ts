@@ -4,9 +4,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ChannelMessage } from './channel-message.entity';
+import { ChannelUser } from './channel-user.entity';
 
 @Entity()
 export class Channel {
@@ -22,6 +25,12 @@ export class Channel {
   @Column({ nullable: true })
   @Exclude()
   password: string | null;
+
+  @OneToMany(() => ChannelMessage, (message: ChannelMessage) => message.channel)
+  messages: ChannelMessage[];
+
+  @OneToMany(() => ChannelUser, (user: ChannelUser) => user.channel)
+  users: ChannelUser[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()

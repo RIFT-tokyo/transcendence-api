@@ -4,7 +4,6 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  RelationId,
 } from 'typeorm';
 import { Channel } from './channel.entity';
 import { User } from './user.entity';
@@ -14,8 +13,8 @@ export class ChannelMessage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @RelationId((channel: Channel) => channel.id)
-  channel_id: number;
+  @ManyToOne(() => Channel)
+  channel: Channel;
 
   @ManyToOne(() => User)
   user: User;

@@ -5,7 +5,6 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  RelationId,
   UpdateDateColumn,
 } from 'typeorm';
 import { Channel } from './channel.entity';
@@ -17,8 +16,8 @@ export class ChannelUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @RelationId((channel: Channel) => channel.id)
-  channel_id: number;
+  @ManyToOne(() => Channel, (channel: Channel) => channel.users)
+  channel: Channel;
 
   @ManyToOne(() => User)
   user: User;

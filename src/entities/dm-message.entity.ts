@@ -4,7 +4,6 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  RelationId,
 } from 'typeorm';
 import { DM } from './dm.entity';
 import { User } from './user.entity';
@@ -14,8 +13,8 @@ export class DMMessage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @RelationId((dm: DM) => dm.id)
-  dm_id: number;
+  @ManyToOne(() => DM, (dm) => dm.messages)
+  dm: DM;
 
   @ManyToOne(() => User)
   from_user: User;
