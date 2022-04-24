@@ -18,10 +18,10 @@ export class Match {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   host_player: User;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   guest_player: User;
 
   @Column({ nullable: false, default: 0 })
