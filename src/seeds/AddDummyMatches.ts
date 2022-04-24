@@ -32,7 +32,7 @@ export class AddDummyMatches implements Seeder {
       .createQueryBuilder()
       .insert()
       .into('match')
-      .values(matches[0])
+      .values(matches)
       .execute();
   }
 }

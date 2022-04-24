@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Match } from '../entities/match.entity';
 
 @Injectable()
@@ -12,6 +12,10 @@ export class MatchesService {
 
   async findAll() {
     return await this.matchRepository.find({
+      where: {
+        end_at: Not(IsNull()),
+      },
+      order: { end_at: 'DESC' },
       relations: ['host_player', 'guest_player'],
     });
   }
