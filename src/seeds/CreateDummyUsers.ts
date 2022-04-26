@@ -2,9 +2,9 @@ import { Connection } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 import User from '../factories/user.factory';
 
-export class CreateUsers implements Seeder {
+export class CreateDummyUsers implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<any> {
-    const count = 50;
+    const count = 200;
     const combinations = [];
     await factory(User)().createMany(count);
 

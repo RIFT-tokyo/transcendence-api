@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { AppGateway } from './app.gateway';
+import { MatchesModule } from './matches/matches.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AppGateway } from './app.gateway';
     }),
     UsersModule,
     AuthModule,
+    MatchesModule,
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService, AppGateway],

@@ -1,6 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { User } from '../generated/model/models';
 import { User as EntityUser } from '../entities/user.entity';
+import { Achievement as EntityAchievement } from '../entities/achievement.entity';
+import { Achievement } from '../generated/model/models';
 
 export class CreateUserDTO implements User {
   username: string;
@@ -23,6 +25,7 @@ export class ResponseUserDTO implements User {
   status_message: string;
   followers?: number;
   following?: number;
+  achievements?: Achievement[];
   created_at?: string;
   updated_at?: string;
 
@@ -33,8 +36,18 @@ export class ResponseUserDTO implements User {
     this.profile_image = user.profile_image;
     this.status = user.status;
     this.status_message = user.status_message;
-    this.followers = user.followers?.length;
-    this.following = user.following?.length;
+    this.followers = user.followers ? user.followers.length : undefined;
+    this.following = user.following ? user.following.length : undefined;
+    this.achievements = user.achievements
+      ? user.achievements.map((achievement: EntityAchievement) => ({
+          id: achievement.id,
+          name: achievement.name,
+          description: achievement.description,
+          image: achievement.image,
+          created_at: achievement.created_at.toISOString(),
+          updated_at: achievement.updated_at.toISOString(),
+        }))
+      : undefined;
     this.created_at = user.created_at.toISOString();
     this.updated_at = user.updated_at.toISOString();
   }

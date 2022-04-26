@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   InternalServerErrorException,
+  Logger,
   Session,
   UseGuards,
   UseInterceptors,
@@ -15,12 +16,17 @@ import { ResponseUserDTO } from './users.dto';
 @Controller('me')
 @UseInterceptors(CurrentUserInterceptor)
 export class MeController {
+  private readonly logger = new Logger('MeController');
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(AuthenticatedGuard)
   @Get()
   async getMe(@Session() session: UserSession): Promise<ResponseUserDTO> {
-    const user = await this.usersService.findUserById(session.userId);
+    const user = await this.usersService.findUserById(session.userId, [
+      'following',
+      'followers',
+      'achievements',
+    ]);
     if (!user) {
       throw new InternalServerErrorException('User not found');
     }

@@ -3,6 +3,7 @@ import { Configuration } from './configuration';
 
 import { AuthService } from './api/auth.service';
 import { FollowService } from './api/follow.service';
+import { MatchService } from './api/match.service';
 import { UserService } from './api/user.service';
 
 @Global()
@@ -11,11 +12,13 @@ import { UserService } from './api/user.service';
   exports:      [
     AuthService,
     FollowService,
+    MatchService,
     UserService
   ],
   providers: [
     AuthService,
     FollowService,
+    MatchService,
     UserService
   ]
 })
