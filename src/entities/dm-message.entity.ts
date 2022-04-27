@@ -1,3 +1,4 @@
+import { IsDate } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -26,5 +27,6 @@ export class DMMessage {
   text: string;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
+  @IsDate()
   created_at: Date;
 }
