@@ -22,7 +22,7 @@ export class ChannelUser {
   @ManyToOne(() => User)
   user: User;
 
-  @Column()
+  @Column({ default: false })
   is_ban: boolean;
 
   @ManyToOne(() => Roll)
