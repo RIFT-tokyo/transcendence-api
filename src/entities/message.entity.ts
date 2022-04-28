@@ -33,7 +33,7 @@ export class Message {
   @IsDate()
   updated_at: Date;
 
-  @DeleteDateColumn({ type: 'timestamp with time zone' })
+  @DeleteDateColumn({ type: 'timestamp with time zone', nullable: true })
   @IsDate()
   deleted_at: Date | null;
 }
