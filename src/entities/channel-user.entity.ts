@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Channel } from './channel.entity';
-import { Roll } from './roll.entity';
+import { Role } from './role.entity';
 import { User } from './user.entity';
 
 @Entity()

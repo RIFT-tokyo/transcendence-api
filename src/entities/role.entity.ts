@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Roll {
+export class Role {
   @PrimaryGeneratedColumn()
   id: number;
 
