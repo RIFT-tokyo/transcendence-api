@@ -17,6 +17,7 @@ import {
   Post,
   InternalServerErrorException,
   Logger,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserDTO, ResponseUserDTO } from './users.dto';
@@ -25,6 +26,7 @@ import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { S3 } from 'aws-sdk';
 import { UserSession } from 'src/types/userSession';
 import { v4 as uuidv4 } from 'uuid';
+import { PaginationParams } from 'src/types/paginationParams';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -112,8 +114,10 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  async index(): Promise<ResponseUserDTO[]> {
-    const users = await this.usersService.findAll();
+  async index(
+    @Query() { offset, limit }: PaginationParams,
+  ): Promise<ResponseUserDTO[]> {
+    const users = await this.usersService.findAll(offset, limit);
     return users.map((user) => new ResponseUserDTO(user));
   }
 

@@ -20,9 +20,11 @@ export class UsersService {
     return await this.userRepository.findOne({ username }, { relations });
   }
 
-  async findAll() {
+  async findAll(offset?: number, limit?: number) {
     return await this.userRepository.find({
       relations: ['following', 'followers'],
+      skip: offset,
+      take: limit,
     });
   }
 
