@@ -10,7 +10,7 @@ import {
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { UsersService } from './users.service';
 import { CurrentUserInterceptor } from '../common/interceptor/current-user.interceptor';
-import { UserSession } from 'src/types/user-session';
+import { UserSession } from 'src/types/userSession';
 import { ResponseUserDTO } from './users.dto';
 
 @Controller('me')

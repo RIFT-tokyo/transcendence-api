@@ -16,7 +16,7 @@ import { AuthService } from './auth.service';
 import { Login } from '../generated/model/login';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { UserSession } from 'src/types/user-session';
+import { UserSession } from 'src/types/userSession';
 import { User } from 'src/entities/user.entity';
 import { Password } from '../generated/model/password';
 
