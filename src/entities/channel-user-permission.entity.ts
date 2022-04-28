@@ -13,7 +13,7 @@ import { Role } from './role.entity';
 import { User } from './user.entity';
 
 @Entity()
-export class ChannelUser {
+export class ChannelUserPermission {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -26,8 +26,11 @@ export class ChannelUser {
   @Column({ default: false })
   is_ban: boolean;
 
-  @ManyToOne(() => Roll)
-  roll: Roll;
+  @Column({ default: false })
+  is_authorized: boolean;
+
+  @ManyToOne(() => Role, { nullable: true })
+  role: Role;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()

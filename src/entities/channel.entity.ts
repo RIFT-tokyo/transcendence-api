@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ChannelMessage } from './channel-message.entity';
-import { ChannelUser } from './channel-user.entity';
+import { ChannelUserPermission } from './channel-user-permission.entity';
 
 @Entity()
 export class Channel {
@@ -29,8 +29,11 @@ export class Channel {
   @OneToMany(() => ChannelMessage, (message: ChannelMessage) => message.channel)
   messages: ChannelMessage[];
 
-  @OneToMany(() => ChannelUser, (user: ChannelUser) => user.channel)
-  users: ChannelUser[];
+  @OneToMany(
+    () => ChannelUserPermission,
+    (user: ChannelUserPermission) => user.channel,
+  )
+  users: ChannelUserPermission[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
