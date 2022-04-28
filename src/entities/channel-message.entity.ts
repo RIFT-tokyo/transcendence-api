@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Channel } from './channel.entity';
 import { Message } from './message.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class ChannelMessage {
@@ -18,6 +19,9 @@ export class ChannelMessage {
 
   @ManyToOne(() => Channel)
   channel: Channel;
+
+  @ManyToOne(() => User)
+  user: User;
 
   @OneToOne(() => Message)
   message: Message;

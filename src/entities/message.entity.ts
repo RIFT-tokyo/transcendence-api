@@ -4,19 +4,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 
 @Entity()
 export class Message {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => User)
-  user: User;
 
   @Column()
   @IsNotEmpty()

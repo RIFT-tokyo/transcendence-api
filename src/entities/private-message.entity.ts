@@ -17,6 +17,9 @@ export class PrivateMessage {
   id: number;
 
   @ManyToOne(() => User)
+  from_user: User;
+
+  @ManyToOne(() => User)
   to_user: User;
 
   @OneToOne(() => Message)
