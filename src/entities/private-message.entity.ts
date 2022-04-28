@@ -1,21 +1,28 @@
 import { IsDate } from 'class-validator';
 import {
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { DMMessage } from './dm-message.entity';
+import { User } from './user.entity';
 
 @Entity()
-export class DM {
+export class PrivateMessage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => DMMessage, (message: DMMessage) => message.dm)
-  messages: DMMessage[];
+  @ManyToOne(() => User)
+  from_user: User;
+
+  @ManyToOne(() => User)
+  to_user: User;
+
+  @Column()
+  text: string;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
