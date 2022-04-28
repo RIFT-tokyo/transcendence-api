@@ -1,6 +1,5 @@
 import { IsDate, IsNotEmpty, IsString } from 'class-validator';
 import {
-  Check,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -12,7 +11,6 @@ import {
 import { User } from './user.entity';
 
 @Entity()
-@Check(`"text" <> ''`)
 export class Message {
   @PrimaryGeneratedColumn()
   id: number;
