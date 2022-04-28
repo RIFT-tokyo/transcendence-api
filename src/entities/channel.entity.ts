@@ -20,9 +20,6 @@ export class Channel {
   @Column()
   name: string;
 
-  @Column({ unique: true })
-  slug: string;
-
   @Column({ nullable: true })
   @Exclude()
   password: string | null;

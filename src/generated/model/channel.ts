@@ -14,7 +14,6 @@
 export interface Channel { 
     id?: number;
     name?: string;
-    slug?: string;
     is_protected?: boolean;
     created_at?: string;
     updated_at?: string;

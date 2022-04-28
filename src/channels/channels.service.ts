@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from '../entities/channel.entity';
 import { Repository } from 'typeorm';
 import { NewChannel } from 'src/generated';
-import { CreateChannelDTO, ResponseChannelDTO } from './channels.dto';
+import { ResponseChannelDTO } from './channels.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -24,9 +24,7 @@ export class ChannelsService {
         Number(process.env.HASH_SALT),
       );
     }
-    const result = await this.channelsRepository.save(
-      new CreateChannelDTO(channel),
-    );
+    const result = await this.channelsRepository.save(channel);
     return new ResponseChannelDTO(result);
   }
 }
