@@ -1,4 +1,4 @@
-import { IsDate } from 'class-validator';
+import { IsDate, IsNotEmpty, IsString } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -13,7 +13,9 @@ export class Roll {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
+  @IsNotEmpty()
+  @IsString()
   name: string;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
