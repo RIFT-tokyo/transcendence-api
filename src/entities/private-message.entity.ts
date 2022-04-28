@@ -1,13 +1,14 @@
 import { IsDate } from 'class-validator';
 import {
-  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Message } from './message.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -16,13 +17,10 @@ export class PrivateMessage {
   id: number;
 
   @ManyToOne(() => User)
-  from_user: User;
-
-  @ManyToOne(() => User)
   to_user: User;
 
-  @Column()
-  text: string;
+  @OneToOne(() => Message)
+  message: Message;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()

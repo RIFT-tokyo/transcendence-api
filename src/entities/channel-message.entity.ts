@@ -1,15 +1,15 @@
 import { IsDate } from 'class-validator';
 import {
-  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Channel } from './channel.entity';
-import { User } from './user.entity';
+import { Message } from './message.entity';
 
 @Entity()
 export class ChannelMessage {
@@ -19,11 +19,8 @@ export class ChannelMessage {
   @ManyToOne(() => Channel)
   channel: Channel;
 
-  @ManyToOne(() => User)
-  user: User;
-
-  @Column()
-  text: string;
+  @OneToOne(() => Message)
+  message: Message;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
