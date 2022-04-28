@@ -1,6 +1,7 @@
 import { Exclude } from 'class-transformer';
-import { IsDate } from 'class-validator';
+import { IsDate, IsNotEmpty, IsString } from 'class-validator';
 import {
+  Check,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -13,11 +14,14 @@ import { ChannelMessage } from './channel-message.entity';
 import { ChannelUser } from './channel-user.entity';
 
 @Entity()
+@Check(`"name" <> ''`)
 export class Channel {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
+  @IsNotEmpty()
+  @IsString()
   name: string;
 
   @Column({ nullable: true })
