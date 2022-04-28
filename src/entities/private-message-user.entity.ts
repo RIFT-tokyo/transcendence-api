@@ -3,14 +3,25 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity()
 export class PrivateMessageUser {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @OneToOne(() => User)
+  from_user: User;
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  to_users: User[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
