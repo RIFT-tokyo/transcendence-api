@@ -10,13 +10,15 @@ export class MatchesService {
     private readonly matchRepository: Repository<Match>,
   ) {}
 
-  async findAll() {
+  async findAll(offset?: number, limit?: number) {
     return await this.matchRepository.find({
       where: {
         end_at: Not(IsNull()),
       },
       order: { end_at: 'DESC' },
       relations: ['host_player', 'guest_player'],
+      skip: offset,
+      take: limit,
     });
   }
 }
