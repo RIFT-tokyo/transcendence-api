@@ -1,16 +1,17 @@
-import { IsNumber, Min, IsOptional } from 'class-validator';
+import { IsNumber, Min, IsOptional, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class PaginationParams {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
-  offset?: number;
+  @Min(1)
+  @Max(80)
+  limit: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(1)
-  limit?: number;
+  @Min(0)
+  offset?: number;
 }
