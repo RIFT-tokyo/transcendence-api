@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -10,6 +10,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectConnection() private readonly connection: Connection,
   ) {}
 
   async findUserById(id: number, relations: Array<string> = []) {
@@ -20,7 +21,7 @@ export class UsersService {
     return await this.userRepository.findOne({ username }, { relations });
   }
 
-  async findAll(offset?: number, limit?: number) {
+  async findAll(limit: number, offset?: number) {
     return await this.userRepository.find({
       relations: ['following', 'followers'],
       skip: offset,
@@ -61,26 +62,30 @@ export class UsersService {
     );
   }
 
-  async getFollowers(id: number) {
-    const user = await this.userRepository.findOne(
-      { id },
-      { relations: ['followers'] },
-    );
+  async getFollowers(id: number, limit: number, offset?: number) {
+    const user = await this.userRepository.findOne(id);
     if (!user) {
       return null;
     }
-    return user.followers;
+    const followers = await this.connection.query(
+      'SELECT * FROM "user" WHERE id IN (SELECT "userId_2" FROM \
+      user_followers_user WHERE "userId_1" = $1 LIMIT $2 OFFSET $3);',
+      [id, limit, offset],
+    );
+    return followers;
   }
 
-  async getFollowing(id: number) {
-    const user = await this.userRepository.findOne(
-      { id },
-      { relations: ['following'] },
-    );
+  async getFollowing(id: number, limit: number, offset?: number) {
+    const user = await this.userRepository.findOne(id);
     if (!user) {
       return null;
     }
-    return user.following;
+    const following = await this.connection.query(
+      'SELECT * FROM "user" WHERE id IN (SELECT "userId_1" FROM \
+      user_followers_user WHERE "userId_2" = $1 LIMIT $2 OFFSET $3);',
+      [id, limit, offset],
+    );
+    return following;
   }
 
   async follow(id: number, targetId: number) {
@@ -112,7 +117,13 @@ export class UsersService {
   }
 
   async isFollowing(id: number, targetId: number) {
-    const followingUsers = await this.getFollowing(id);
-    return followingUsers.some((u) => u.id === targetId);
+    const user = await this.userRepository.findOne(
+      { id },
+      { relations: ['following'] },
+    );
+    if (!user) {
+      return null;
+    }
+    return user.following.some((u) => u.id === targetId);
   }
 }
