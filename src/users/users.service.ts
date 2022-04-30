@@ -67,12 +67,15 @@ export class UsersService {
     if (!user) {
       return null;
     }
-    const rawData = await this.connection.query(
-      'SELECT "userId_2" FROM user_followers_user \
-      WHERE "userId_1" = $1 LIMIT $2 OFFSET $3;',
-      [id, limit, offset],
-    );
-    const followersIds = rawData.map((obj) => obj.userId_2);
+    const rawData: { user_id: number }[] = await this.connection
+      .createQueryBuilder()
+      .select('user_followers_user.userId_2 as user_id')
+      .from('user_followers_user', 'user_followers_user')
+      .where('user_followers_user.userId_1 = :id', { id })
+      .limit(limit)
+      .offset(offset)
+      .getRawMany();
+    const followersIds = rawData.map((obj) => obj.user_id);
     const followers = await this.userRepository
       .createQueryBuilder('user')
       .where('user.id IN (:...ids)', { ids: followersIds })
@@ -85,12 +88,15 @@ export class UsersService {
     if (!user) {
       return null;
     }
-    const rawData = await this.connection.query(
-      'SELECT "userId_1" FROM user_followers_user \
-      WHERE "userId_2" = $1 LIMIT $2 OFFSET $3;',
-      [id, limit, offset],
-    );
-    const followingIds = rawData.map((obj) => obj.userId_1);
+    const rawData: { user_id: number }[] = await this.connection
+      .createQueryBuilder()
+      .select('user_followers_user.userId_1 as user_id')
+      .from('user_followers_user', 'user_followers_user')
+      .where('user_followers_user.userId_2 = :id', { id })
+      .limit(limit)
+      .offset(offset)
+      .getRawMany();
+    const followingIds = rawData.map((obj) => obj.user_id);
     const following = await this.userRepository
       .createQueryBuilder('user')
       .where('user.id IN (:...ids)', { ids: followingIds })
