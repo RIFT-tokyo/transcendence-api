@@ -22,8 +22,8 @@ export class AddDummyMatches implements Seeder {
         guest_player_points = 11;
         result = 'guest';
       }
-      const host_player_id = Math.floor(Math.random() * 200) + 1;
-      const guest_player_id = Math.floor(Math.random() * 200) + 1;
+      const host_player_id = Math.floor(Math.random() * users.length) + 1;
+      const guest_player_id = Math.floor(Math.random() * users.length) + 1;
 
       matches.push({
         host_player_points,
@@ -35,7 +35,6 @@ export class AddDummyMatches implements Seeder {
         end_at: new Date(),
       });
     }
-    this.logger.log(JSON.stringify(matches));
     await connection.getRepository(Match).insert(matches);
   }
 }
