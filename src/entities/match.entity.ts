@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -19,9 +20,11 @@ export class Match {
   id: number;
 
   @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'host_player_id' })
   host_player: User;
 
   @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'guest_player_id' })
   guest_player: User;
 
   @Column({ nullable: false, default: 0 })

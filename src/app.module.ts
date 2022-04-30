@@ -8,6 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { AppGateway } from './app.gateway';
 import { MatchesModule } from './matches/matches.module';
+import { ChannelsController } from './channels/channels.controller';
+import { ChannelsService } from './channels/channels.service';
+import { ChannelsModule } from './channels/channels.module';
 
 @Module({
   imports: [
@@ -24,9 +27,10 @@ import { MatchesModule } from './matches/matches.module';
     }),
     UsersModule,
     AuthModule,
+    ChannelsModule,
     MatchesModule,
   ],
-  controllers: [AppController, UsersController],
-  providers: [AppService, UsersService, AppGateway],
+  controllers: [AppController, UsersController, ChannelsController],
+  providers: [AppService, UsersService, ChannelsService, AppGateway],
 })
 export class AppModule {}
