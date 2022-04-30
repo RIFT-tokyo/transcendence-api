@@ -3,6 +3,7 @@ import { Match } from '../entities/match.entity';
 import { Connection } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 import { User } from '../entities/user.entity';
+import * as Faker from 'faker/locale/ja';
 
 export class AddDummyMatches implements Seeder {
   private readonly logger = new Logger('AddDummyMatches');
@@ -31,8 +32,8 @@ export class AddDummyMatches implements Seeder {
         result,
         host_player: users.find((user) => user.id === host_player_id),
         guest_player: users.find((user) => user.id === guest_player_id),
-        start_at: new Date(),
-        end_at: new Date(),
+        start_at: Faker.date.past(),
+        end_at: Faker.date.recent(),
       });
     }
     await connection.getRepository(Match).insert(matches);
