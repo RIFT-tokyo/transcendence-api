@@ -11,7 +11,7 @@ export class MatchesService {
   ) {}
 
   async findAll(limit?: number, offset?: number) {
-    return await this.matchRepository.find({
+    const [matches, count] = await this.matchRepository.findAndCount({
       where: {
         end_at: Not(IsNull()),
       },
@@ -20,5 +20,7 @@ export class MatchesService {
       skip: offset,
       take: limit,
     });
+    const has_next = count > (offset ?? 0) + limit;
+    return { matches, has_next };
   }
 }

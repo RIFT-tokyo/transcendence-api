@@ -1,4 +1,4 @@
-import { Match } from '../generated/model/models';
+import { Match, MatchList } from '../generated/model/models';
 import { Match as MatchEntity } from '../entities/match.entity';
 import { ResponseUserDTO } from '../users/users.dto';
 
@@ -21,5 +21,15 @@ export class ResponseMatchDTO implements Match {
     this.result = match.result;
     this.start_at = match.start_at.toISOString();
     this.end_at = match.end_at.toISOString();
+  }
+}
+
+export class ResponseMatchListDTO implements MatchList {
+  entries: Match[];
+  has_next: boolean;
+
+  constructor(matchList: MatchEntity[], has_next: boolean) {
+    this.entries = matchList.map((match) => new ResponseMatchDTO(match));
+    this.has_next = has_next;
   }
 }
