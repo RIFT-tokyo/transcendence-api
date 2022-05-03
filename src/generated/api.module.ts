@@ -2,7 +2,6 @@ import { DynamicModule, HttpService, HttpModule, Module, Global } from '@nestjs/
 import { Configuration } from './configuration';
 
 import { AuthService } from './api/auth.service';
-import { ChannelService } from './api/channel.service';
 import { FollowService } from './api/follow.service';
 import { MatchService } from './api/match.service';
 import { UserService } from './api/user.service';
@@ -12,14 +11,12 @@ import { UserService } from './api/user.service';
   imports:      [ HttpModule ],
   exports:      [
     AuthService,
-    ChannelService,
     FollowService,
     MatchService,
     UserService
   ],
   providers: [
     AuthService,
-    ChannelService,
     FollowService,
     MatchService,
     UserService

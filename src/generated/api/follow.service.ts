@@ -14,7 +14,7 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
-import { User } from '../model/user';
+import { InlineResponse200 } from '../model/inlineResponse200';
 import { Configuration } from '../configuration';
 
 
@@ -84,7 +84,7 @@ export class FollowService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserIDFollowing(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<Array<User>>>;
+    public getUsersUserIDFollowing(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<InlineResponse200>>;
     public getUsersUserIDFollowing(userID: number, limit?: number, offset?: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -116,7 +116,7 @@ export class FollowService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<User>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/following`,
+        return this.httpClient.get<InlineResponse200>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/following`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -174,7 +174,7 @@ export class FollowService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserIdFriends(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<Array<User>>>;
+    public getUsersUserIdFriends(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<InlineResponse200>>;
     public getUsersUserIdFriends(userID: number, limit?: number, offset?: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -206,7 +206,7 @@ export class FollowService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<User>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/followers`,
+        return this.httpClient.get<InlineResponse200>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/followers`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
