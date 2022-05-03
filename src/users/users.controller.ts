@@ -211,12 +211,16 @@ export class UsersController {
   async getFollowers(
     @Param('id', ParseIntPipe) id: number,
     @Query() { limit = 10, offset }: PaginationParams,
-  ): Promise<ResponseUserDTO[]> {
-    const users = await this.usersService.getFollowers(id, limit, offset);
-    if (!users) {
+  ): Promise<ResponseUserListDTO> {
+    const { followers, has_next } = await this.usersService.getFollowers(
+      id,
+      limit,
+      offset,
+    );
+    if (!followers) {
       throw new NotFoundException('User not found');
     }
-    return users.map((user) => new ResponseUserDTO(user));
+    return new ResponseUserListDTO(followers, has_next);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -224,12 +228,16 @@ export class UsersController {
   async getFollowing(
     @Param('id', ParseIntPipe) id: number,
     @Query() { limit = 10, offset }: PaginationParams,
-  ): Promise<ResponseUserDTO[]> {
-    const users = await this.usersService.getFollowing(id, limit, offset);
-    if (!users) {
+  ): Promise<ResponseUserListDTO> {
+    const { following, has_next } = await this.usersService.getFollowing(
+      id,
+      limit,
+      offset,
+    );
+    if (!following) {
       throw new NotFoundException('User not found');
     }
-    return users.map((user) => new ResponseUserDTO(user));
+    return new ResponseUserListDTO(following, has_next);
   }
 
   @UseGuards(AuthenticatedGuard)

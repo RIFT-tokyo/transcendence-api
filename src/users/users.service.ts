@@ -69,11 +69,13 @@ export class UsersService {
     if (!user) {
       return null;
     }
-    const rawData: { user_id: number }[] = await this.connection
+    const queryBuilder = this.connection
       .createQueryBuilder()
       .select('user_followers_user.userId_2 as user_id')
       .from('user_followers_user', 'user_followers_user')
-      .where('user_followers_user.userId_1 = :id', { id })
+      .where('user_followers_user.userId_1 = :id', { id });
+
+    const rawData: { user_id: number }[] = await queryBuilder
       .limit(limit)
       .offset(offset)
       .getRawMany();
@@ -82,7 +84,10 @@ export class UsersService {
       .createQueryBuilder('user')
       .where('user.id IN (:...ids)', { ids: followersIds })
       .getMany();
-    return followers;
+
+    const count = await queryBuilder.getCount();
+    const has_next = count > (offset ?? 0) + limit;
+    return { followers, has_next };
   }
 
   async getFollowing(id: number, limit: number, offset?: number) {
@@ -90,11 +95,13 @@ export class UsersService {
     if (!user) {
       return null;
     }
-    const rawData: { user_id: number }[] = await this.connection
+    const queryBuilder = await this.connection
       .createQueryBuilder()
       .select('user_followers_user.userId_1 as user_id')
       .from('user_followers_user', 'user_followers_user')
-      .where('user_followers_user.userId_2 = :id', { id })
+      .where('user_followers_user.userId_2 = :id', { id });
+
+    const rawData: { user_id: number }[] = await queryBuilder
       .limit(limit)
       .offset(offset)
       .getRawMany();
@@ -103,7 +110,10 @@ export class UsersService {
       .createQueryBuilder('user')
       .where('user.id IN (:...ids)', { ids: followingIds })
       .getMany();
-    return following;
+
+    const count = await queryBuilder.getCount();
+    const has_next = count > (offset ?? 0) + limit;
+    return { following, has_next };
   }
 
   async follow(id: number, targetId: number) {
