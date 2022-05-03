@@ -3,6 +3,7 @@ README.md
 api.module.ts
 api/api.ts
 api/auth.service.ts
+api/channel.service.ts
 api/follow.service.ts
 api/match.service.ts
 api/user.service.ts
@@ -10,14 +11,16 @@ configuration.ts
 git_push.sh
 index.ts
 model/achievement.ts
+model/channel.ts
 model/error.ts
 model/filePath.ts
-model/inlineResponse200.ts
-model/inlineResponse2001.ts
 model/login.ts
 model/match.ts
+model/matchList.ts
 model/models.ts
+model/newChannel.ts
 model/password.ts
 model/rankedUser.ts
 model/user.ts
+model/userList.ts
 variables.ts

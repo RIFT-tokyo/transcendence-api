@@ -14,7 +14,7 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
-import { InlineResponse2001 } from '../model/inlineResponse2001';
+import { MatchList } from '../model/matchList';
 import { Configuration } from '../configuration';
 
 
@@ -47,7 +47,7 @@ export class MatchService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getMatches(limit?: number, offset?: number, ): Observable<AxiosResponse<InlineResponse2001>>;
+    public getMatches(limit?: number, offset?: number, ): Observable<AxiosResponse<MatchList>>;
     public getMatches(limit?: number, offset?: number, ): Observable<any> {
 
 
@@ -75,7 +75,7 @@ export class MatchService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<InlineResponse2001>(`${this.basePath}/matches`,
+        return this.httpClient.get<MatchList>(`${this.basePath}/matches`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
