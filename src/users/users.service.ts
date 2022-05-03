@@ -22,11 +22,13 @@ export class UsersService {
   }
 
   async findAll(limit: number, offset?: number) {
-    return await this.userRepository.find({
+    const [users, count] = await this.userRepository.findAndCount({
       relations: ['following', 'followers'],
       skip: offset,
       take: limit,
     });
+    const has_next = count > offset + limit;
+    return { users, has_next };
   }
 
   async deleteUser(id: number) {

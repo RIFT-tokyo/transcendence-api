@@ -20,7 +20,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UpdateUserDTO, ResponseUserDTO } from './users.dto';
+import {
+  UpdateUserDTO,
+  ResponseUserDTO,
+  ResponseUserListDTO,
+} from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { S3 } from 'aws-sdk';
@@ -116,9 +120,9 @@ export class UsersController {
   @Get()
   async index(
     @Query() { limit = 10, offset }: PaginationParams,
-  ): Promise<ResponseUserDTO[]> {
-    const users = await this.usersService.findAll(limit, offset);
-    return users.map((user) => new ResponseUserDTO(user));
+  ): Promise<ResponseUserListDTO> {
+    const { users, has_next } = await this.usersService.findAll(limit, offset);
+    return new ResponseUserListDTO(users, has_next);
   }
 
   @UseGuards(AuthenticatedGuard)
