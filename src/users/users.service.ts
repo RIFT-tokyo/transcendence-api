@@ -27,7 +27,7 @@ export class UsersService {
       skip: offset,
       take: limit,
     });
-    const has_next = count > offset + limit;
+    const has_next = count > (offset ?? 0) + limit;
     return { users, has_next };
   }
 
