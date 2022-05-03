@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { User } from '../generated/model/models';
-import { InlineResponse200 } from '../generated/model/models';
+import { UserList } from '../generated/model/models';
 import { User as EntityUser } from '../entities/user.entity';
 import { Achievement as EntityAchievement } from '../entities/achievement.entity';
 import { Achievement } from '../generated/model/models';
@@ -54,7 +54,7 @@ export class ResponseUserDTO implements User {
   }
 }
 
-export class ResponseUserListDTO implements InlineResponse200 {
+export class ResponseUserListDTO implements UserList {
   entries: User[];
   has_next: boolean;
 
