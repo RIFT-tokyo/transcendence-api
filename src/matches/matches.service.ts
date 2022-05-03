@@ -10,7 +10,7 @@ export class MatchesService {
     private readonly matchRepository: Repository<Match>,
   ) {}
 
-  async findAll(offset?: number, limit?: number) {
+  async findAll(limit?: number, offset?: number) {
     return await this.matchRepository.find({
       where: {
         end_at: Not(IsNull()),

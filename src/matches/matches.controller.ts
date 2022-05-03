@@ -12,9 +12,9 @@ export class MatchesController {
   @UseGuards(AuthenticatedGuard)
   @Get()
   async matchHistory(
-    @Query() { offset, limit }: PaginationParams,
+    @Query() { limit = 10, offset }: PaginationParams,
   ): Promise<ResponseMatchDTO[]> {
-    const matches = await this.matchesService.findAll(offset, limit);
+    const matches = await this.matchesService.findAll(limit, offset);
     return matches.map((match) => new ResponseMatchDTO(match));
   }
 }
