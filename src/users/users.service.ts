@@ -80,10 +80,13 @@ export class UsersService {
       .offset(offset)
       .getRawMany();
     const followersIds = rawData.map((obj) => obj.user_id);
-    const followers = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.id IN (:...ids)', { ids: followersIds })
-      .getMany();
+    let followers = null;
+    if (followersIds.length) {
+      followers = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id IN (:...ids)', { ids: followersIds })
+        .getMany();
+    }
 
     const count = await queryBuilder.getCount();
     const has_next = count > (offset ?? 0) + limit;
@@ -106,10 +109,13 @@ export class UsersService {
       .offset(offset)
       .getRawMany();
     const followingIds = rawData.map((obj) => obj.user_id);
-    const following = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.id IN (:...ids)', { ids: followingIds })
-      .getMany();
+    let following = null;
+    if (followingIds.length) {
+      following = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id IN (:...ids)', { ids: followingIds })
+        .getMany();
+    }
 
     const count = await queryBuilder.getCount();
     const has_next = count > (offset ?? 0) + limit;
