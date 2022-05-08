@@ -80,7 +80,7 @@ export class UsersService {
       .offset(offset)
       .getRawMany();
     const followersIds = rawData.map((obj) => obj.user_id);
-    let followers = null;
+    let followers = [];
     if (followersIds.length) {
       followers = await this.userRepository
         .createQueryBuilder('user')
@@ -109,7 +109,7 @@ export class UsersService {
       .offset(offset)
       .getRawMany();
     const followingIds = rawData.map((obj) => obj.user_id);
-    let following = null;
+    let following = [];
     if (followingIds.length) {
       following = await this.userRepository
         .createQueryBuilder('user')
