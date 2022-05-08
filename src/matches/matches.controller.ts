@@ -1,7 +1,7 @@
 import { Controller, Get, Logger, Query, UseGuards } from '@nestjs/common';
 import { PaginationParams } from 'src/types/paginationParams';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { ResponseMatchDTO, ResponseMatchListDTO } from './match.dto';
+import { ResponseMatchListDTO } from './match.dto';
 import { MatchesService } from './matches.service';
 
 @Controller('matches')
