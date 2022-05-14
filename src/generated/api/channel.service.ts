@@ -43,23 +43,11 @@ export class ChannelService {
     /**
      * List channels
      * 
-     * @param limit 
-     * @param offset 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getChannels(limit?: number, offset?: number, ): Observable<AxiosResponse<Array<Channel>>>;
-    public getChannels(limit?: number, offset?: number, ): Observable<any> {
-
-
-
-        let queryParameters = {};
-        if (limit !== undefined && limit !== null) {
-            queryParameters['limit'] = <any>limit;
-        }
-        if (offset !== undefined && offset !== null) {
-            queryParameters['offset'] = <any>offset;
-        }
+    public getChannels(): Observable<AxiosResponse<Array<Channel>>>;
+    public getChannels(): Observable<any> {
 
         let headers = this.defaultHeaders;
 
@@ -78,7 +66,6 @@ export class ChannelService {
         ];
         return this.httpClient.get<Array<Channel>>(`${this.basePath}/channels`,
             {
-                params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
             }
