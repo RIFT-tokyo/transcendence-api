@@ -4,6 +4,7 @@ import { User } from '../entities/user.entity';
 import { Connection, Repository } from 'typeorm';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import * as bcrypt from 'bcrypt';
+import { EntriesList } from '../types/EntriesList';
 
 @Injectable()
 export class UsersService {
@@ -21,14 +22,14 @@ export class UsersService {
     return await this.userRepository.findOne({ username }, { relations });
   }
 
-  async findAll(limit: number, offset?: number) {
+  async findAll(limit: number, offset?: number): Promise<EntriesList<User>> {
     const [users, count] = await this.userRepository.findAndCount({
       relations: ['following', 'followers'],
       skip: offset,
       take: limit,
     });
     const has_next = count > (offset ?? 0) + limit;
-    return { users, has_next };
+    return { entries: users, has_next };
   }
 
   async deleteUser(id: number) {
@@ -64,7 +65,11 @@ export class UsersService {
     );
   }
 
-  async getFollowers(id: number, limit: number, offset?: number) {
+  async getFollowers(
+    id: number,
+    limit: number,
+    offset?: number,
+  ): Promise<EntriesList<User>> {
     const user = await this.userRepository.findOne(id);
     if (!user) {
       return null;
@@ -90,10 +95,14 @@ export class UsersService {
 
     const count = await queryBuilder.getCount();
     const has_next = count > (offset ?? 0) + limit;
-    return { followers, has_next };
+    return { entries: followers, has_next };
   }
 
-  async getFollowing(id: number, limit: number, offset?: number) {
+  async getFollowing(
+    id: number,
+    limit: number,
+    offset?: number,
+  ): Promise<EntriesList<User>> {
     const user = await this.userRepository.findOne(id);
     if (!user) {
       return null;
@@ -119,7 +128,7 @@ export class UsersService {
 
     const count = await queryBuilder.getCount();
     const has_next = count > (offset ?? 0) + limit;
-    return { following, has_next };
+    return { entries: following, has_next };
   }
 
   async follow(id: number, targetId: number) {

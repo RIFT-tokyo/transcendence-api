@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntriesList } from 'src/types/EntriesList';
+import { EntriesList } from '../types/EntriesList';
 import { IsNull, Not, Repository } from 'typeorm';
 import { Match } from '../entities/match.entity';
 
@@ -22,6 +22,6 @@ export class MatchesService {
       take: limit,
     });
     const has_next = count > (offset ?? 0) + limit;
-    return { matches, has_next };
+    return { entries: matches, has_next };
   }
 }

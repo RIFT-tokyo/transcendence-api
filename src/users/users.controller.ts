@@ -121,8 +121,8 @@ export class UsersController {
   async index(
     @Query() { limit = 10, offset }: PaginationParams,
   ): Promise<ResponseUserListDTO> {
-    const { users, has_next } = await this.usersService.findAll(limit, offset);
-    return new ResponseUserListDTO(users, has_next);
+    const entriesList = await this.usersService.findAll(limit, offset);
+    return new ResponseUserListDTO(entriesList);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -212,11 +212,11 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Query() { limit = 10, offset }: PaginationParams,
   ): Promise<ResponseUserListDTO> {
-    const ret = await this.usersService.getFollowers(id, limit, offset);
-    if (!ret) {
+    const entriesList = await this.usersService.getFollowers(id, limit, offset);
+    if (!entriesList) {
       throw new NotFoundException('User not found');
     }
-    return new ResponseUserListDTO(ret.followers, ret.has_next);
+    return new ResponseUserListDTO(entriesList);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -225,11 +225,11 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Query() { limit = 10, offset }: PaginationParams,
   ): Promise<ResponseUserListDTO> {
-    const ret = await this.usersService.getFollowing(id, limit, offset);
-    if (!ret) {
+    const entriesList = await this.usersService.getFollowing(id, limit, offset);
+    if (!entriesList) {
       throw new NotFoundException('User not found');
     }
-    return new ResponseUserListDTO(ret.following, ret.has_next);
+    return new ResponseUserListDTO(entriesList);
   }
 
   @UseGuards(AuthenticatedGuard)

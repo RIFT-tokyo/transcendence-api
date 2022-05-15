@@ -4,6 +4,7 @@ import { UserList } from '../generated/model/models';
 import { User as EntityUser } from '../entities/user.entity';
 import { Achievement as EntityAchievement } from '../entities/achievement.entity';
 import { Achievement } from '../generated/model/models';
+import { EntriesList } from '../types/EntriesList';
 
 export class CreateUserDTO implements User {
   username: string;
@@ -58,8 +59,8 @@ export class ResponseUserListDTO implements UserList {
   entries: User[];
   has_next: boolean;
 
-  constructor(userList: EntityUser[], has_next: boolean) {
-    this.entries = userList.map((user) => new ResponseUserDTO(user));
-    this.has_next = has_next;
+  constructor(entriesList: EntriesList<EntityUser>) {
+    this.entries = entriesList.entries.map((user) => new ResponseUserDTO(user));
+    this.has_next = entriesList.has_next;
   }
 }

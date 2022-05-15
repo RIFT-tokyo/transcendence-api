@@ -14,10 +14,7 @@ export class MatchesController {
   async matchHistory(
     @Query() { limit = 10, offset }: PaginationParams,
   ): Promise<ResponseMatchListDTO> {
-    const { matches, has_next } = await this.matchesService.findAll(
-      limit,
-      offset,
-    );
-    return new ResponseMatchListDTO(matches, has_next);
+    const entriesList = await this.matchesService.findAll(limit, offset);
+    return new ResponseMatchListDTO(entriesList);
   }
 }
