@@ -28,9 +28,9 @@ import {
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { S3 } from 'aws-sdk';
-import { UserSession } from 'src/types/UserSession';
+import { UserSession } from '../types/UserSession';
 import { v4 as uuidv4 } from 'uuid';
-import { PaginationParams } from 'src/types/PaginationParams';
+import { PaginationParams } from '../types/PaginationParams';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
