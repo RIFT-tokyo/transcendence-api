@@ -16,6 +16,7 @@ import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { FilePath } from '../model/filePath';
 import { User } from '../model/user';
+import { UserList } from '../model/userList';
 import { Configuration } from '../configuration';
 
 
@@ -151,7 +152,7 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsers(limit?: number, offset?: number, ): Observable<AxiosResponse<Array<User>>>;
+    public getUsers(limit?: number, offset?: number, ): Observable<AxiosResponse<UserList>>;
     public getUsers(limit?: number, offset?: number, ): Observable<any> {
 
 
@@ -179,7 +180,7 @@ export class UserService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<User>>(`${this.basePath}/users`,
+        return this.httpClient.get<UserList>(`${this.basePath}/users`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,

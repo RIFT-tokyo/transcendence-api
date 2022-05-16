@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EntriesList } from '../types/EntriesList';
 import { IsNull, Not, Repository } from 'typeorm';
 import { Match } from '../entities/match.entity';
 
@@ -10,13 +11,17 @@ export class MatchesService {
     private readonly matchRepository: Repository<Match>,
   ) {}
 
-  async findAll() {
-    return await this.matchRepository.find({
+  async findAll(limit?: number, offset?: number): Promise<EntriesList<Match>> {
+    const [matches, count] = await this.matchRepository.findAndCount({
       where: {
         end_at: Not(IsNull()),
       },
       order: { end_at: 'DESC' },
       relations: ['host_player', 'guest_player'],
+      skip: offset,
+      take: limit,
     });
+    const has_next = count > (offset ?? 0) + limit;
+    return { entries: matches, has_next };
   }
 }

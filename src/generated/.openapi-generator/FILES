@@ -1,5 +1,4 @@
 .gitignore
-.openapi-generator-ignore
 README.md
 api.module.ts
 api/api.ts
@@ -17,9 +16,11 @@ model/error.ts
 model/filePath.ts
 model/login.ts
 model/match.ts
+model/matchList.ts
 model/models.ts
 model/newChannel.ts
 model/password.ts
 model/rankedUser.ts
 model/user.ts
+model/userList.ts
 variables.ts

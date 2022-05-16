@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import * as bcrypt from 'bcrypt';
+import { EntriesList } from '../types/EntriesList';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectConnection() private readonly connection: Connection,
   ) {}
 
   async findUserById(id: number, relations: Array<string> = []) {
@@ -20,10 +22,14 @@ export class UsersService {
     return await this.userRepository.findOne({ username }, { relations });
   }
 
-  async findAll() {
-    return await this.userRepository.find({
+  async findAll(limit: number, offset?: number): Promise<EntriesList<User>> {
+    const [users, count] = await this.userRepository.findAndCount({
       relations: ['following', 'followers'],
+      skip: offset,
+      take: limit,
     });
+    const has_next = count > (offset ?? 0) + limit;
+    return { entries: users, has_next };
   }
 
   async deleteUser(id: number) {
@@ -59,26 +65,70 @@ export class UsersService {
     );
   }
 
-  async getFollowers(id: number) {
-    const user = await this.userRepository.findOne(
-      { id },
-      { relations: ['followers'] },
-    );
+  async getFollowers(
+    id: number,
+    limit: number,
+    offset?: number,
+  ): Promise<EntriesList<User>> {
+    const user = await this.userRepository.findOne(id);
     if (!user) {
       return null;
     }
-    return user.followers;
+    const queryBuilder = this.connection
+      .createQueryBuilder()
+      .select('user_followers_user.userId_2 as user_id')
+      .from('user_followers_user', 'user_followers_user')
+      .where('user_followers_user.userId_1 = :id', { id });
+
+    const rawData: { user_id: number }[] = await queryBuilder
+      .limit(limit)
+      .offset(offset)
+      .getRawMany();
+    const followersIds = rawData.map((obj) => obj.user_id);
+    let followers = [];
+    if (followersIds.length) {
+      followers = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id IN (:...ids)', { ids: followersIds })
+        .getMany();
+    }
+
+    const count = await queryBuilder.getCount();
+    const has_next = count > (offset ?? 0) + limit;
+    return { entries: followers, has_next };
   }
 
-  async getFollowing(id: number) {
-    const user = await this.userRepository.findOne(
-      { id },
-      { relations: ['following'] },
-    );
+  async getFollowing(
+    id: number,
+    limit: number,
+    offset?: number,
+  ): Promise<EntriesList<User>> {
+    const user = await this.userRepository.findOne(id);
     if (!user) {
       return null;
     }
-    return user.following;
+    const queryBuilder = await this.connection
+      .createQueryBuilder()
+      .select('user_followers_user.userId_1 as user_id')
+      .from('user_followers_user', 'user_followers_user')
+      .where('user_followers_user.userId_2 = :id', { id });
+
+    const rawData: { user_id: number }[] = await queryBuilder
+      .limit(limit)
+      .offset(offset)
+      .getRawMany();
+    const followingIds = rawData.map((obj) => obj.user_id);
+    let following = [];
+    if (followingIds.length) {
+      following = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id IN (:...ids)', { ids: followingIds })
+        .getMany();
+    }
+
+    const count = await queryBuilder.getCount();
+    const has_next = count > (offset ?? 0) + limit;
+    return { entries: following, has_next };
   }
 
   async follow(id: number, targetId: number) {
@@ -110,7 +160,13 @@ export class UsersService {
   }
 
   async isFollowing(id: number, targetId: number) {
-    const followingUsers = await this.getFollowing(id);
-    return followingUsers.some((u) => u.id === targetId);
+    const user = await this.userRepository.findOne(
+      { id },
+      { relations: ['following'] },
+    );
+    if (!user) {
+      return null;
+    }
+    return user.following.some((u) => u.id === targetId);
   }
 }

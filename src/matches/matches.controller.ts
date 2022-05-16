@@ -1,6 +1,7 @@
-import { Controller, Get, Logger, UseGuards } from '@nestjs/common';
+import { Controller, Get, Logger, Query, UseGuards } from '@nestjs/common';
+import { PaginationParams } from '../types/PaginationParams';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { ResponseMatchDTO } from './match.dto';
+import { ResponseMatchListDTO } from './match.dto';
 import { MatchesService } from './matches.service';
 
 @Controller('matches')
@@ -10,8 +11,10 @@ export class MatchesController {
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  async matchHistory(): Promise<ResponseMatchDTO[]> {
-    const matches = await this.matchesService.findAll();
-    return matches.map((match) => new ResponseMatchDTO(match));
+  async matchHistory(
+    @Query() { limit = 10, offset }: PaginationParams,
+  ): Promise<ResponseMatchListDTO> {
+    const entriesList = await this.matchesService.findAll(limit, offset);
+    return new ResponseMatchListDTO(entriesList);
   }
 }

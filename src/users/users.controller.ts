@@ -17,14 +17,20 @@ import {
   Post,
   InternalServerErrorException,
   Logger,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UpdateUserDTO, ResponseUserDTO } from './users.dto';
+import {
+  UpdateUserDTO,
+  ResponseUserDTO,
+  ResponseUserListDTO,
+} from './users.dto';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { S3 } from 'aws-sdk';
-import { UserSession } from 'src/types/user-session';
+import { UserSession } from '../types/UserSession';
 import { v4 as uuidv4 } from 'uuid';
+import { PaginationParams } from '../types/PaginationParams';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -112,9 +118,11 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  async index(): Promise<ResponseUserDTO[]> {
-    const users = await this.usersService.findAll();
-    return users.map((user) => new ResponseUserDTO(user));
+  async index(
+    @Query() { limit = 10, offset }: PaginationParams,
+  ): Promise<ResponseUserListDTO> {
+    const entriesList = await this.usersService.findAll(limit, offset);
+    return new ResponseUserListDTO(entriesList);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -202,24 +210,26 @@ export class UsersController {
   @Get(':id/followers')
   async getFollowers(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ResponseUserDTO[]> {
-    const users = await this.usersService.getFollowers(id);
-    if (!users) {
+    @Query() { limit = 10, offset }: PaginationParams,
+  ): Promise<ResponseUserListDTO> {
+    const entriesList = await this.usersService.getFollowers(id, limit, offset);
+    if (!entriesList) {
       throw new NotFoundException('User not found');
     }
-    return users.map((user) => new ResponseUserDTO(user));
+    return new ResponseUserListDTO(entriesList);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get(':id/following')
   async getFollowing(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ResponseUserDTO[]> {
-    const users = await this.usersService.getFollowing(id);
-    if (!users) {
+    @Query() { limit = 10, offset }: PaginationParams,
+  ): Promise<ResponseUserListDTO> {
+    const entriesList = await this.usersService.getFollowing(id, limit, offset);
+    if (!entriesList) {
       throw new NotFoundException('User not found');
     }
-    return users.map((user) => new ResponseUserDTO(user));
+    return new ResponseUserListDTO(entriesList);
   }
 
   @UseGuards(AuthenticatedGuard)
