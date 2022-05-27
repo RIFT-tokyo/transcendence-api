@@ -33,7 +33,7 @@ export class AuthService {
 
   async validateFtUser(userData: CreateUserDTO) {
     const user = await this.usersService.findUserByUsername(userData.username);
-    if (user) {
+    if (user && user.intra_id === userData.intra_id) {
       return user;
     }
     userData.password = null;
