@@ -8,6 +8,19 @@ import { Login } from '../generated/model/login';
 export class AuthService {
   constructor(private readonly usersService: UsersService) {}
 
+  private async isUsernameAvailable(username: string) {
+    const user = await this.usersService.findUserByUsername(username);
+    return !user;
+  }
+
+  private async uniqueUsernameGenerator(username: string) {
+    let uniqueUsername = username;
+    while ((await this.isUsernameAvailable(uniqueUsername)) === false) {
+      uniqueUsername = uniqueUsername + Math.floor(Math.random() * 10);
+    }
+    return uniqueUsername;
+  }
+
   async signup(login: Login) {
     const user = await this.usersService.findUserByUsername(login.username);
     if (user) {
@@ -36,7 +49,7 @@ export class AuthService {
     if (user) {
       return user;
     }
-    userData.username = 'abcabc';
+    userData.username = await this.uniqueUsernameGenerator(userData.username);
     userData.password = null;
     return await this.usersService.createUser(userData);
   }
