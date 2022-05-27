@@ -22,6 +22,10 @@ export class UsersService {
     return await this.userRepository.findOne({ username }, { relations });
   }
 
+  async findUserByIntraId(intra_id: number, relations: Array<string> = []) {
+    return await this.userRepository.findOne({ intra_id }, { relations });
+  }
+
   async findAll(limit: number, offset?: number): Promise<EntriesList<User>> {
     const [users, count] = await this.userRepository.findAndCount({
       relations: ['following', 'followers'],
