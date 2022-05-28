@@ -12,6 +12,7 @@ git_push.sh
 index.ts
 model/achievement.ts
 model/channel.ts
+model/channelUser.ts
 model/error.ts
 model/filePath.ts
 model/login.ts
@@ -21,6 +22,7 @@ model/models.ts
 model/newChannel.ts
 model/password.ts
 model/rankedUser.ts
+model/role.ts
 model/user.ts
 model/userList.ts
 variables.ts
