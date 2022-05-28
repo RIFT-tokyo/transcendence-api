@@ -26,9 +26,6 @@ export class ChannelUserPermission {
   @Column({ default: false })
   is_ban: boolean;
 
-  @Column({ default: false })
-  is_authorized: boolean;
-
   @ManyToOne(() => Role, { nullable: true })
   role: Role;
 
