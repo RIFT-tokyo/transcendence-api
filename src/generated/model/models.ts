@@ -1,5 +1,6 @@
 export * from './achievement';
 export * from './channel';
+export * from './channelUser';
 export * from './filePath';
 export * from './login';
 export * from './match';
@@ -8,5 +9,6 @@ export * from './error';
 export * from './newChannel';
 export * from './password';
 export * from './rankedUser';
+export * from './role';
 export * from './user';
 export * from './userList';
