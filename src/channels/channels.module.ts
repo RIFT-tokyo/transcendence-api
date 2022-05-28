@@ -7,6 +7,7 @@ import { Channel } from '../entities/channel.entity';
 import { ChannelsController } from './channels.controller';
 import { ChannelsGateway } from './channels.gateway';
 import { ChannelsService } from './channels.service';
+import { ChannelUserPermissionsService } from './channel-user-permissions.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ChannelsService } from './channels.service';
     TypeOrmModule.forFeature([Channel, Message, ChannelMessage]),
   ],
   exports: [TypeOrmModule, ChannelsService],
-  providers: [ChannelsService, ChannelsGateway],
+  providers: [ChannelsService, ChannelUserPermissionsService, ChannelsGateway],
   controllers: [ChannelsController],
 })
 export class ChannelsModule {}
