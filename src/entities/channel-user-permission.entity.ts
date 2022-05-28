@@ -5,7 +5,7 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Channel } from './channel.entity';
@@ -14,8 +14,11 @@ import { User } from './user.entity';
 
 @Entity()
 export class ChannelUserPermission {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  channelId: number;
+
+  @PrimaryColumn()
+  userId: number;
 
   @ManyToOne(() => Channel, (channel: Channel) => channel.users)
   channel: Channel;
