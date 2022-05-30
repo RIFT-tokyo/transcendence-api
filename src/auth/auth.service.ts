@@ -1,3 +1,4 @@
+import { UserService } from './../generated/api/user.service';
 import { Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDTO } from '../users/users.dto';
@@ -8,17 +9,25 @@ import { Login } from '../generated/model/login';
 export class AuthService {
   constructor(private readonly usersService: UsersService) {}
 
-  private async isUsernameAvailable(username: string) {
-    const user = await this.usersService.findUserByUsername(username);
-    return !user;
-  }
-
   private async uniqueUsernameGenerator(username: string) {
-    let uniqueUsername = username;
-    while ((await this.isUsernameAvailable(uniqueUsername)) === false) {
-      uniqueUsername = uniqueUsername + Math.floor(Math.random() * 10);
+    const nums = '0123456789';
+    const addUnitLength = 4;
+
+    const forwardMatchedUsernames = (
+      await this.usersService.findManyUsersByForwardMatchedUsername(username)
+    ).map((u) => u.username);
+
+    let res = username;
+    while (forwardMatchedUsernames.includes(res)) {
+      // generate a random numeric string(addedStr) of length addUnitLength.
+      let addedStr = '';
+      for (let i = 0; i < addUnitLength; i++) {
+        addedStr += nums[Math.floor(Math.random() * nums.length)];
+      }
+
+      res += addedStr;
     }
-    return uniqueUsername;
+    return res;
   }
 
   async signup(login: Login) {
