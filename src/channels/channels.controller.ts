@@ -26,8 +26,14 @@ export class ChannelsController {
   @Post()
   @HttpCode(201)
   async createChannel(
-    @Body() channel: NewChannel,
+    @Body() channelData: NewChannel,
   ): Promise<ResponseChannelDTO> {
-    return await this.channelsService.create(channel);
+    const channel = await this.channelsService.create(channelData);
+    if (!channel) {
+      throw new NotFoundException('Channel not found');
+    }
+    return new ResponseChannelDTO(channel);
+  }
+
   }
 }
