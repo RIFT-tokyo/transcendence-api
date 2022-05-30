@@ -15,7 +15,6 @@ import { Channel } from './channel';
 
 
 export interface ChannelUser { 
-    id?: number;
     channel?: Channel;
     user?: User;
     is_ban?: boolean;
