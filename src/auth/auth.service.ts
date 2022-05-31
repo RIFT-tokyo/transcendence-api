@@ -8,6 +8,18 @@ import { Login } from '../generated/model/login';
 export class AuthService {
   constructor(private readonly usersService: UsersService) {}
 
+  private async uniqueUsernameGenerator(username: string) {
+    const forwardMatchedUsernames = (
+      await this.usersService.findUsersByUsernameLike(`${username}%`)
+    ).map((u) => u.username);
+
+    let res = username;
+    while (forwardMatchedUsernames.includes(res)) {
+      res += Math.floor(Math.random() * 10000);
+    }
+    return res;
+  }
+
   async signup(login: Login) {
     const user = await this.usersService.findUserByUsername(login.username);
     if (user) {
@@ -32,10 +44,11 @@ export class AuthService {
   }
 
   async validateFtUser(userData: CreateUserDTO) {
-    const user = await this.usersService.findUserByUsername(userData.username);
+    const user = await this.usersService.findUserByIntraId(userData.intra_id);
     if (user) {
       return user;
     }
+    userData.username = await this.uniqueUsernameGenerator(userData.username);
     userData.password = null;
     return await this.usersService.createUser(userData);
   }

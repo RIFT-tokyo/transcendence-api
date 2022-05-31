@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { Connection, Repository } from 'typeorm';
+import { Like, Connection, Repository } from 'typeorm';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import * as bcrypt from 'bcrypt';
 import { EntriesList } from '../types/EntriesList';
@@ -20,6 +20,14 @@ export class UsersService {
 
   async findUserByUsername(username: string, relations: Array<string> = []) {
     return await this.userRepository.findOne({ username }, { relations });
+  }
+
+  async findUsersByUsernameLike(pattern: string) {
+    return await this.userRepository.find({ username: Like(pattern) });
+  }
+
+  async findUserByIntraId(intra_id: number, relations: Array<string> = []) {
+    return await this.userRepository.findOne({ intra_id }, { relations });
   }
 
   async findAll(limit: number, offset?: number): Promise<EntriesList<User>> {
