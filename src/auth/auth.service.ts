@@ -1,4 +1,3 @@
-import { UserService } from './../generated/api/user.service';
 import { Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDTO } from '../users/users.dto';
