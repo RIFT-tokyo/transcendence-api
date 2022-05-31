@@ -14,7 +14,7 @@ export class AuthService {
     const addUnitLength = 4;
 
     const forwardMatchedUsernames = (
-      await this.usersService.findManyUsersByForwardMatchedUsername(username)
+      await this.usersService.findUsersByUsernameLike(`${username}%`)
     ).map((u) => u.username);
 
     let res = username;

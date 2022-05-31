@@ -22,8 +22,8 @@ export class UsersService {
     return await this.userRepository.findOne({ username }, { relations });
   }
 
-  async findManyUsersByForwardMatchedUsername(username: string) {
-    return await this.userRepository.find({ username: Like(`${username}%`) });
+  async findUsersByUsernameLike(pattern: string) {
+    return await this.userRepository.find({ username: Like(pattern) });
   }
 
   async findUserByIntraId(intra_id: number, relations: Array<string> = []) {
