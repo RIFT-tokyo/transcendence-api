@@ -10,22 +10,13 @@ export class AuthService {
   constructor(private readonly usersService: UsersService) {}
 
   private async uniqueUsernameGenerator(username: string) {
-    const nums = '0123456789';
-    const addUnitLength = 4;
-
     const forwardMatchedUsernames = (
       await this.usersService.findUsersByUsernameLike(`${username}%`)
     ).map((u) => u.username);
 
     let res = username;
     while (forwardMatchedUsernames.includes(res)) {
-      // generate a random numeric string(addedStr) of length addUnitLength.
-      let addedStr = '';
-      for (let i = 0; i < addUnitLength; i++) {
-        addedStr += nums[Math.floor(Math.random() * nums.length)];
-      }
-
-      res += addedStr;
+      res += Math.floor(Math.random() * 10000);
     }
     return res;
   }
