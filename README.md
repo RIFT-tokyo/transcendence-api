@@ -1,13 +1,46 @@
+# transcendence-api
 
+## Usage
 
-**migration**
+Run following commands in `transcendence-env` directory.
+
+### Migration
+
+Automatically generate migration file from Entity files
 ```
-docker-compose exec api yarn migration:generate <name>  # make migrations file
-docker-compose exec api yarn migration:run              # migrate
-docker-compose exec api yarn migration:revert           # revert migration
+docker-compose exec api yarn migration:generate <name>
+```
+Create migration file template
+```
+docker-compose exec api yarn migration:create <name>
+```
+Run migrations
+```
+docker-compose exec api yarn migration:run
+```
+Revert latest migration
+```
+docker-compose exec api yarn migration:revert
+```
+Show migrations
+```
+docker-compose exec api yarn migration:show
 ```
 
-**test**
+### Seeding
+
+Show TypeORM Seeding config
 ```
-docker-compose exec api yarn test  # run all tests
+docker-compose exec api yarn seed:config
+```
+Execute seed
+```
+docker-compose exec api yarn seed:run [-s SeederClassName]
+```
+
+### Test
+
+Run all tests
+```
+docker-compose exec api yarn test
 ```
