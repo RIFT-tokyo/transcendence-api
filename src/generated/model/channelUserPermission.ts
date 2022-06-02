@@ -14,7 +14,7 @@ import { User } from './user';
 import { Channel } from './channel';
 
 
-export interface ChannelUser { 
+export interface ChannelUserPermission { 
     channel?: Channel;
     user?: User;
     is_ban?: boolean;
