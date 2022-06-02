@@ -1,6 +1,6 @@
 export * from './achievement';
 export * from './channel';
-export * from './channelUser';
+export * from './channelUserPermission';
 export * from './filePath';
 export * from './login';
 export * from './match';

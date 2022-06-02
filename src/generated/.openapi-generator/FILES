@@ -12,7 +12,7 @@ git_push.sh
 index.ts
 model/achievement.ts
 model/channel.ts
-model/channelUser.ts
+model/channelUserPermission.ts
 model/error.ts
 model/filePath.ts
 model/login.ts
