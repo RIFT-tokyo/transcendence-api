@@ -42,12 +42,20 @@ export class ChannelsController {
   @Post()
   @HttpCode(201)
   async createChannel(
+    @Session() session: UserSession,
     @Body() channelData: NewChannel,
   ): Promise<ResponseChannelDTO> {
     const channel = await this.channelsService.create(channelData);
     if (!channel) {
       throw new NotFoundException('Channel not found');
     }
+    const channelUser: CreateChannelUserPermissionDTO = {
+      channelId: channel.id,
+      userId: session.userId,
+      is_ban: false,
+      role: { id: 1, name: 'owner' },
+    };
+    await this.channelUsersService.create(channelUser);
     return new ResponseChannelDTO(channel);
   }
 
