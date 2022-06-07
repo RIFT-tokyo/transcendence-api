@@ -1,11 +1,17 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class fixChannelUserPermission1653635448266
+export class fixChannelUserPermission1654593528996
   implements MigrationInterface
 {
-  name = 'fixChannelUserPermission1653635448266';
+  name = 'fixChannelUserPermission1654593528996';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "channel_user_permission" DROP COLUMN "is_ban"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "channel_user_permission" DROP COLUMN "is_authorized"`,
+    );
     await queryRunner.query(
       `ALTER TABLE "channel_user_permission" DROP CONSTRAINT "PK_498f7df08587dc19a171838b4c0"`,
     );
@@ -13,7 +19,7 @@ export class fixChannelUserPermission1653635448266
       `ALTER TABLE "channel_user_permission" DROP COLUMN "id"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "channel_user_permission" DROP COLUMN "is_authorized"`,
+      `ALTER TABLE "channel_user_permission" ADD "ban_until" TIMESTAMP WITH TIME ZONE`,
     );
     await queryRunner.query(
       `ALTER TABLE "channel_user_permission" ADD CONSTRAINT "PK_6b013e0ae385a320d07b0ff2881" PRIMARY KEY ("channelId", "userId")`,
@@ -61,13 +67,19 @@ export class fixChannelUserPermission1653635448266
       `ALTER TABLE "channel_user_permission" DROP CONSTRAINT "PK_6b013e0ae385a320d07b0ff2881"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "channel_user_permission" ADD "is_authorized" boolean NOT NULL DEFAULT false`,
+      `ALTER TABLE "channel_user_permission" DROP COLUMN "ban_until"`,
     );
     await queryRunner.query(
       `ALTER TABLE "channel_user_permission" ADD "id" SERIAL NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE "channel_user_permission" ADD CONSTRAINT "PK_498f7df08587dc19a171838b4c0" PRIMARY KEY ("id")`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "channel_user_permission" ADD "is_authorized" boolean NOT NULL DEFAULT false`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "channel_user_permission" ADD "is_ban" boolean NOT NULL DEFAULT false`,
     );
   }
 }
