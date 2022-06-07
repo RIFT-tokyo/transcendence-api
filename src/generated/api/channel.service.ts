@@ -15,6 +15,8 @@ import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { Channel } from '../model/channel';
+import { ChannelPassword } from '../model/channelPassword';
+import { ChannelUser } from '../model/channelUser';
 import { ChannelUserPermission } from '../model/channelUserPermission';
 import { NewChannel } from '../model/newChannel';
 import { Configuration } from '../configuration';
@@ -44,15 +46,15 @@ export class ChannelService {
     /**
      * Leave channel
      * 
-     * @param channelID 
+     * @param channelId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public deleteChannelsChannelID(channelID: string, ): Observable<AxiosResponse<any>>;
-    public deleteChannelsChannelID(channelID: string, ): Observable<any> {
+    public deleteMeChannelsChannelId(channelId: string, ): Observable<AxiosResponse<any>>;
+    public deleteMeChannelsChannelId(channelId: string, ): Observable<any> {
 
-        if (channelID === null || channelID === undefined) {
-            throw new Error('Required parameter channelID was null or undefined when calling deleteChannelsChannelID.');
+        if (channelId === null || channelId === undefined) {
+            throw new Error('Required parameter channelId was null or undefined when calling deleteMeChannelsChannelId.');
         }
 
         let headers = this.defaultHeaders;
@@ -70,7 +72,7 @@ export class ChannelService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.delete<any>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}`,
+        return this.httpClient.delete<any>(`${this.basePath}/me/channels/${encodeURIComponent(String(channelId))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -114,7 +116,7 @@ export class ChannelService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getChannelsMe(): Observable<AxiosResponse<Array<ChannelUserPermission>>>;
+    public getChannelsMe(): Observable<AxiosResponse<Array<Channel>>>;
     public getChannelsMe(): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -132,7 +134,7 @@ export class ChannelService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<ChannelUserPermission>>(`${this.basePath}/channels/me`,
+        return this.httpClient.get<Array<Channel>>(`${this.basePath}/me/channels`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -146,7 +148,7 @@ export class ChannelService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getChannelsUsersUserID(channelID: string, ): Observable<AxiosResponse<Array<ChannelUserPermission>>>;
+    public getChannelsUsersUserID(channelID: string, ): Observable<AxiosResponse<Array<ChannelUser>>>;
     public getChannelsUsersUserID(channelID: string, ): Observable<any> {
 
         if (channelID === null || channelID === undefined) {
@@ -168,7 +170,7 @@ export class ChannelService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<Array<ChannelUserPermission>>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}/users`,
+        return this.httpClient.get<Array<ChannelUser>>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}/users`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -215,18 +217,20 @@ export class ChannelService {
         );
     }
     /**
-     * Join channel
+     * Update a channel
      * 
      * @param channelID 
+     * @param newChannel 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public postChannelsChannelID(channelID: string, ): Observable<AxiosResponse<ChannelUserPermission>>;
-    public postChannelsChannelID(channelID: string, ): Observable<any> {
+    public putChannelsChannelID(channelID: string, newChannel?: NewChannel, ): Observable<AxiosResponse<any>>;
+    public putChannelsChannelID(channelID: string, newChannel?: NewChannel, ): Observable<any> {
 
         if (channelID === null || channelID === undefined) {
-            throw new Error('Required parameter channelID was null or undefined when calling postChannelsChannelID.');
+            throw new Error('Required parameter channelID was null or undefined when calling putChannelsChannelID.');
         }
+
 
         let headers = this.defaultHeaders;
 
@@ -242,9 +246,14 @@ export class ChannelService {
 
         // to determine the Content-Type header
         const consumes: string[] = [
+            'application/json'
         ];
-        return this.httpClient.post<ChannelUserPermission>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}`,
-            null,
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers['Content-Type'] = httpContentTypeSelected;
+        }
+        return this.httpClient.put<any>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}`,
+            newChannel,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -260,7 +269,7 @@ export class ChannelService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public putChannelsChannelIDUsersUserID(channelID: string, userID: string, channelUserPermission?: ChannelUserPermission, ): Observable<AxiosResponse<any>>;
+    public putChannelsChannelIDUsersUserID(channelID: string, userID: string, channelUserPermission?: ChannelUserPermission, ): Observable<AxiosResponse<ChannelUser>>;
     public putChannelsChannelIDUsersUserID(channelID: string, userID: string, channelUserPermission?: ChannelUserPermission, ): Observable<any> {
 
         if (channelID === null || channelID === undefined) {
@@ -292,8 +301,52 @@ export class ChannelService {
         if (httpContentTypeSelected != undefined) {
             headers['Content-Type'] = httpContentTypeSelected;
         }
-        return this.httpClient.put<any>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}/users/${encodeURIComponent(String(userID))}`,
+        return this.httpClient.put<ChannelUser>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/channels/${encodeURIComponent(String(channelID))}`,
             channelUserPermission,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * Join channel
+     * 
+     * @param channelId 
+     * @param channelPassword 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public putMeChannelsChannelId(channelId: string, channelPassword?: ChannelPassword, ): Observable<AxiosResponse<Channel>>;
+    public putMeChannelsChannelId(channelId: string, channelPassword?: ChannelPassword, ): Observable<any> {
+
+        if (channelId === null || channelId === undefined) {
+            throw new Error('Required parameter channelId was null or undefined when calling putMeChannelsChannelId.');
+        }
+
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers['Content-Type'] = httpContentTypeSelected;
+        }
+        return this.httpClient.put<Channel>(`${this.basePath}/me/channels/${encodeURIComponent(String(channelId))}`,
+            channelPassword,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers

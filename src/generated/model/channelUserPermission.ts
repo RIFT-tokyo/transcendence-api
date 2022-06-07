@@ -10,16 +10,10 @@
  * Do not edit the class manually.
  */
 import { Role } from './role';
-import { User } from './user';
-import { Channel } from './channel';
 
 
 export interface ChannelUserPermission { 
-    channel?: Channel;
-    user?: User;
-    is_ban?: boolean;
     role?: Role;
-    created_at?: string;
-    updated_at?: string;
+    is_ban?: boolean;
 }
 

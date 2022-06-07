@@ -10,14 +10,11 @@
  * Do not edit the class manually.
  */
 import { Role } from './role';
+import { User } from './user';
 
 
-export interface Channel { 
-    id?: number;
-    name?: string;
-    is_protected?: boolean;
+export interface ChannelUser { 
+    user?: User;
     role?: Role;
-    created_at?: string;
-    updated_at?: string;
 }
 
