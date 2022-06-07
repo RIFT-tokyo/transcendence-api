@@ -26,8 +26,9 @@ export class ChannelUserPermission {
   @ManyToOne(() => User)
   user: User;
 
-  @Column({ default: false })
-  is_ban: boolean;
+  @Column({ type: 'timestamp with time zone', nullable: true })
+  @IsDate()
+  ban_until: Date;
 
   @ManyToOne(() => Role, { nullable: true })
   role: Role;
