@@ -25,7 +25,7 @@ export class UsersGateway {
 
   updateUserStatus(status: User.StatusEnum, userID: number) {
     this.usersService.updateUser(userID, { status: status });
-    this.server.emit('userStatus', {
+    this.server.emit('user-status:receive', {
       status: status,
       userID,
     });
@@ -41,7 +41,7 @@ export class UsersGateway {
     this.updateUserStatus('offline', userID);
   }
 
-  @SubscribeMessage('userStatus')
+  @SubscribeMessage('user-status:set')
   handleUserStatus(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: UserStatusBody,
