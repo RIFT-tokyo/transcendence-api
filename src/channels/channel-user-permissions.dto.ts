@@ -1,34 +1,36 @@
-import { Channel, ChannelUserPermission, Role, User } from 'src/generated';
-import { ResponseUserDTO } from 'src/users/users.dto';
+import { ChannelUserPermission, Role } from '../generated';
 import { ChannelUserPermission as EntityChannelUserPermission } from '../entities/channel-user-permission.entity';
-import { ResponseChannelDTO } from './channels.dto';
 
 export class CreateChannelUserPermissionDTO {
   userId: number;
   channelId: number;
-  is_ban: boolean;
   role?: Role;
+  password?: string;
 }
 
 export class UpdateChannelUserPermissionDTO {
-  is_ban?: boolean;
-  role?: Role;
+  ban_until: Date | null;
+  role: Role;
+
+  constructor(channelUserPermission: ChannelUserPermission) {
+    this.ban_until = null;
+    if (channelUserPermission.is_ban) {
+      const ban_until = new Date();
+      ban_until.setHours(ban_until.getHours() + 1);
+      this.ban_until = ban_until;
+    }
+    this.role = channelUserPermission.role;
+  }
 }
 
 export class ResponseChannelUserPermissionDTO implements ChannelUserPermission {
-  channel: Channel;
-  user: User;
   is_ban: boolean;
   role: Role;
-  created_at?: string;
-  updated_at?: string;
 
   constructor(channelUser: EntityChannelUserPermission) {
-    this.channel = new ResponseChannelDTO(channelUser.channel);
-    this.user = new ResponseUserDTO(channelUser.user);
-    this.is_ban = channelUser.is_ban;
+    this.is_ban = channelUser.ban_until
+      ? channelUser.ban_until < new Date()
+      : false;
     this.role = channelUser.role;
-    this.created_at = channelUser.created_at.toISOString();
-    this.updated_at = channelUser.updated_at.toISOString();
   }
 }
