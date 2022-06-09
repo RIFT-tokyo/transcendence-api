@@ -13,7 +13,11 @@ export class ChannelsService {
   ) {}
 
   async findAll() {
-    return await this.channelsRepository.find();
+    return await this.channelsRepository.find({ relations: ['users'] });
+  }
+
+  async findById(id: number) {
+    return await this.channelsRepository.findOne(id);
   }
 
   async create(channel: NewChannel) {
