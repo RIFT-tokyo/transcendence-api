@@ -7,9 +7,10 @@ import { MeController } from './me.controller';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CurrentUserInterceptor } from '../common/interceptor/current-user.interceptor';
 import { UsersGateway } from './users.gateway';
+import { ChannelsModule } from '../channels/channels.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User]), ChannelsModule],
   exports: [TypeOrmModule, UsersService],
   providers: [
     UsersService,
