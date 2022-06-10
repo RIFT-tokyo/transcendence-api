@@ -8,6 +8,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { WSResponseMessagelDTO } from './channels.dto';
 
 interface SendMessageBody {
   text: string;
@@ -19,13 +20,18 @@ interface JoinChannelBody {
   channelID: number;
 }
 
+interface ServerToClientEvents {
+  'message:receive': (message: WSResponseMessagelDTO) => void;
+  'message:receive-all': (messages: WSResponseMessagelDTO[]) => void;
+}
+
 @WebSocketGateway({ cors: true, namespace: '/channels' })
 export class ChannelsGateway {
   @Inject()
   channelsService: ChannelsService;
 
   @WebSocketServer()
-  server: Server;
+  server: Server<ServerToClientEvents>;
 
   @SubscribeMessage('message:send')
   async handleSendMessage(@MessageBody() body: SendMessageBody) {
@@ -34,15 +40,9 @@ export class ChannelsGateway {
       body.channelID,
       body.text,
     );
-    this.server.to(String(body.channelID)).emit('message:receive', {
-      message: {
-        id: channelMessage.id,
-        channelID: body.channelID,
-        text: channelMessage.message.text,
-        user: channelMessage.user,
-        createdAt: channelMessage.created_at.getTime(),
-      },
-    });
+    this.server
+      .to(String(body.channelID))
+      .emit('message:receive', new WSResponseMessagelDTO(channelMessage));
   }
 
   @SubscribeMessage('channel:join')
@@ -56,16 +56,10 @@ export class ChannelsGateway {
       'messages.user',
       'messages.message',
     ]);
-    this.server.to(client.id).emit('message:receive-all', {
-      messages: channel.messages.map((msg) => {
-        return {
-          id: msg.id,
-          text: msg.message.text,
-          user: msg.user,
-          createdAt: msg.created_at.getTime(),
-        };
-      }),
-    });
+    this.server.to(client.id).emit(
+      'message:receive-all',
+      channel.messages.map((msg) => new WSResponseMessagelDTO(msg)),
+    );
   }
 
   @SubscribeMessage('channel:leave')
