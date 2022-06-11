@@ -8,7 +8,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { WSResponseMessagelDTO } from './channels.dto';
+import { WSResponseMessageDTO } from './channels.dto';
 
 interface SendMessageBody {
   text: string;
@@ -21,8 +21,8 @@ interface JoinChannelBody {
 }
 
 interface ServerToClientEvents {
-  'message:receive': (message: WSResponseMessagelDTO) => void;
-  'message:receive-all': (messages: WSResponseMessagelDTO[]) => void;
+  'message:receive': (message: WSResponseMessageDTO) => void;
+  'message:receive-all': (messages: WSResponseMessageDTO[]) => void;
 }
 
 @WebSocketGateway({ cors: true, namespace: '/channels' })
@@ -42,7 +42,7 @@ export class ChannelsGateway {
     );
     this.server
       .to(String(body.channelID))
-      .emit('message:receive', new WSResponseMessagelDTO(channelMessage));
+      .emit('message:receive', new WSResponseMessageDTO(channelMessage));
   }
 
   @SubscribeMessage('channel:join')
@@ -58,7 +58,7 @@ export class ChannelsGateway {
     ]);
     this.server.to(client.id).emit(
       'message:receive-all',
-      channel.messages.map((msg) => new WSResponseMessagelDTO(msg)),
+      channel.messages.map((msg) => new WSResponseMessageDTO(msg)),
     );
   }
 

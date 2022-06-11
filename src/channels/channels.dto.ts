@@ -18,7 +18,7 @@ export class ResponseChannelDTO implements Channel {
   }
 }
 
-export class WSResponseMessagelDTO {
+export class WSResponseMessageDTO {
   id: number;
   text: string;
   createdAt: Date;
