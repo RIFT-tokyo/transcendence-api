@@ -3,6 +3,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateUserDTO } from '../users/users.dto';
 import * as bcrypt from 'bcrypt';
 import { Login } from '../generated/model/login';
+import * as speakeasy from 'speakeasy';
 
 @Injectable()
 export class AuthService {
@@ -68,5 +69,16 @@ export class AuthService {
       });
     }
     return null;
+  }
+
+  async getOrCreateTwoFaSecretKey(userId: number) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    if (!user.two_fa_secret) {
+      const secret = speakeasy.generateSecret({ length: 20 });
+      console.log(secret.base32);
+    }
   }
 }

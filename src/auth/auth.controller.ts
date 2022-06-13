@@ -19,6 +19,7 @@ import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { UserSession } from '../types/UserSession';
 import { User } from 'src/entities/user.entity';
 import { Password } from '../generated/model/password';
+import * as speakeasy from 'speakeasy';
 
 @Controller('auth')
 export class AuthController {
@@ -82,5 +83,24 @@ export class AuthController {
     if (!user) {
       throw new BadRequestException('Invalid credentials');
     }
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('2fa/qrcode')
+  @HttpCode(200)
+  async getTwoFaQRcode(@Session() session: UserSession) {
+    const secret = speakeasy.generateSecret({ length: 20 });
+
+    console.log(secret.base32);
+
+    // FBDXWRCNIBFUA5JKGNKF2SBRGVYUOKJQ
+    // const user = await this.authService.updatePassword(
+    //   session.userId,
+    //   body.old_password,
+    //   body.new_password,
+    // );
+    // if (!user) {
+    //   throw new BadRequestException('Invalid credentials');
+    // }
   }
 }
