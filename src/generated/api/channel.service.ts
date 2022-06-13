@@ -46,15 +46,15 @@ export class ChannelService {
     /**
      * Leave channel
      * 
-     * @param channelId 
+     * @param channelID 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public deleteMeChannelsChannelId(channelId: string, ): Observable<AxiosResponse<any>>;
-    public deleteMeChannelsChannelId(channelId: string, ): Observable<any> {
+    public deleteMeChannelsChannelId(channelID: number, ): Observable<AxiosResponse<any>>;
+    public deleteMeChannelsChannelId(channelID: number, ): Observable<any> {
 
-        if (channelId === null || channelId === undefined) {
-            throw new Error('Required parameter channelId was null or undefined when calling deleteMeChannelsChannelId.');
+        if (channelID === null || channelID === undefined) {
+            throw new Error('Required parameter channelID was null or undefined when calling deleteMeChannelsChannelId.');
         }
 
         let headers = this.defaultHeaders;
@@ -72,7 +72,7 @@ export class ChannelService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.delete<any>(`${this.basePath}/me/channels/${encodeURIComponent(String(channelId))}`,
+        return this.httpClient.delete<any>(`${this.basePath}/me/channels/${encodeURIComponent(String(channelID))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
@@ -148,8 +148,8 @@ export class ChannelService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getChannelsUsersUserID(channelID: string, ): Observable<AxiosResponse<Array<ChannelUser>>>;
-    public getChannelsUsersUserID(channelID: string, ): Observable<any> {
+    public getChannelsUsersUserID(channelID: number, ): Observable<AxiosResponse<Array<ChannelUser>>>;
+    public getChannelsUsersUserID(channelID: number, ): Observable<any> {
 
         if (channelID === null || channelID === undefined) {
             throw new Error('Required parameter channelID was null or undefined when calling getChannelsUsersUserID.');
@@ -224,8 +224,8 @@ export class ChannelService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public putChannelsChannelID(channelID: string, newChannel?: NewChannel, ): Observable<AxiosResponse<any>>;
-    public putChannelsChannelID(channelID: string, newChannel?: NewChannel, ): Observable<any> {
+    public putChannelsChannelID(channelID: number, newChannel?: NewChannel, ): Observable<AxiosResponse<any>>;
+    public putChannelsChannelID(channelID: number, newChannel?: NewChannel, ): Observable<any> {
 
         if (channelID === null || channelID === undefined) {
             throw new Error('Required parameter channelID was null or undefined when calling putChannelsChannelID.');
@@ -269,8 +269,8 @@ export class ChannelService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public putChannelsChannelIDUsersUserID(channelID: string, userID: string, channelUserPermission?: ChannelUserPermission, ): Observable<AxiosResponse<ChannelUser>>;
-    public putChannelsChannelIDUsersUserID(channelID: string, userID: string, channelUserPermission?: ChannelUserPermission, ): Observable<any> {
+    public putChannelsChannelIDUsersUserID(channelID: number, userID: number, channelUserPermission?: ChannelUserPermission, ): Observable<AxiosResponse<ChannelUser>>;
+    public putChannelsChannelIDUsersUserID(channelID: number, userID: number, channelUserPermission?: ChannelUserPermission, ): Observable<any> {
 
         if (channelID === null || channelID === undefined) {
             throw new Error('Required parameter channelID was null or undefined when calling putChannelsChannelIDUsersUserID.');
@@ -312,16 +312,16 @@ export class ChannelService {
     /**
      * Join channel
      * 
-     * @param channelId 
+     * @param channelID 
      * @param channelPassword 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public putMeChannelsChannelId(channelId: string, channelPassword?: ChannelPassword, ): Observable<AxiosResponse<Channel>>;
-    public putMeChannelsChannelId(channelId: string, channelPassword?: ChannelPassword, ): Observable<any> {
+    public putMeChannelsChannelId(channelID: number, channelPassword?: ChannelPassword, ): Observable<AxiosResponse<Channel>>;
+    public putMeChannelsChannelId(channelID: number, channelPassword?: ChannelPassword, ): Observable<any> {
 
-        if (channelId === null || channelId === undefined) {
-            throw new Error('Required parameter channelId was null or undefined when calling putMeChannelsChannelId.');
+        if (channelID === null || channelID === undefined) {
+            throw new Error('Required parameter channelID was null or undefined when calling putMeChannelsChannelId.');
         }
 
 
@@ -345,7 +345,7 @@ export class ChannelService {
         if (httpContentTypeSelected != undefined) {
             headers['Content-Type'] = httpContentTypeSelected;
         }
-        return this.httpClient.put<Channel>(`${this.basePath}/me/channels/${encodeURIComponent(String(channelId))}`,
+        return this.httpClient.put<Channel>(`${this.basePath}/me/channels/${encodeURIComponent(String(channelID))}`,
             channelPassword,
             {
                 withCredentials: this.configuration.withCredentials,
