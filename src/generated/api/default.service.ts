@@ -15,6 +15,7 @@ import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { InlineObject } from '../model/inlineObject';
+import { InlineObject1 } from '../model/inlineObject1';
 import { Configuration } from '../configuration';
 
 
@@ -45,36 +46,6 @@ export class DefaultService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAuth2faActivate(): Observable<AxiosResponse<any>>;
-    public getAuth2faActivate(): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // authentication (sessionAuth) required
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers['Accept'] = httpHeaderAcceptSelected;
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-        return this.httpClient.get<any>(`${this.basePath}/auth/2fa/activate`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers
-            }
-        );
-    }
-    /**
-     * Your GET endpoint
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
     public getAuth2faDeactivate(): Observable<AxiosResponse<any>>;
     public getAuth2faDeactivate(): Observable<any> {
 
@@ -93,6 +64,44 @@ export class DefaultService {
         const consumes: string[] = [
         ];
         return this.httpClient.get<any>(`${this.basePath}/auth/2fa/deactivate`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * 
+     * 
+     * @param inlineObject1 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public postAuth2faActivate(inlineObject1?: InlineObject1, ): Observable<AxiosResponse<any>>;
+    public postAuth2faActivate(inlineObject1?: InlineObject1, ): Observable<any> {
+
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers['Content-Type'] = httpContentTypeSelected;
+        }
+        return this.httpClient.post<any>(`${this.basePath}/auth/2fa/activate`,
+            inlineObject1,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers

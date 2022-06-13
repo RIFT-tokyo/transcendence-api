@@ -2,6 +2,7 @@ export * from './achievement';
 export * from './channel';
 export * from './filePath';
 export * from './inlineObject';
+export * from './inlineObject1';
 export * from './login';
 export * from './match';
 export * from './matchList';
