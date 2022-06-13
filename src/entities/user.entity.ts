@@ -27,6 +27,13 @@ export class User {
   @Exclude()
   intra_id: number | null;
 
+  @Column({ default: false })
+  is_two_fa_enabled: boolean;
+
+  @Column({ nullable: true })
+  @Exclude()
+  two_fa_secret: string | null;
+
   @Column({ nullable: true })
   display_name: string;
 
