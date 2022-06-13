@@ -27,6 +27,7 @@ export interface User {
     created_at?: string;
     updated_at?: string;
     achievements?: Array<Achievement>;
+    is_two_fa_enabled?: boolean;
 }
 export namespace User {
     export type StatusEnum = 'online' | 'offline' | 'game';

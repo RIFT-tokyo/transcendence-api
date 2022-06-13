@@ -4,6 +4,7 @@ api.module.ts
 api/api.ts
 api/auth.service.ts
 api/channel.service.ts
+api/default.service.ts
 api/follow.service.ts
 api/match.service.ts
 api/user.service.ts
@@ -14,6 +15,7 @@ model/achievement.ts
 model/channel.ts
 model/error.ts
 model/filePath.ts
+model/inlineObject.ts
 model/login.ts
 model/match.ts
 model/matchList.ts

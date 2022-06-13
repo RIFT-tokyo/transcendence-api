@@ -3,6 +3,7 @@ import { Configuration } from './configuration';
 
 import { AuthService } from './api/auth.service';
 import { ChannelService } from './api/channel.service';
+import { DefaultService } from './api/default.service';
 import { FollowService } from './api/follow.service';
 import { MatchService } from './api/match.service';
 import { UserService } from './api/user.service';
@@ -13,6 +14,7 @@ import { UserService } from './api/user.service';
   exports:      [
     AuthService,
     ChannelService,
+    DefaultService,
     FollowService,
     MatchService,
     UserService
@@ -20,6 +22,7 @@ import { UserService } from './api/user.service';
   providers: [
     AuthService,
     ChannelService,
+    DefaultService,
     FollowService,
     MatchService,
     UserService
