@@ -9,11 +9,9 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { User } from './user';
 
 
 export interface InlineResponse200 { 
-    entries?: Array<User>;
-    has_next?: boolean;
+    qrcode?: string;
 }
 

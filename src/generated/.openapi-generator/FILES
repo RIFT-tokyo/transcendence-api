@@ -17,6 +17,7 @@ model/error.ts
 model/filePath.ts
 model/inlineObject.ts
 model/inlineObject1.ts
+model/inlineResponse200.ts
 model/login.ts
 model/match.ts
 model/matchList.ts
