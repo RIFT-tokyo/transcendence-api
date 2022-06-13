@@ -73,6 +73,9 @@ export class MeController {
     const channelUserPermission = await this.channelUserPermissionsService.join(
       channelUserPermissionData,
     );
+    if (!channelUserPermission) {
+      throw new UnauthorizedException();
+    }
     return new ResponseChannelDTO(channelUserPermission);
   }
 
