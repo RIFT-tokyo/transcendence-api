@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   Put,
   Session,
+  UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,10 +22,7 @@ import { UserSession } from '../types/UserSession';
 import { ResponseUserDTO } from './users.dto';
 import { ResponseChannelDTO } from '../channels/channels.dto';
 import { ChannelUserPermissionsService } from '../channels/channel-user-permissions.service';
-import {
-  CreateChannelUserPermissionDTO,
-  ResponseChannelUserPermissionDTO,
-} from '../channels/channel-user-permissions.dto';
+import { CreateChannelUserPermissionDTO } from '../channels/channel-user-permissions.dto';
 import { ChannelPassword } from '../generated';
 
 @Controller('me')
@@ -66,7 +64,7 @@ export class MeController {
     @Session() session: UserSession,
     @Param('channelId', ParseIntPipe) channelId: number,
     @Body() channelPassword: ChannelPassword,
-  ): Promise<ResponseChannelUserPermissionDTO> {
+  ): Promise<ResponseChannelDTO> {
     const channelUserPermissionData: CreateChannelUserPermissionDTO = {
       channelId,
       userId: session.userId,
@@ -75,7 +73,7 @@ export class MeController {
     const channelUserPermission = await this.channelUserPermissionsService.join(
       channelUserPermissionData,
     );
-    return new ResponseChannelUserPermissionDTO(channelUserPermission);
+    return new ResponseChannelDTO(channelUserPermission);
   }
 
   @UseGuards(AuthenticatedGuard)
