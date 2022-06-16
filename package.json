@@ -41,6 +41,7 @@
     "@types/cookie-session": "^2.0.44",
     "@types/express-handlebars": "^6.0.0",
     "@types/multer": "^1.4.7",
+    "@types/qrcode": "^1.4.2",
     "@types/speakeasy": "^2.0.7",
     "@types/uuid": "^8.3.4",
     "all": "^0.0.0",

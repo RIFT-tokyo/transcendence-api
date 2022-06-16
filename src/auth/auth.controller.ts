@@ -5,6 +5,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  InternalServerErrorException,
+  NotFoundException,
   Post,
   Put,
   Redirect,
@@ -19,8 +21,7 @@ import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { UserSession } from '../types/UserSession';
 import { User } from 'src/entities/user.entity';
 import { Password } from '../generated/model/password';
-import * as speakeasy from 'speakeasy';
-
+import * as QRCode from 'qrcode';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -89,18 +90,11 @@ export class AuthController {
   @Get('2fa/qrcode')
   @HttpCode(200)
   async getTwoFaQRcode(@Session() session: UserSession) {
-    const secret = speakeasy.generateSecret({ length: 20 });
-
-    console.log(secret.base32);
-
-    // FBDXWRCNIBFUA5JKGNKF2SBRGVYUOKJQ
-    // const user = await this.authService.updatePassword(
-    //   session.userId,
-    //   body.old_password,
-    //   body.new_password,
-    // );
-    // if (!user) {
-    //   throw new BadRequestException('Invalid credentials');
-    // }
+    const secret = await this.authService.generateTwoFaSecret(session.userId);
+    if (!secret) {
+      throw new NotFoundException('User not found');
+    }
+    const qrcode = await QRCode.toDataURL(secret.otpauth_url);
+    return { qrcode };
   }
 }

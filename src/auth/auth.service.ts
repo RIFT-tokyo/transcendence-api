@@ -4,10 +4,17 @@ import { CreateUserDTO } from '../users/users.dto';
 import * as bcrypt from 'bcrypt';
 import { Login } from '../generated/model/login';
 import * as speakeasy from 'speakeasy';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly usersService: UsersService,
+  ) {}
 
   private async uniqueUsernameGenerator(username: string) {
     const forwardMatchedUsernames = (
@@ -71,14 +78,14 @@ export class AuthService {
     return null;
   }
 
-  async getOrCreateTwoFaSecretKey(userId: number) {
+  async generateTwoFaSecret(userId: number) {
     const user = await this.usersService.findUserById(userId);
     if (!user) {
       return null;
     }
-    if (!user.two_fa_secret) {
-      const secret = speakeasy.generateSecret({ length: 20 });
-      console.log(secret.base32);
-    }
+    const secret = speakeasy.generateSecret({ length: 20 });
+    user.two_fa_secret = secret.base32;
+    await this.userRepository.save(user);
+    return secret;
   }
 }
