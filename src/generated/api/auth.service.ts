@@ -14,6 +14,9 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
+import { InlineObject } from '../model/inlineObject';
+import { InlineObject1 } from '../model/inlineObject1';
+import { InlineResponse200 } from '../model/inlineResponse200';
 import { Login } from '../model/login';
 import { Password } from '../model/password';
 import { Configuration } from '../configuration';
@@ -40,6 +43,67 @@ export class AuthService {
         return consumes.includes(form);
     }
 
+    /**
+     * Your GET endpoint
+     * 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getAuth2faDeactivate(): Observable<AxiosResponse<any>>;
+    public getAuth2faDeactivate(): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        return this.httpClient.get<any>(`${this.basePath}/auth/2fa/deactivate`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * Your GET endpoint
+     * 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getAuth2faQrcode(): Observable<AxiosResponse<InlineResponse200>>;
+    public getAuth2faQrcode(): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        return this.httpClient.get<InlineResponse200>(`${this.basePath}/auth/2fa/qrcode`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
     /**
      * Oauth callback
      * After allowing transcendence on screen 42, you will be redirected here. This is where the server-side will register or retrieve the user\&#39;s information.
@@ -94,6 +158,82 @@ export class AuthService {
         const consumes: string[] = [
         ];
         return this.httpClient.get<any>(`${this.basePath}/auth/login`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * 
+     * 
+     * @param inlineObject1 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public postAuth2faActivate(inlineObject1?: InlineObject1, ): Observable<AxiosResponse<any>>;
+    public postAuth2faActivate(inlineObject1?: InlineObject1, ): Observable<any> {
+
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers['Content-Type'] = httpContentTypeSelected;
+        }
+        return this.httpClient.post<any>(`${this.basePath}/auth/2fa/activate`,
+            inlineObject1,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * 
+     * 
+     * @param inlineObject 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public postAuth2faVerify(inlineObject?: InlineObject, ): Observable<AxiosResponse<any>>;
+    public postAuth2faVerify(inlineObject?: InlineObject, ): Observable<any> {
+
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers['Content-Type'] = httpContentTypeSelected;
+        }
+        return this.httpClient.post<any>(`${this.basePath}/auth/2fa/verify`,
+            inlineObject,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers

@@ -4,7 +4,6 @@ api.module.ts
 api/api.ts
 api/auth.service.ts
 api/channel.service.ts
-api/default.service.ts
 api/follow.service.ts
 api/match.service.ts
 api/user.service.ts
