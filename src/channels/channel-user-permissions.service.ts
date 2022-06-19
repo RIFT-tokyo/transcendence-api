@@ -53,7 +53,7 @@ export class ChannelUserPermissionsService {
     }
     if (
       channel.password &&
-      !(await bcrypt.compare(channel.password, channelUser.password))
+      !(await bcrypt.compare(channelUser.password, channel.password))
     ) {
       return null;
     }
