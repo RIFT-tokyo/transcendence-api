@@ -4,6 +4,13 @@
 
 Run following commands in `transcendence-env` directory.
 
+### Setup
+
+```
+docker-compose exec api yarm migration:run
+docker-compose exec api yarn seed:run -s AddRoles
+```
+
 ### Migration
 
 Automatically generate migration file from Entity files
