@@ -4,6 +4,7 @@ import { CreateUserDTO } from '../users/users.dto';
 import * as bcrypt from 'bcrypt';
 import { Login } from '../generated/model/login';
 import * as speakeasy from 'speakeasy';
+import * as QRCode from 'qrcode';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
@@ -78,14 +79,62 @@ export class AuthService {
     return null;
   }
 
-  async generateTwoFaSecret(userId: number) {
+  async generateTwoFaSecretAndQr(userId: number) {
     const user = await this.usersService.findUserById(userId);
     if (!user) {
       return null;
     }
-    const secret = speakeasy.generateSecret({ length: 20 });
+    const secret = speakeasy.generateSecret({
+      length: 20,
+      name: '',
+      issuer: 'transcendence',
+    });
     user.two_fa_secret = secret.base32;
     await this.userRepository.save(user);
-    return secret;
+
+    const url = speakeasy.otpauthURL({
+      secret: secret.ascii,
+      label: encodeURIComponent(''),
+      issuer: 'transcendence',
+    });
+    const qrcode = await QRCode.toDataURL(url);
+    return qrcode;
+  }
+
+  async verifyTwoFaAuthcode(userId: number, authcode: string) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    if (!user.is_two_fa_enabled) {
+      return true;
+    }
+    const verified = speakeasy.totp.verify({
+      secret: user.two_fa_secret,
+      encoding: 'base32',
+      token: authcode,
+    });
+    return verified;
+  }
+
+  async turnOnTwoFa(userId: number) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    user.is_two_fa_enabled = true;
+    await this.userRepository.save(user);
+    return user;
+  }
+
+  async turnOffTwoFa(userId: number) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    user.two_fa_secret = null;
+    user.is_two_fa_enabled = false;
+    await this.userRepository.save(user);
+    return user;
   }
 }
