@@ -5,7 +5,6 @@ import {
   Controller,
   Get,
   HttpCode,
-  InternalServerErrorException,
   NotFoundException,
   Post,
   Put,
@@ -21,7 +20,6 @@ import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { UserSession } from '../types/UserSession';
 import { User } from 'src/entities/user.entity';
 import { Password } from '../generated/model/password';
-import * as QRCode from 'qrcode';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -87,14 +85,46 @@ export class AuthController {
   }
 
   @UseGuards(AuthenticatedGuard)
+  @Post('2fa/activate')
+  @HttpCode(204)
+  async twoFaActivate(
+    @Body() body: { authcode: string },
+    @Session() session: UserSession,
+  ) {
+    const { authcode } = body;
+    const verified = await this.authService.verifyTwoFaAuthcode(
+      session.userId,
+      authcode,
+    );
+    if (!verified) {
+      throw new BadRequestException('Invalid authcode');
+    }
+    const user = await this.authService.turnOnTwoFa(session.userId);
+    if (!user) {
+      throw new BadRequestException('Invalid authcode');
+    }
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('2fa/deactivate')
+  @HttpCode(200)
+  async twoFaDeactivate(@Session() session: UserSession) {
+    const user = await this.authService.turnOffTwoFa(session.userId);
+    if (!user) {
+      throw new BadRequestException('Invalid credentials');
+    }
+  }
+
+  @UseGuards(AuthenticatedGuard)
   @Get('2fa/qrcode')
   @HttpCode(200)
   async getTwoFaQRcode(@Session() session: UserSession) {
-    const secret = await this.authService.generateTwoFaSecret(session.userId);
-    if (!secret) {
+    const qrcode = await this.authService.generateTwoFaSecretAndQr(
+      session.userId,
+    );
+    if (!qrcode) {
       throw new NotFoundException('User not found');
     }
-    const qrcode = await QRCode.toDataURL(secret.otpauth_url);
     return { qrcode };
   }
 }
