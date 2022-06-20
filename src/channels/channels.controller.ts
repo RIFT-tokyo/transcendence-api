@@ -3,8 +3,6 @@ import {
   Controller,
   Get,
   HttpCode,
-  Param,
-  ParseIntPipe,
   Post,
   Session,
   UseGuards,
@@ -13,7 +11,6 @@ import { NewChannel } from '../generated';
 import { UserSession } from '../types/UserSession';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { ChannelUserPermissionsService } from './channel-user-permissions.service';
-import { ChannelUserDTO } from './channel-user.dto';
 import { ResponseChannelDTO } from './channels.dto';
 import { ChannelsService } from './channels.service';
 
@@ -48,17 +45,5 @@ export class ChannelsController {
         session.userId,
       );
     return new ResponseChannelDTO(channelUserPermission);
-  }
-
-  @UseGuards(AuthenticatedGuard)
-  @Get(':id/users')
-  async getChannelUsers(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<ChannelUserDTO[]> {
-    const channelUserPermissions =
-      await this.channelUserPermissionsService.findByChannelId(id);
-    return channelUserPermissions.map(
-      (channelUser) => new ChannelUserDTO(channelUser),
-    );
   }
 }

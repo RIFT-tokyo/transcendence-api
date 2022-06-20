@@ -22,7 +22,6 @@ import { UserSession } from '../types/UserSession';
 import { ResponseUserDTO } from './users.dto';
 import { ResponseChannelDTO } from '../channels/channels.dto';
 import { ChannelUserPermissionsService } from '../channels/channel-user-permissions.service';
-import { CreateChannelUserPermissionDTO } from '../channels/channel-user-permissions.dto';
 import { ChannelPassword } from '../generated';
 
 @Controller('me')
@@ -65,13 +64,10 @@ export class MeController {
     @Param('channelId', ParseIntPipe) channelId: number,
     @Body() channelPassword: ChannelPassword,
   ): Promise<ResponseChannelDTO> {
-    const channelUserPermissionData: CreateChannelUserPermissionDTO = {
-      channelId,
-      userId: session.userId,
-      password: channelPassword.password,
-    };
     const channelUserPermission = await this.channelUserPermissionsService.join(
-      channelUserPermissionData,
+      channelId,
+      session.userId,
+      channelPassword.password,
     );
     if (!channelUserPermission) {
       throw new UnauthorizedException();

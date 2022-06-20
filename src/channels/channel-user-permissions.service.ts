@@ -3,10 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelUserPermission } from '../entities/channel-user-permission.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import {
-  CreateChannelUserPermissionDTO,
-  UpdateChannelUserPermissionDTO,
-} from './channel-user-permissions.dto';
 import { ChannelsService } from './channels.service';
 import { NewChannel } from '../generated';
 import { Role } from 'src/entities/role.entity';
@@ -26,13 +22,6 @@ export class ChannelUserPermissionsService {
     });
   }
 
-  async findByChannelId(channelId: number) {
-    return await this.channelUserPermissionsRepository.find({
-      where: { channelId },
-      relations: ['user', 'channel', 'role'],
-    });
-  }
-
   async create(channelData: NewChannel, userId: number) {
     const channel = await this.channelService.create(channelData);
     const channelUserPermission = new ChannelUserPermission();
@@ -46,20 +35,23 @@ export class ChannelUserPermissionsService {
     return this.channelUserPermissionsRepository.save(channelUserPermission);
   }
 
-  async join(channelUser: CreateChannelUserPermissionDTO) {
-    const channel = await this.channelService.findById(channelUser.channelId);
+  async join(channelId: number, userId: number, password: string) {
+    const channel = await this.channelService.findById(channelId);
     if (!channel) {
       return null;
     }
     if (
       channel.password &&
-      !(await bcrypt.compare(channelUser.password, channel.password))
+      !(await bcrypt.compare(password, channel.password))
     ) {
       return null;
     }
-    await this.channelUserPermissionsRepository.insert(channelUser);
+    await this.channelUserPermissionsRepository.insert({
+      channelId,
+      userId,
+    });
     return await this.channelUserPermissionsRepository.findOne(
-      { userId: channelUser.userId, channelId: channelUser.channelId },
+      { userId, channelId },
       { relations: ['user', 'channel', 'role'] },
     );
   }
@@ -69,20 +61,5 @@ export class ChannelUserPermissionsService {
       channelId,
       userId,
     });
-  }
-
-  async update(
-    channelId: number,
-    userId: number,
-    channelUser: UpdateChannelUserPermissionDTO,
-  ) {
-    await this.channelUserPermissionsRepository.update(
-      { channelId, userId },
-      channelUser,
-    );
-    return await this.channelUserPermissionsRepository.findOne(
-      { channelId, userId },
-      { relations: ['user', 'channel', 'role'] },
-    );
   }
 }

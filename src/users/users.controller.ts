@@ -32,11 +32,6 @@ import { UserSession } from '../types/UserSession';
 import { v4 as uuidv4 } from 'uuid';
 import { PaginationParams } from '../types/PaginationParams';
 import { ChannelUserPermissionsService } from '../channels/channel-user-permissions.service';
-import { ChannelUserPermission } from '../generated';
-import {
-  ResponseChannelUserPermissionDTO,
-  UpdateChannelUserPermissionDTO,
-} from '../channels/channel-user-permissions.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -287,23 +282,5 @@ export class UsersController {
     if (!ret) {
       throw new NotFoundException('User not found');
     }
-  }
-
-  @UseGuards(AuthenticatedGuard)
-  @Put(':id/channels/:channelId')
-  async updateChannelUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Param('channelId', ParseIntPipe) channelId: number,
-    @Body() channelUserPermissionData: ChannelUserPermission,
-  ) {
-    const data = await this.channelUserPermissionsService.update(
-      channelId,
-      id,
-      new UpdateChannelUserPermissionDTO(channelUserPermissionData),
-    );
-    if (!data) {
-      throw new NotFoundException('ChannelUser not found');
-    }
-    return new ResponseChannelUserPermissionDTO(data);
   }
 }
