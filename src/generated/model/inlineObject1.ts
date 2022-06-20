@@ -13,6 +13,5 @@
 
 export interface InlineObject1 { 
     authcode?: string;
-    password?: string;
 }
 
