@@ -1,13 +1,12 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChannelMessage } from 'src/entities/channel-message.entity';
-import { Message } from 'src/entities/message.entity';
-import { UsersModule } from 'src/users/users.module';
+import { ChannelMessage } from '../entities/channel-message.entity';
+import { Message } from '../entities/message.entity';
+import { UsersModule } from '../users/users.module';
 import { Channel } from '../entities/channel.entity';
 import { ChannelsController } from './channels.controller';
 import { ChannelsGateway } from './channels.gateway';
 import { ChannelsService } from './channels.service';
-import { ChannelUserPermissionsService } from './channel-user-permissions.service';
 import { ChannelUserPermission } from '../entities/channel-user-permission.entity';
 
 @Module({
@@ -20,8 +19,8 @@ import { ChannelUserPermission } from '../entities/channel-user-permission.entit
       ChannelUserPermission,
     ]),
   ],
-  exports: [TypeOrmModule, ChannelsService, ChannelUserPermissionsService],
-  providers: [ChannelsService, ChannelUserPermissionsService, ChannelsGateway],
+  exports: [TypeOrmModule, ChannelsService],
+  providers: [ChannelsService, ChannelsGateway],
   controllers: [ChannelsController],
 })
 export class ChannelsModule {}

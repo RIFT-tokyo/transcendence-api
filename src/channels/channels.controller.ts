@@ -10,16 +10,12 @@ import {
 import { NewChannel } from '../generated';
 import { UserSession } from '../types/UserSession';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
-import { ChannelUserPermissionsService } from './channel-user-permissions.service';
 import { ResponseChannelDTO } from './channels.dto';
 import { ChannelsService } from './channels.service';
 
 @Controller('channels')
 export class ChannelsController {
-  constructor(
-    private readonly channelsService: ChannelsService,
-    private readonly channelUserPermissionsService: ChannelUserPermissionsService,
-  ) {}
+  constructor(private readonly channelsService: ChannelsService) {}
 
   @UseGuards(AuthenticatedGuard)
   @Get()
@@ -39,11 +35,10 @@ export class ChannelsController {
     @Session() session: UserSession,
     @Body() channelData: NewChannel,
   ): Promise<ResponseChannelDTO> {
-    const channelUserPermission =
-      await this.channelUserPermissionsService.create(
-        channelData,
-        session.userId,
-      );
+    const channelUserPermission = await this.channelsService.create(
+      channelData,
+      session.userId,
+    );
     return new ResponseChannelDTO(channelUserPermission);
   }
 }

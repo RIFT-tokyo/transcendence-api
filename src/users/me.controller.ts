@@ -21,8 +21,8 @@ import { CurrentUserInterceptor } from '../common/interceptor/current-user.inter
 import { UserSession } from '../types/UserSession';
 import { ResponseUserDTO } from './users.dto';
 import { ResponseChannelDTO } from '../channels/channels.dto';
-import { ChannelUserPermissionsService } from '../channels/channel-user-permissions.service';
 import { ChannelPassword } from '../generated';
+import { ChannelsService } from '../channels/channels.service';
 
 @Controller('me')
 @UseInterceptors(CurrentUserInterceptor)
@@ -30,7 +30,7 @@ export class MeController {
   private readonly logger = new Logger('MeController');
   constructor(
     private readonly usersService: UsersService,
-    private readonly channelUserPermissionsService: ChannelUserPermissionsService,
+    private readonly channelsService: ChannelsService,
   ) {}
 
   @UseGuards(AuthenticatedGuard)
@@ -53,7 +53,7 @@ export class MeController {
     @Session() session: UserSession,
   ): Promise<ResponseChannelDTO[]> {
     const channelUserPermissions =
-      await this.channelUserPermissionsService.findByUserId(session.userId);
+      await this.channelsService.findChannelsByUserId(session.userId);
     return channelUserPermissions.map((v) => new ResponseChannelDTO(v));
   }
 
@@ -64,7 +64,7 @@ export class MeController {
     @Param('channelId', ParseIntPipe) channelId: number,
     @Body() channelPassword: ChannelPassword,
   ): Promise<ResponseChannelDTO> {
-    const channelUserPermission = await this.channelUserPermissionsService.join(
+    const channelUserPermission = await this.channelsService.join(
       channelId,
       session.userId,
       channelPassword.password,
@@ -82,10 +82,7 @@ export class MeController {
     @Session() session: UserSession,
     @Param('channelId', ParseIntPipe) channelId: number,
   ): Promise<void> {
-    const ret = await this.channelUserPermissionsService.leave(
-      channelId,
-      session.userId,
-    );
+    const ret = await this.channelsService.leave(channelId, session.userId);
     if (ret.affected === 0) {
       throw new NotFoundException('ChannelUser not found');
     }

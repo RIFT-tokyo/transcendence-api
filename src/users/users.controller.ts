@@ -31,16 +31,12 @@ import { S3 } from 'aws-sdk';
 import { UserSession } from '../types/UserSession';
 import { v4 as uuidv4 } from 'uuid';
 import { PaginationParams } from '../types/PaginationParams';
-import { ChannelUserPermissionsService } from '../channels/channel-user-permissions.service';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   private readonly logger = new Logger('UsersController');
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly channelUserPermissionsService: ChannelUserPermissionsService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   private async deleteS3Object(key: string) {
     const s3 = new S3({
