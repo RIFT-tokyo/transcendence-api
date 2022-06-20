@@ -24,10 +24,6 @@ export class ChannelsService {
     return await this.channelsRepository.find({ relations: ['users'] });
   }
 
-  async findById(id: number) {
-    return await this.channelsRepository.findOne(id);
-  }
-
   async findChannelById(id: number, relations: Array<string> = []) {
     return await this.channelsRepository.findOne({ id }, { relations });
   }
