@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChannelMessage } from 'src/entities/channel-message.entity';
 import { Message } from 'src/entities/message.entity';
@@ -12,7 +12,7 @@ import { ChannelUserPermission } from '../entities/channel-user-permission.entit
 
 @Module({
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     TypeOrmModule.forFeature([
       Channel,
       Message,
