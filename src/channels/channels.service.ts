@@ -72,7 +72,7 @@ export class ChannelsService {
     return this.channelUserPermissionsRepository.save(channelUserPermission);
   }
 
-  async join(channelId: number, userId: number, password: string) {
+  async join(channelId: number, userId: number, password?: string) {
     const channel = await this.findChannelById(channelId);
     if (!channel) {
       return null;
