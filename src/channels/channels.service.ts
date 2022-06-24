@@ -93,10 +93,11 @@ export class ChannelsService {
     );
   }
 
-  async leave(channelId: number, userId: number) {
-    return await this.channelUserPermissionsRepository.softDelete({
-      channelId,
-      userId,
-    });
-  }
+  // TODO: チャンネルleave機能実装時にコメントアウトを解除する
+  // async leave(channelId: number, userId: number) {
+  //   return await this.channelUserPermissionsRepository.softDelete({
+  //     channelId,
+  //     userId,
+  //   });
+  // }
 }
