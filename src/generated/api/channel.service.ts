@@ -179,50 +179,6 @@ export class ChannelService {
         );
     }
     /**
-     * Update a channel
-     * 
-     * @param channelID 
-     * @param newChannel 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public putChannelsChannelID(channelID: number, newChannel?: NewChannel, ): Observable<AxiosResponse<any>>;
-    public putChannelsChannelID(channelID: number, newChannel?: NewChannel, ): Observable<any> {
-
-        if (channelID === null || channelID === undefined) {
-            throw new Error('Required parameter channelID was null or undefined when calling putChannelsChannelID.');
-        }
-
-
-        let headers = this.defaultHeaders;
-
-        // authentication (sessionAuth) required
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers['Accept'] = httpHeaderAcceptSelected;
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers['Content-Type'] = httpContentTypeSelected;
-        }
-        return this.httpClient.put<any>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}`,
-            newChannel,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers
-            }
-        );
-    }
-    /**
      * Join channel
      * 
      * @param channelID 

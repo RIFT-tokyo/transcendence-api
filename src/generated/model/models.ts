@@ -9,6 +9,5 @@ export * from './error';
 export * from './newChannel';
 export * from './password';
 export * from './rankedUser';
-export * from './role';
 export * from './user';
 export * from './userList';

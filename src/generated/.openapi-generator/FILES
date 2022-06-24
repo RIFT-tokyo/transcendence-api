@@ -22,7 +22,6 @@ model/models.ts
 model/newChannel.ts
 model/password.ts
 model/rankedUser.ts
-model/role.ts
 model/user.ts
 model/userList.ts
 variables.ts

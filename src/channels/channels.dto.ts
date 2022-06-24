@@ -2,13 +2,12 @@ import { ChannelUserPermission } from '../entities/channel-user-permission.entit
 import { Channel as EntityChannel } from '../entities/channel.entity';
 import { ChannelMessage } from '../entities/channel-message.entity';
 import { Channel } from '../generated/model/channel';
-import { Role } from '../generated/model/role';
 
 export class ResponseChannelDTO implements Channel {
   id: number;
   name: string;
   is_protected: boolean;
-  role: Role;
+  role: Channel.RoleEnum | null;
   created_at?: string;
   updated_at?: string;
 

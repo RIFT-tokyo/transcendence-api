@@ -8,7 +8,6 @@ import { ChannelMessage } from '../entities/channel-message.entity';
 import { Message } from '../entities/message.entity';
 import { UsersService } from '../users/users.service';
 import { ChannelUserPermission } from '../entities/channel-user-permission.entity';
-import { Role } from '../entities/role.entity';
 
 @Injectable()
 export class ChannelsService {
@@ -35,7 +34,7 @@ export class ChannelsService {
   async findChannelsByUserId(userId: number) {
     return await this.channelUserPermissionsRepository.find({
       where: { userId },
-      relations: ['user', 'channel', 'role'],
+      relations: ['user', 'channel'],
     });
   }
 
@@ -65,10 +64,7 @@ export class ChannelsService {
     channelUserPermission.channelId = channel.id;
     channelUserPermission.channel = channel;
     channelUserPermission.userId = userId;
-    const role = new Role();
-    role.id = 1;
-    role.name = 'owner';
-    channelUserPermission.role = role;
+    channelUserPermission.role = 'owner';
     return this.channelUserPermissionsRepository.save(channelUserPermission);
   }
 
@@ -88,7 +84,7 @@ export class ChannelsService {
     );
     return await this.channelUserPermissionsRepository.findOne(
       { userId, channelId: channel.id },
-      { relations: ['user', 'channel', 'role'] },
+      { relations: ['user', 'channel'] },
     );
   }
 

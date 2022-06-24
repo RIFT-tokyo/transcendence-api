@@ -9,15 +9,22 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { Role } from './role';
 
 
 export interface Channel { 
     id?: number;
     name?: string;
     is_protected?: boolean;
-    role?: Role;
+    role?: Channel.RoleEnum | null;
     created_at?: string;
     updated_at?: string;
 }
+export namespace Channel {
+    export type RoleEnum = 'owner' | 'administrator';
+    export const RoleEnum = {
+        Owner: 'owner' as RoleEnum,
+        Administrator: 'administrator' as RoleEnum
+    };
+}
+
 

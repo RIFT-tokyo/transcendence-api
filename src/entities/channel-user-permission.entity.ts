@@ -9,7 +9,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Channel } from './channel.entity';
-import { Role } from './role.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -30,8 +29,8 @@ export class ChannelUserPermission {
   @IsDate()
   ban_until: Date;
 
-  @ManyToOne(() => Role, { nullable: true })
-  role: Role;
+  @Column({ nullable: true })
+  role: 'owner' | 'administrator';
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()
