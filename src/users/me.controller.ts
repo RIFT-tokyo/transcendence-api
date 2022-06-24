@@ -4,6 +4,7 @@ import {
   Get,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Put,
@@ -61,8 +62,12 @@ export class MeController {
     @Param('channelId', ParseIntPipe) channelId: number,
     @Body() channelPassword: ChannelPassword,
   ): Promise<ResponseChannelDTO> {
+    const channel = await this.channelsService.findChannelById(channelId);
+    if (!channel) {
+      throw new NotFoundException();
+    }
     const channelUserPermission = await this.channelsService.join(
-      channelId,
+      channel,
       session.userId,
       channelPassword.password,
     );

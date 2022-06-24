@@ -72,11 +72,7 @@ export class ChannelsService {
     return this.channelUserPermissionsRepository.save(channelUserPermission);
   }
 
-  async join(channelId: number, userId: number, password?: string) {
-    const channel = await this.findChannelById(channelId);
-    if (!channel) {
-      return null;
-    }
+  async join(channel: Channel, userId: number, password?: string) {
     if (
       channel.password &&
       !(await bcrypt.compare(password, channel.password))
@@ -85,13 +81,13 @@ export class ChannelsService {
     }
     await this.channelUserPermissionsRepository.upsert(
       {
-        channelId,
+        channelId: channel.id,
         userId,
       },
       ['channelId', 'userId'],
     );
     return await this.channelUserPermissionsRepository.findOne(
-      { userId, channelId },
+      { userId, channelId: channel.id },
       { relations: ['user', 'channel', 'role'] },
     );
   }
