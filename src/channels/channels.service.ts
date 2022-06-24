@@ -83,10 +83,13 @@ export class ChannelsService {
     ) {
       return null;
     }
-    await this.channelUserPermissionsRepository.insert({
-      channelId,
-      userId,
-    });
+    await this.channelUserPermissionsRepository.upsert(
+      {
+        channelId,
+        userId,
+      },
+      ['channelId', 'userId'],
+    );
     return await this.channelUserPermissionsRepository.findOne(
       { userId, channelId },
       { relations: ['user', 'channel', 'role'] },
