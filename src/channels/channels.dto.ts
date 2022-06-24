@@ -16,7 +16,7 @@ export class ResponseChannelDTO implements Channel {
   constructor(channelUserPermission: ChannelUserPermission);
   constructor(arg: EntityChannel | ChannelUserPermission, userId?: number) {
     if (arg instanceof EntityChannel) {
-      const role = arg.users.find((v) => v.userId === userId)?.role ?? null;
+      const role = arg.users?.find((v) => v.userId === userId)?.role ?? null;
 
       this.id = arg.id;
       this.name = arg.name;
