@@ -8,7 +8,6 @@ Run following commands in `transcendence-env` directory.
 
 ```
 docker-compose exec api yarm migration:run
-docker-compose exec api yarn seed:run -s AddRoles
 ```
 
 ### Migration
