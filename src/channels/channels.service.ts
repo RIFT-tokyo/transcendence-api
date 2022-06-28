@@ -2,18 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from '../entities/channel.entity';
 import { Repository } from 'typeorm';
-import { NewChannel } from 'src/generated';
-import { ResponseChannelDTO } from './channels.dto';
+import { NewChannel } from '../generated';
 import * as bcrypt from 'bcrypt';
-import { ChannelMessage } from 'src/entities/channel-message.entity';
-import { Message } from 'src/entities/message.entity';
-import { UsersService } from 'src/users/users.service';
+import { ChannelMessage } from '../entities/channel-message.entity';
+import { Message } from '../entities/message.entity';
+import { UsersService } from '../users/users.service';
+import { ChannelUserPermission } from '../entities/channel-user-permission.entity';
 
 @Injectable()
 export class ChannelsService {
   constructor(
     @InjectRepository(Channel)
     private readonly channelsRepository: Repository<Channel>,
+    @InjectRepository(ChannelUserPermission)
+    private readonly channelUserPermissionsRepository: Repository<ChannelUserPermission>,
     @InjectRepository(ChannelMessage)
     private readonly channelMessageRepository: Repository<ChannelMessage>,
     @InjectRepository(Message)
@@ -27,6 +29,13 @@ export class ChannelsService {
 
   async findChannelById(id: number, relations: Array<string> = []) {
     return await this.channelsRepository.findOne({ id }, { relations });
+  }
+
+  async findChannelsByUserId(userId: number) {
+    return await this.channelUserPermissionsRepository.find({
+      where: { userId },
+      relations: ['user', 'channel'],
+    });
   }
 
   async createMessage(userId: number, channelId: number, text: string) {
@@ -43,14 +52,47 @@ export class ChannelsService {
     return await this.channelMessageRepository.save(channelMessage);
   }
 
-  async create(channel: NewChannel) {
-    if (channel.password) {
-      channel.password = await bcrypt.hash(
-        channel.password,
+  async create(channelData: NewChannel, userId: number) {
+    if (channelData.password) {
+      channelData.password = await bcrypt.hash(
+        channelData.password,
         Number(process.env.HASH_SALT),
       );
     }
-    const result = await this.channelsRepository.save(channel);
-    return new ResponseChannelDTO(result);
+    const channel = await this.channelsRepository.save(channelData);
+    const channelUserPermission = new ChannelUserPermission();
+    channelUserPermission.channelId = channel.id;
+    channelUserPermission.channel = channel;
+    channelUserPermission.userId = userId;
+    channelUserPermission.role = 'owner';
+    return this.channelUserPermissionsRepository.save(channelUserPermission);
   }
+
+  async join(channel: Channel, userId: number, password?: string) {
+    if (
+      channel.password &&
+      !(await bcrypt.compare(password, channel.password))
+    ) {
+      return null;
+    }
+    await this.channelUserPermissionsRepository.upsert(
+      {
+        channelId: channel.id,
+        userId,
+      },
+      ['channelId', 'userId'],
+    );
+    return await this.channelUserPermissionsRepository.findOne(
+      { userId, channelId: channel.id },
+      { relations: ['user', 'channel'] },
+    );
+  }
+
+  // TODO: チャンネルleave機能実装時にコメントアウトを解除する
+  // async leave(channelId: number, userId: number) {
+  //   return await this.channelUserPermissionsRepository.softDelete({
+  //     channelId,
+  //     userId,
+  //   });
+  // }
 }

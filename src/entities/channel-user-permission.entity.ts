@@ -5,17 +5,19 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Channel } from './channel.entity';
-import { Role } from './role.entity';
 import { User } from './user.entity';
 
 @Entity()
 export class ChannelUserPermission {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  channelId: number;
+
+  @PrimaryColumn()
+  userId: number;
 
   @ManyToOne(() => Channel, (channel: Channel) => channel.users)
   channel: Channel;
@@ -23,14 +25,12 @@ export class ChannelUserPermission {
   @ManyToOne(() => User)
   user: User;
 
-  @Column({ default: false })
-  is_ban: boolean;
+  // @Column({ type: 'timestamp with time zone', nullable: true })
+  // @IsDate()
+  // ban_until: Date;
 
-  @Column({ default: false })
-  is_authorized: boolean;
-
-  @ManyToOne(() => Role, { nullable: true })
-  role: Role;
+  @Column({ nullable: true })
+  role: 'owner' | 'administrator';
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   @IsDate()

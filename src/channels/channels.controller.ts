@@ -4,9 +4,11 @@ import {
   Get,
   HttpCode,
   Post,
+  Session,
   UseGuards,
 } from '@nestjs/common';
-import { NewChannel } from 'src/generated';
+import { NewChannel } from '../generated';
+import { UserSession } from '../types/UserSession';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { ResponseChannelDTO } from './channels.dto';
 import { ChannelsService } from './channels.service';
@@ -17,17 +19,26 @@ export class ChannelsController {
 
   @UseGuards(AuthenticatedGuard)
   @Get()
-  async getChannels(): Promise<ResponseChannelDTO[]> {
+  async getChannels(
+    @Session() session: UserSession,
+  ): Promise<ResponseChannelDTO[]> {
     const channels = await this.channelsService.findAll();
-    return channels.map((channel) => new ResponseChannelDTO(channel));
+    return channels.map(
+      (channel) => new ResponseChannelDTO(channel, session.userId),
+    );
   }
 
   @UseGuards(AuthenticatedGuard)
   @Post()
   @HttpCode(201)
   async createChannel(
-    @Body() channel: NewChannel,
+    @Session() session: UserSession,
+    @Body() channelData: NewChannel,
   ): Promise<ResponseChannelDTO> {
-    return await this.channelsService.create(channel);
+    const channelUserPermission = await this.channelsService.create(
+      channelData,
+      session.userId,
+    );
+    return new ResponseChannelDTO(channelUserPermission);
   }
 }
