@@ -45,7 +45,7 @@ export class AuthService {
 
     /**
      * Your GET endpoint
-     * 
+     * deactivate 2 factor from security setting
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
@@ -75,7 +75,7 @@ export class AuthService {
     }
     /**
      * Your GET endpoint
-     * 
+     * return 2 factor\&#39;s qrcode
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
@@ -166,7 +166,7 @@ export class AuthService {
     }
     /**
      * 
-     * 
+     * activate 2 factor from security setting
      * @param inlineObject1 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -204,13 +204,13 @@ export class AuthService {
     }
     /**
      * 
-     * 
+     * authenticate 2 factor, this is used just after user login with 2 factor activated.
      * @param inlineObject 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public postAuth2faVerify(inlineObject?: InlineObject, ): Observable<AxiosResponse<any>>;
-    public postAuth2faVerify(inlineObject?: InlineObject, ): Observable<any> {
+    public postAuth2faAuthenticate(inlineObject?: InlineObject, ): Observable<AxiosResponse<any>>;
+    public postAuth2faAuthenticate(inlineObject?: InlineObject, ): Observable<any> {
 
 
         let headers = this.defaultHeaders;
@@ -232,7 +232,7 @@ export class AuthService {
         if (httpContentTypeSelected != undefined) {
             headers['Content-Type'] = httpContentTypeSelected;
         }
-        return this.httpClient.post<any>(`${this.basePath}/auth/2fa/verify`,
+        return this.httpClient.post<any>(`${this.basePath}/auth/2fa/authenticate`,
             inlineObject,
             {
                 withCredentials: this.configuration.withCredentials,
