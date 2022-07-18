@@ -6,7 +6,7 @@ export class AuthenticatedGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     return (
       request.session.userId &&
-      (!request.session.isTwoFaEnabled || request.session.isTwoFaAutanticated)
+      (!request.session.isTwoFaEnabled || request.session.isTwoFaAuthenticated)
     );
   }
 }
