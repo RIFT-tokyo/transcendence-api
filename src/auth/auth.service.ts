@@ -29,6 +29,8 @@ export class AuthService {
     return res;
   }
 
+  findUserById = this.usersService.findUserById;
+
   async signup(login: Login) {
     const user = await this.usersService.findUserByUsername(login.username);
     if (user) {
@@ -86,7 +88,7 @@ export class AuthService {
     }
     const secret = speakeasy.generateSecret({
       length: 20,
-      name: '',
+      name: user.username,
       issuer: 'transcendence',
     });
     user.two_fa_secret = secret.base32;
@@ -94,7 +96,7 @@ export class AuthService {
 
     const url = speakeasy.otpauthURL({
       secret: secret.ascii,
-      label: encodeURIComponent(''),
+      label: encodeURIComponent(user.username),
       issuer: 'transcendence',
     });
     const qrcode = await QRCode.toDataURL(url);
@@ -105,9 +107,6 @@ export class AuthService {
     const user = await this.usersService.findUserById(userId);
     if (!user) {
       return null;
-    }
-    if (!user.is_two_fa_enabled) {
-      return true;
     }
     const verified = speakeasy.totp.verify({
       secret: user.two_fa_secret,
