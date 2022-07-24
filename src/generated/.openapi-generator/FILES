@@ -12,6 +12,7 @@ git_push.sh
 index.ts
 model/achievement.ts
 model/channel.ts
+model/channelPassword.ts
 model/error.ts
 model/filePath.ts
 model/inlineObject.ts
