@@ -3,10 +3,19 @@ import { UsersService } from 'src/users/users.service';
 import { CreateUserDTO } from '../users/users.dto';
 import * as bcrypt from 'bcrypt';
 import { Login } from '../generated/model/login';
+import * as speakeasy from 'speakeasy';
+import * as QRCode from 'qrcode';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly usersService: UsersService,
+  ) {}
 
   private async uniqueUsernameGenerator(username: string) {
     const forwardMatchedUsernames = (
@@ -19,6 +28,8 @@ export class AuthService {
     }
     return res;
   }
+
+  findUserById = this.usersService.findUserById;
 
   async signup(login: Login) {
     const user = await this.usersService.findUserByUsername(login.username);
@@ -68,5 +79,61 @@ export class AuthService {
       });
     }
     return null;
+  }
+
+  async generateTwoFaSecretAndQr(userId: number) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    const secret = speakeasy.generateSecret({
+      length: 20,
+      name: user.username,
+      issuer: 'transcendence',
+    });
+    user.two_fa_secret = secret.base32;
+    await this.userRepository.save(user);
+
+    const url = speakeasy.otpauthURL({
+      secret: secret.ascii,
+      label: encodeURIComponent(user.username),
+      issuer: 'transcendence',
+    });
+    const qrcode = await QRCode.toDataURL(url);
+    return qrcode;
+  }
+
+  async verifyTwoFaAuthcode(userId: number, authcode: string) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    const verified = speakeasy.totp.verify({
+      secret: user.two_fa_secret,
+      encoding: 'base32',
+      token: authcode,
+    });
+    return verified;
+  }
+
+  async turnOnTwoFa(userId: number) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    user.is_two_fa_enabled = true;
+    await this.userRepository.save(user);
+    return user;
+  }
+
+  async turnOffTwoFa(userId: number) {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      return null;
+    }
+    user.two_fa_secret = null;
+    user.is_two_fa_enabled = false;
+    await this.userRepository.save(user);
+    return user;
   }
 }

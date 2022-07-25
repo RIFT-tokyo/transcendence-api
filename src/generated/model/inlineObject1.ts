@@ -11,7 +11,7 @@
  */
 
 
-export interface InlineResponse200 { 
-    qrcode?: string;
+export interface InlineObject1 { 
+    authcode?: string;
 }
 

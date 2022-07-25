@@ -14,6 +14,7 @@ export class CreateUserDTO implements User {
   status?: User.StatusEnum;
   password?: string;
   intra_id?: number;
+  is_two_fa_enabled?: boolean;
 }
 
 export class UpdateUserDTO extends PartialType(CreateUserDTO) {}
@@ -25,6 +26,7 @@ export class ResponseUserDTO implements User {
   profile_image: string;
   status: User.StatusEnum;
   status_message: string;
+  is_two_fa_enabled: boolean;
   followers?: number;
   following?: number;
   achievements?: Achievement[];
@@ -38,6 +40,7 @@ export class ResponseUserDTO implements User {
     this.profile_image = user.profile_image;
     this.status = user.status;
     this.status_message = user.status_message;
+    this.is_two_fa_enabled = user.is_two_fa_enabled;
     this.followers = user.followers ? user.followers.length : undefined;
     this.following = user.following ? user.following.length : undefined;
     this.achievements = user.achievements
