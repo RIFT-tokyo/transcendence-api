@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from '../entities/channel.entity';
-import { Repository } from 'typeorm';
-import { NewChannel } from '../generated';
+import { In, Repository } from 'typeorm';
+import { ChannelUser, NewChannel, UpdateChannelUser } from '../generated';
 import * as bcrypt from 'bcrypt';
 import { ChannelMessage } from '../entities/channel-message.entity';
 import { Message } from '../entities/message.entity';
 import { UsersService } from '../users/users.service';
 import { ChannelUserPermission } from '../entities/channel-user-permission.entity';
+
+const BAN_HOURS = 1;
 
 @Injectable()
 export class ChannelsService {
@@ -24,16 +26,30 @@ export class ChannelsService {
   ) {}
 
   async findAll() {
-    return await this.channelsRepository.find();
+    return await this.channelsRepository.find({order: {name: "DESC"}});
   }
 
   async findChannelById(id: number, relations: Array<string> = []) {
     return await this.channelsRepository.findOne({ id }, { relations });
   }
 
+  async findChannelByChannelIdAndUserId(channelId: number, userId: number) {
+    return await this.channelUserPermissionsRepository.findOne({
+      channelId,
+      userId,
+    });
+  }
+
   async findChannelsByUserId(userId: number) {
     return await this.channelUserPermissionsRepository.find({
       where: { userId },
+      relations: ['user', 'channel'],
+    });
+  }
+
+  async findChannelsByChannelId(channelId: number) {
+    return await this.channelUserPermissionsRepository.find({
+      where: { channelId },
       relations: ['user', 'channel'],
     });
   }
@@ -88,11 +104,29 @@ export class ChannelsService {
     );
   }
 
-  // TODO: チャンネルleave機能実装時にコメントアウトを解除する
-  // async leave(channelId: number, userId: number) {
-  //   return await this.channelUserPermissionsRepository.softDelete({
-  //     channelId,
-  //     userId,
-  //   });
-  // }
+  async leave(channelId: number, userId: number) {
+    return await this.channelUserPermissionsRepository.softDelete({
+      channelId,
+      userId,
+    });
+  }
+
+  async updateUserPermissions(
+    channelId: number,
+    channelUserData: ChannelUser,
+  ) {
+    const permission: Pick<ChannelUserPermission, 'role' | 'ban_until'> = {
+      role: channelUserData.role,
+      ban_until: null,
+    };
+    if (channelUserData.is_ban) {
+      const ban_until = new Date();
+      ban_until.setHours(ban_until.getHours() + BAN_HOURS);
+      permission.ban_until = ban_until;
+    }
+    await this.channelUserPermissionsRepository.update(
+      { channelId, userId: channelUserData.user.id },
+      { ...permission },
+    );
+  }
 }

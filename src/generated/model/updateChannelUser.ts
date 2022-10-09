@@ -9,15 +9,11 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { Role } from './role';
+import { ChannelUserPermission } from './channelUserPermission';
 
 
-export interface Channel { 
-    id?: number;
-    name?: string;
-    is_protected?: boolean;
-    role?: Role | null;
-    created_at?: string;
-    updated_at?: string;
+export interface UpdateChannelUser { 
+    userIds?: Array<number>;
+    permission?: ChannelUserPermission;
 }
 
