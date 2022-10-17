@@ -104,13 +104,6 @@ export class ChannelsService {
     );
   }
 
-  async leave(channelId: number, userId: number) {
-    return await this.channelUserPermissionsRepository.softDelete({
-      channelId,
-      userId,
-    });
-  }
-
   async updateUserPermissions(channelId: number, channelUserData: ChannelUser) {
     const permission: Pick<ChannelUserPermission, 'role' | 'ban_until'> = {
       role: channelUserData.role,
