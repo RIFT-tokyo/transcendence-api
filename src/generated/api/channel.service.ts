@@ -16,6 +16,7 @@ import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { Channel } from '../model/channel';
 import { ChannelPassword } from '../model/channelPassword';
+import { ChannelUser } from '../model/channelUser';
 import { NewChannel } from '../model/newChannel';
 import { Configuration } from '../configuration';
 
@@ -140,6 +141,42 @@ export class ChannelService {
         );
     }
     /**
+     * List users participating in a channel
+     * 
+     * @param channelID 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getChannelsUsersUserID(channelID: number, ): Observable<AxiosResponse<Array<ChannelUser>>>;
+    public getChannelsUsersUserID(channelID: number, ): Observable<any> {
+
+        if (channelID === null || channelID === undefined) {
+            throw new Error('Required parameter channelID was null or undefined when calling getChannelsUsersUserID.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        return this.httpClient.get<Array<ChannelUser>>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}/users`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
      * Create new channel
      * 
      * @param newChannel 
@@ -172,6 +209,94 @@ export class ChannelService {
         }
         return this.httpClient.post<Channel>(`${this.basePath}/channels`,
             newChannel,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * Update a channel
+     * 
+     * @param channelID 
+     * @param newChannel 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public putChannelsChannelID(channelID: number, newChannel?: NewChannel, ): Observable<AxiosResponse<any>>;
+    public putChannelsChannelID(channelID: number, newChannel?: NewChannel, ): Observable<any> {
+
+        if (channelID === null || channelID === undefined) {
+            throw new Error('Required parameter channelID was null or undefined when calling putChannelsChannelID.');
+        }
+
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers['Content-Type'] = httpContentTypeSelected;
+        }
+        return this.httpClient.put<any>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}`,
+            newChannel,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers
+            }
+        );
+    }
+    /**
+     * Update the status of users participating in the channel
+     * 
+     * @param channelID 
+     * @param channelUser 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public putChannelsChannelIDUsers(channelID: number, channelUser?: Array<ChannelUser>, ): Observable<AxiosResponse<Array<ChannelUser>>>;
+    public putChannelsChannelIDUsers(channelID: number, channelUser?: Array<ChannelUser>, ): Observable<any> {
+
+        if (channelID === null || channelID === undefined) {
+            throw new Error('Required parameter channelID was null or undefined when calling putChannelsChannelIDUsers.');
+        }
+
+
+        let headers = this.defaultHeaders;
+
+        // authentication (sessionAuth) required
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers['Accept'] = httpHeaderAcceptSelected;
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers['Content-Type'] = httpContentTypeSelected;
+        }
+        return this.httpClient.put<Array<ChannelUser>>(`${this.basePath}/channels/${encodeURIComponent(String(channelID))}/users`,
+            channelUser,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
