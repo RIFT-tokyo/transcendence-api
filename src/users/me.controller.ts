@@ -76,18 +76,4 @@ export class MeController {
     }
     return new ResponseChannelDTO(channelUserPermission);
   }
-
-  // TODO: チャンネルleave機能実装時にコメントアウトを解除する
-  // @UseGuards(AuthenticatedGuard)
-  // @Delete('channels/:channelId')
-  // @HttpCode(204)
-  // async leaveChannel(
-  //   @Session() session: UserSession,
-  //   @Param('channelId', ParseIntPipe) channelId: number,
-  // ): Promise<void> {
-  //   const ret = await this.channelsService.leave(channelId, session.userId);
-  //   if (ret.affected === 0) {
-  //     throw new NotFoundException('ChannelUser not found');
-  //   }
-  // }
 }
