@@ -11,6 +11,7 @@ import { MatchesModule } from './matches/matches.module';
 import { ChannelsController } from './channels/channels.controller';
 import { ChannelsService } from './channels/channels.service';
 import { ChannelsModule } from './channels/channels.module';
+import { PmsModule } from './pms/pms.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ChannelsModule } from './channels/channels.module';
     AuthModule,
     ChannelsModule,
     MatchesModule,
+    PmsModule,
   ],
   controllers: [AppController, UsersController, ChannelsController],
   providers: [AppService, UsersService, ChannelsService, AppGateway],
