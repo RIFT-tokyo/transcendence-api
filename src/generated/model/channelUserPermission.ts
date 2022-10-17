@@ -12,12 +12,8 @@
 import { Role } from './role';
 
 
-export interface Channel { 
-    id?: number;
-    name?: string;
-    is_protected?: boolean;
+export interface ChannelUserPermission { 
     role?: Role | null;
-    created_at?: string;
-    updated_at?: string;
+    is_ban?: boolean;
 }
 

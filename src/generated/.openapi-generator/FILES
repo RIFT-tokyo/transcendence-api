@@ -13,6 +13,8 @@ index.ts
 model/achievement.ts
 model/channel.ts
 model/channelPassword.ts
+model/channelUser.ts
+model/channelUserPermission.ts
 model/error.ts
 model/filePath.ts
 model/inlineObject.ts
@@ -25,6 +27,8 @@ model/models.ts
 model/newChannel.ts
 model/password.ts
 model/rankedUser.ts
+model/role.ts
+model/updateChannelUser.ts
 model/user.ts
 model/userList.ts
 variables.ts

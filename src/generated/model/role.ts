@@ -9,15 +9,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { Role } from './role';
 
 
-export interface Channel { 
-    id?: number;
-    name?: string;
-    is_protected?: boolean;
-    role?: Role | null;
-    created_at?: string;
-    updated_at?: string;
-}
+export type Role = 'owner' | 'administrator';
+
+export const Role = {
+    Owner: 'owner' as Role,
+    Administrator: 'administrator' as Role
+};
 

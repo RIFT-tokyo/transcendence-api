@@ -1,20 +1,27 @@
-import { ChannelUserPermission } from '../entities/channel-user-permission.entity';
+import { ChannelUserPermission as EntityChannelUserPermission } from '../entities/channel-user-permission.entity';
 import { Channel as EntityChannel } from '../entities/channel.entity';
 import { ChannelMessage } from '../entities/channel-message.entity';
 import { Channel } from '../generated/model/channel';
 import { PrivateMessage } from 'src/entities/private-message.entity';
+import { Role } from '../generated/model/role';
+import { ChannelUser } from '../generated/model/channelUser';
+import { User } from '../generated/model/user';
+import { ResponseUserDTO } from '../users/users.dto';
 
 export class ResponseChannelDTO implements Channel {
   id: number;
   name: string;
   is_protected: boolean;
-  role: Channel.RoleEnum | null;
+  role: Role | null;
   created_at?: string;
   updated_at?: string;
 
   constructor(channel: EntityChannel, userId: number);
-  constructor(channelUserPermission: ChannelUserPermission);
-  constructor(arg: EntityChannel | ChannelUserPermission, userId?: number) {
+  constructor(channelUserPermission: EntityChannelUserPermission);
+  constructor(
+    arg: EntityChannel | EntityChannelUserPermission,
+    userId?: number,
+  ) {
     if (arg instanceof EntityChannel) {
       const role = arg.users?.find((v) => v.userId === userId)?.role ?? null;
 
@@ -68,5 +75,39 @@ export class WSResponseMessageDTO {
         display_name: message.from_user.display_name,
       };
     }
+  }
+}
+
+export class ChannelUserDTO implements ChannelUser {
+  user: ResponseUserDTO;
+  role: Role;
+  is_ban: boolean;
+
+  constructor(
+    channelUserPermission: EntityChannelUserPermission,
+    now: Date = new Date(),
+  ) {
+    this.user = new ResponseUserDTO(channelUserPermission.user);
+    this.role = channelUserPermission.role;
+    this.is_ban =
+      channelUserPermission.ban_until !== null &&
+      channelUserPermission.ban_until > now;
+  }
+}
+
+export class CreateChannelUserPermissionDTO {
+  userId: number;
+  channelId: number;
+  role?: Role;
+  password?: string;
+}
+
+export class ResponseChannelUserDTO implements ChannelUser {
+  user: User;
+  role: Role;
+
+  constructor(channelUser: EntityChannelUserPermission) {
+    this.user = new ResponseUserDTO(channelUser.user);
+    this.role = channelUser.role;
   }
 }

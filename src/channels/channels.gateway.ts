@@ -40,6 +40,10 @@ export class ChannelsGateway {
       body.channelID,
       body.text,
     );
+    const permission = await this.channelsService.findChannelByChannelIdAndUserId(body.channelID, body.userID);
+    if (permission.ban_until && permission.ban_until > new Date()) {
+      return;
+    }
     this.server
       .to(String(body.channelID))
       .emit('message:receive', new WSResponseMessageDTO(channelMessage));
@@ -56,9 +60,17 @@ export class ChannelsGateway {
       'messages.user',
       'messages.message',
     ]);
+
+    const channelUserPermissions =
+      await this.channelsService.findChannelsByChannelId(body.channelID);
+    const banIds = channelUserPermissions
+      .filter((permission) => permission.ban_until && permission.ban_until > new Date())
+      .map((permission) => permission.user.id);
     this.server.to(client.id).emit(
       'message:receive-all',
-      channel.messages.map((msg) => new WSResponseMessageDTO(msg)),
+      channel.messages
+        .filter((msg) => !banIds.includes(msg.user.id))
+        .map((msg) => new WSResponseMessageDTO(msg)),
     );
   }
 
