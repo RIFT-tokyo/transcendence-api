@@ -6,6 +6,7 @@ import { Message } from 'src/entities/message.entity';
 import { PrivateMessageUser } from 'src/entities/private-message-user.entity';
 import { PrivateMessage } from 'src/entities/private-message.entity';
 import { UsersModule } from 'src/users/users.module';
+import { PmsController } from './pms.controller';
 
 @Module({
   imports: [
@@ -14,5 +15,6 @@ import { UsersModule } from 'src/users/users.module';
   ],
   exports: [TypeOrmModule, PmsService],
   providers: [PmsService, PmsGateway],
+  controllers: [PmsController],
 })
 export class PmsModule {}

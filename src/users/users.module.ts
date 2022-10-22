@@ -8,9 +8,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CurrentUserInterceptor } from '../common/interceptor/current-user.interceptor';
 import { UsersGateway } from './users.gateway';
 import { ChannelsModule } from '../channels/channels.module';
+import { PmsModule } from '../pms/pms.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), forwardRef(() => ChannelsModule)],
+  imports: [TypeOrmModule.forFeature([User]), forwardRef(() => ChannelsModule), forwardRef(() => PmsModule)],
   exports: [TypeOrmModule, UsersService],
   providers: [
     UsersService,

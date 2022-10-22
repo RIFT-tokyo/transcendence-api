@@ -6,6 +6,7 @@ api/auth.service.ts
 api/channel.service.ts
 api/follow.service.ts
 api/match.service.ts
+api/pm.service.ts
 api/user.service.ts
 configuration.ts
 git_push.sh

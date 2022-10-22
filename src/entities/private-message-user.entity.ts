@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToOne,
@@ -17,6 +18,7 @@ export class PrivateMessageUser {
   id: number;
 
   @OneToOne(() => User)
+  @JoinColumn()
   from_user: User;
 
   @ManyToMany(() => User)

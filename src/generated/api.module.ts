@@ -5,6 +5,7 @@ import { AuthService } from './api/auth.service';
 import { ChannelService } from './api/channel.service';
 import { FollowService } from './api/follow.service';
 import { MatchService } from './api/match.service';
+import { PmService } from './api/pm.service';
 import { UserService } from './api/user.service';
 
 @Global()
@@ -15,6 +16,7 @@ import { UserService } from './api/user.service';
     ChannelService,
     FollowService,
     MatchService,
+    PmService,
     UserService
   ],
   providers: [
@@ -22,6 +24,7 @@ import { UserService } from './api/user.service';
     ChannelService,
     FollowService,
     MatchService,
+    PmService,
     UserService
   ]
 })

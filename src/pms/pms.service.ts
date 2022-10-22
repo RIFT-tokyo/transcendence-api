@@ -29,16 +29,17 @@ export class PmsService {
 
   async findPrivateMessageUserById(userId: number) {
     return await this.privateMessageUserRepository.findOne({
-      where: { from_user: { id: userId } },
+      relations: [ 'to_users' ],
+      where: { from_user: { id : userId } },
     });
   }
 
-  // ・createMessageで呼ばれる ・PMの検索欄で押された時に呼ばれる
+  // ・createMessageで呼ばれる ・ユーザーステータスリストのDMアイコン押した時に呼ばれる
   async findOrCreatePrivateMessageUser(fromUserId: number, toUserId: number) {
     const fromUser = await this.usersService.findUserById(fromUserId);
     const toUser = await this.usersService.findUserById(toUserId);
 
-    // ffromUserのprivateMessageUser探す
+    // fromUserのprivateMessageUser探す
     // -> あったらそれを使う　なかったら新しく作る
     let fromUserPrivateMessageUser = await this.findPrivateMessageUserById(
       fromUserId,
@@ -61,7 +62,7 @@ export class PmsService {
     }
     // privateMessageUserを返す
     await this.privateMessageUserRepository.save(fromUserPrivateMessageUser);
-    return fromUserPrivateMessageUser;
+    return toUser;
   }
 
   async createMessage(fromUserId: number, toUserId: number, text: string) {
@@ -69,7 +70,7 @@ export class PmsService {
     const toUser = await this.usersService.findUserById(toUserId);
 
     // toUser側のPrivateMessageUserのto_usersにfromUserがいなかったら追加してやる
-    const toUserPrivateMessageUser = await this.findOrCreatePrivateMessageUser(
+    await this.findOrCreatePrivateMessageUser(
       toUserId,
       fromUserId,
     );

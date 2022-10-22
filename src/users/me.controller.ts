@@ -21,6 +21,7 @@ import { ResponseUserDTO } from './users.dto';
 import { ResponseChannelDTO } from '../channels/channels.dto';
 import { ChannelPassword } from '../generated';
 import { ChannelsService } from '../channels/channels.service';
+import { PmsService } from '../pms/pms.service';
 
 @Controller('me')
 @UseInterceptors(CurrentUserInterceptor)
@@ -29,6 +30,7 @@ export class MeController {
   constructor(
     private readonly usersService: UsersService,
     private readonly channelsService: ChannelsService,
+    private readonly pmsService: PmsService,
   ) {}
 
   @UseGuards(AuthenticatedGuard)
@@ -75,5 +77,24 @@ export class MeController {
       throw new UnauthorizedException();
     }
     return new ResponseChannelDTO(channelUserPermission);
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('pms')
+  async getMePMs(
+    @Session() session: UserSession,
+  ): Promise<ResponseUserDTO[]> {
+    const privateMessageUser = await this.pmsService.findPrivateMessageUserById(session.userId);
+    return privateMessageUser ? privateMessageUser.to_users.map((user) => new ResponseUserDTO(user)) : [];
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Put('pms/:userId')
+  async createPM(
+    @Session() session: UserSession,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<ResponseUserDTO> {
+    const user = await this.pmsService.findOrCreatePrivateMessageUser(session.userId, userId);
+    return new ResponseUserDTO(user);
   }
 }

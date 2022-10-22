@@ -42,7 +42,7 @@ export class PmsGateway {
       body.text,
     );
     this.server
-      .to(String(body.toUserId))
+      .to(this.getPmId(body.fromUserId, body.toUserId))
       .emit('message:receive', new WSResponseMessageDTO(privateMessage));
   }
 
@@ -51,7 +51,7 @@ export class PmsGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: JoinPmBody,
   ) {
-    client.join(String(body.toUserId));
+    client.join(this.getPmId(body.fromUserId, body.toUserId));
     const messages = await this.pmsService.findAllPrivateMessages(
       body.fromUserId,
       body.toUserId,
@@ -67,6 +67,11 @@ export class PmsGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: JoinPmBody,
   ) {
-    client.leave(String(body.toUserId));
+    client.leave(this.getPmId(body.fromUserId, body.toUserId));
+  }
+
+  private getPmId(id1: number, id2: number): string {
+    const userIds = [id1, id2].sort();
+    return `${userIds[0]}-${userIds[1]}`;
   }
 }
