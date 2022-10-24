@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -12,18 +12,18 @@ import { PmsService } from './pms.service';
 
 interface SendMessageBody {
   text: string;
-  fromUserId: number;
-  toUserId: number;
+  fromUserID: number;
+  toUserID: number;
 }
 
 interface JoinPmBody {
-  fromUserId: number;
-  toUserId: number;
+  fromUserID: number;
+  toUserID: number;
 }
 
 interface ServerToClientEvents {
-  'message:receive': (message: WSResponseMessageDTO) => void;
-  'message:receive-all': (messages: WSResponseMessageDTO[]) => void;
+  'private-message:receive': (message: WSResponseMessageDTO) => void;
+  'private-message:receive-all': (messages: WSResponseMessageDTO[]) => void;
 }
 
 @WebSocketGateway({ cors: true, namespace: '/pms' })
@@ -34,16 +34,18 @@ export class PmsGateway {
   @WebSocketServer()
   server: Server<ServerToClientEvents>;
 
-  @SubscribeMessage('message:send')
+  private logger = new Logger("PmsGateway");
+
+  @SubscribeMessage('private-message:send')
   async handleSendMessage(@MessageBody() body: SendMessageBody) {
     const privateMessage = await this.pmsService.createMessage(
-      body.fromUserId,
-      body.toUserId,
+      body.fromUserID,
+      body.toUserID,
       body.text,
     );
     this.server
-      .to(this.getPmId(body.fromUserId, body.toUserId))
-      .emit('message:receive', new WSResponseMessageDTO(privateMessage));
+      .to(this.getPmID(body.fromUserID, body.toUserID))
+      .emit('private-message:receive', new WSResponseMessageDTO(privateMessage));
   }
 
   @SubscribeMessage('pm:join')
@@ -51,15 +53,21 @@ export class PmsGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: JoinPmBody,
   ) {
-    client.join(this.getPmId(body.fromUserId, body.toUserId));
+    this.logger.debug(body);
+    client.join(this.getPmID(body.fromUserID, body.toUserID));
+    this.logger.debug(this.getPmID(body.fromUserID, body.toUserID));
+
     const messages = await this.pmsService.findAllPrivateMessages(
-      body.fromUserId,
-      body.toUserId,
+      body.fromUserID,
+      body.toUserID,
     );
+    this.logger.debug(JSON.stringify(messages));
+    this.logger.debug(`client: ${client[0]}`);
     this.server.to(client.id).emit(
-      'message:receive-all',
+      'private-message:receive-all',
       messages.map((msg) => new WSResponseMessageDTO(msg)),
     );
+    this.logger.debug("--------");
   }
 
   @SubscribeMessage('pm:leave')
@@ -67,11 +75,11 @@ export class PmsGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: JoinPmBody,
   ) {
-    client.leave(this.getPmId(body.fromUserId, body.toUserId));
+    client.leave(this.getPmID(body.fromUserID, body.toUserID));
   }
 
-  private getPmId(id1: number, id2: number): string {
-    const userIds = [id1, id2].sort();
-    return `${userIds[0]}-${userIds[1]}`;
+  private getPmID(id1: number, id2: number): string {
+    const userIDs = [id1, id2].sort();
+    return `${userIDs[0]}-${userIDs[1]}`;
   }
 }

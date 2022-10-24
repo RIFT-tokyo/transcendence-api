@@ -46,6 +46,7 @@ export class PmsService {
     );
     if (!fromUserPrivateMessageUser) {
       const newFromUserPrivateMessageUser = new PrivateMessageUser();
+      newFromUserPrivateMessageUser.to_users = [];
       newFromUserPrivateMessageUser.from_user = fromUser;
       fromUserPrivateMessageUser = newFromUserPrivateMessageUser;
     }
