@@ -20,17 +20,24 @@ export class PmsService {
 
   async findAllPrivateMessages(fromUserId: number, toUserId: number) {
     return await this.privateMessageRepository.find({
-      where: {
-        from_user: { id: fromUserId },
-        to_user: { id: toUserId },
-      },
+      relations: ['from_user', 'message'],
+      where: [
+        {
+          from_user: { id: fromUserId },
+          to_user: { id: toUserId },
+        },
+        {
+          from_user: { id: toUserId },
+          to_user: { id: fromUserId },
+        },
+      ],
     });
   }
 
   async findPrivateMessageUserById(userId: number) {
     return await this.privateMessageUserRepository.findOne({
-      relations: [ 'to_users' ],
-      where: { from_user: { id : userId } },
+      relations: ['to_users'],
+      where: { from_user: { id: userId } },
     });
   }
 
@@ -71,10 +78,7 @@ export class PmsService {
     const toUser = await this.usersService.findUserById(toUserId);
 
     // toUser側のPrivateMessageUserのto_usersにfromUserがいなかったら追加してやる
-    await this.findOrCreatePrivateMessageUser(
-      toUserId,
-      fromUserId,
-    );
+    await this.findOrCreatePrivateMessageUser(toUserId, fromUserId);
 
     const message = new Message();
     message.text = text;

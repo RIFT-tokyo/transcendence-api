@@ -1,5 +1,5 @@
 import { ChannelsService } from './channels.service';
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import {
   ConnectedSocket,
@@ -33,6 +33,8 @@ export class ChannelsGateway {
   @WebSocketServer()
   server: Server<ServerToClientEvents>;
 
+  private logger = new Logger('ChannelsGateway');
+
   @SubscribeMessage('message:send')
   async handleSendMessage(@MessageBody() body: SendMessageBody) {
     const channelMessage = await this.channelsService.createMessage(
@@ -40,7 +42,11 @@ export class ChannelsGateway {
       body.channelID,
       body.text,
     );
-    const permission = await this.channelsService.findChannelByChannelIdAndUserId(body.channelID, body.userID);
+    const permission =
+      await this.channelsService.findChannelByChannelIdAndUserId(
+        body.channelID,
+        body.userID,
+      );
     if (permission.ban_until && permission.ban_until > new Date()) {
       return;
     }
@@ -64,8 +70,12 @@ export class ChannelsGateway {
     const channelUserPermissions =
       await this.channelsService.findChannelsByChannelId(body.channelID);
     const banIds = channelUserPermissions
-      .filter((permission) => permission.ban_until && permission.ban_until > new Date())
+      .filter(
+        (permission) =>
+          permission.ban_until && permission.ban_until > new Date(),
+      )
       .map((permission) => permission.user.id);
+
     this.server.to(client.id).emit(
       'message:receive-all',
       channel.messages

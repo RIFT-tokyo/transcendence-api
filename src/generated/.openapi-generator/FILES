@@ -3,6 +3,7 @@ README.md
 api.module.ts
 api/api.ts
 api/auth.service.ts
+api/block.service.ts
 api/channel.service.ts
 api/follow.service.ts
 api/match.service.ts

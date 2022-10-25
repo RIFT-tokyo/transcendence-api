@@ -34,7 +34,7 @@ export class PmsGateway {
   @WebSocketServer()
   server: Server<ServerToClientEvents>;
 
-  private logger = new Logger("PmsGateway");
+  private logger = new Logger('PmsGateway');
 
   @SubscribeMessage('private-message:send')
   async handleSendMessage(@MessageBody() body: SendMessageBody) {
@@ -43,9 +43,13 @@ export class PmsGateway {
       body.toUserID,
       body.text,
     );
+    this.logger.debug(JSON.stringify(privateMessage));
     this.server
       .to(this.getPmID(body.fromUserID, body.toUserID))
-      .emit('private-message:receive', new WSResponseMessageDTO(privateMessage));
+      .emit(
+        'private-message:receive',
+        new WSResponseMessageDTO(privateMessage),
+      );
   }
 
   @SubscribeMessage('pm:join')
@@ -61,13 +65,11 @@ export class PmsGateway {
       body.fromUserID,
       body.toUserID,
     );
-    this.logger.debug(JSON.stringify(messages));
-    this.logger.debug(`client: ${client[0]}`);
     this.server.to(client.id).emit(
       'private-message:receive-all',
       messages.map((msg) => new WSResponseMessageDTO(msg)),
     );
-    this.logger.debug("--------");
+    this.logger.debug('--------');
   }
 
   @SubscribeMessage('pm:leave')

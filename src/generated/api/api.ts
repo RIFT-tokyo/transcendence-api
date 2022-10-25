@@ -1,5 +1,7 @@
 export * from './auth.service';
 import { AuthService } from './auth.service';
+export * from './block.service';
+import { BlockService } from './block.service';
 export * from './channel.service';
 import { ChannelService } from './channel.service';
 export * from './follow.service';
@@ -10,4 +12,4 @@ export * from './pm.service';
 import { PmService } from './pm.service';
 export * from './user.service';
 import { UserService } from './user.service';
-export const APIS = [AuthService, ChannelService, FollowService, MatchService, PmService, UserService];
+export const APIS = [AuthService, BlockService, ChannelService, FollowService, MatchService, PmService, UserService];
