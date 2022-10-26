@@ -14,7 +14,7 @@
 import { HttpService, Inject, Injectable, Optional } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
-import { UserList } from '../model/userList';
+import { User } from '../model/user';
 import { Configuration } from '../configuration';
 
 
@@ -79,26 +79,14 @@ export class BlockService {
      * List the people a user blocks
      * Lists the people who the specified user blocks.
      * @param userID 
-     * @param limit 
-     * @param offset 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUsersUserIDBlock(userID: number, limit?: number, offset?: number, ): Observable<AxiosResponse<UserList>>;
-    public getUsersUserIDBlock(userID: number, limit?: number, offset?: number, ): Observable<any> {
+    public getUsersUserIDBlock(userID: number, ): Observable<AxiosResponse<Array<User>>>;
+    public getUsersUserIDBlock(userID: number, ): Observable<any> {
 
         if (userID === null || userID === undefined) {
             throw new Error('Required parameter userID was null or undefined when calling getUsersUserIDBlock.');
-        }
-
-
-
-        let queryParameters = {};
-        if (limit !== undefined && limit !== null) {
-            queryParameters['limit'] = <any>limit;
-        }
-        if (offset !== undefined && offset !== null) {
-            queryParameters['offset'] = <any>offset;
         }
 
         let headers = this.defaultHeaders;
@@ -116,9 +104,8 @@ export class BlockService {
         // to determine the Content-Type header
         const consumes: string[] = [
         ];
-        return this.httpClient.get<UserList>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/block`,
+        return this.httpClient.get<Array<User>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/block`,
             {
-                params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers
             }

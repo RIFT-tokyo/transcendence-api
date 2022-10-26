@@ -279,4 +279,48 @@ export class UsersController {
       throw new NotFoundException('User not found');
     }
   }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get(':id/block')
+  async getBlockUsers(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseUserDTO[]> {
+    const blockList = await this.usersService.getBlockUsers(id);
+    if (!blockList) {
+      throw new NotFoundException('User not found');
+    }
+    return blockList.map((user) => new ResponseUserDTO(user));
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Put('block/:id')
+  @HttpCode(204)
+  async blockUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Session() session: UserSession,
+  ): Promise<void> {
+    if (session.userId === id) {
+      throw new BadRequestException('You cannot block yourself');
+    }
+    const ret = await this.usersService.block(session.userId, id);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Delete('block/:id')
+  @HttpCode(204)
+  async unblockUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Session() session: UserSession,
+  ): Promise<void> {
+    if (session.userId === id) {
+      throw new BadRequestException('You cannot block yourself');
+    }
+    const ret = await this.usersService.unBlock(session.userId, id);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
+  }
 }
