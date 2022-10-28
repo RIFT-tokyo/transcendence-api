@@ -323,4 +323,20 @@ export class UsersController {
       throw new NotFoundException('User not found');
     }
   }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get(':id/block/:targetId')
+  @HttpCode(204)
+  async isBlocking(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ): Promise<void> {
+    if (id === targetId) {
+      throw new BadRequestException('You cannot block yourself');
+    }
+    const ret = await this.usersService.isBlocking(id, targetId);
+    if (!ret) {
+      throw new NotFoundException('User not found');
+    }
+  }
 }

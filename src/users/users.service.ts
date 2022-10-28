@@ -188,7 +188,6 @@ export class UsersService {
     return user.block_users;
   }
 
-
   async block(id: number, targetId: number) {
     const user = await this.userRepository.findOne(
       { id },
@@ -215,5 +214,16 @@ export class UsersService {
     user.block_users.splice(targetUserIndex, 1);
     const ret = await this.userRepository.save(user);
     return !!ret;
+  }
+
+  async isBlocking(id: number, targetId: number) {
+    const user = await this.userRepository.findOne(
+      { id },
+      { relations: ['block_users'] },
+    );
+    if (!user) {
+      return null;
+    }
+    return user.block_users.some((u) => u.id === targetId);
   }
 }

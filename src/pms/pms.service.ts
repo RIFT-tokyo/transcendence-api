@@ -45,6 +45,9 @@ export class PmsService {
   async findOrCreatePrivateMessageUser(fromUserId: number, toUserId: number) {
     const fromUser = await this.usersService.findUserById(fromUserId);
     const toUser = await this.usersService.findUserById(toUserId);
+    if (!fromUser || !toUser) {
+      return null;
+    }
 
     // fromUserのprivateMessageUser探す
     // -> あったらそれを使う　なかったら新しく作る
@@ -76,6 +79,9 @@ export class PmsService {
   async createMessage(fromUserId: number, toUserId: number, text: string) {
     const fromUser = await this.usersService.findUserById(fromUserId);
     const toUser = await this.usersService.findUserById(toUserId);
+    if (!fromUser || !toUser) {
+      return null;
+    }
 
     // toUser側のPrivateMessageUserのto_usersにfromUserがいなかったら追加してやる
     await this.findOrCreatePrivateMessageUser(toUserId, fromUserId);

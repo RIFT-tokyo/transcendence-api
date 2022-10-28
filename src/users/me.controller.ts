@@ -95,6 +95,9 @@ export class MeController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<ResponseUserDTO> {
     const user = await this.pmsService.findOrCreatePrivateMessageUser(session.userId, userId);
+    if (!user) {
+      throw new NotFoundException();
+    }
     return new ResponseUserDTO(user);
   }
 }
