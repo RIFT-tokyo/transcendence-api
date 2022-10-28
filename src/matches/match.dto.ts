@@ -1,5 +1,5 @@
 import { Match, MatchList } from '../generated/model/models';
-import { Match as MatchEntity } from '../entities/match.entity';
+import { Match as MatchEntity, Result } from '../entities/match.entity';
 import { ResponseUserDTO } from '../users/users.dto';
 import { EntriesList } from '../types/EntriesList';
 
@@ -35,4 +35,12 @@ export class ResponseMatchListDTO implements MatchList {
     );
     this.has_next = entriesList.has_next;
   }
+}
+
+export class CreateMatchDTO implements Match {
+  host_player_id: number | null;
+  guest_player_id: number | null;
+  host_player_points: number | null;
+  guest_player_points: number | null;
+  result: Result | null;
 }

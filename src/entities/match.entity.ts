@@ -1,3 +1,4 @@
+import { IsDate } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -5,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -36,9 +38,19 @@ export class Match {
   @Column({ type: 'enum', enum: Result, default: Result.DRAW })
   result: Result;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @Column({ type: 'timestamp with time zone' })
+  @IsDate()
   start_at: Date;
 
-  @Column({ type: 'timestamp with time zone', nullable: true })
+  @Column({ type: 'timestamp with time zone' })
+  @IsDate()
   end_at: Date;
+
+  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @IsDate()
+  create_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  @IsDate()
+  updated_at: Date;
 }
