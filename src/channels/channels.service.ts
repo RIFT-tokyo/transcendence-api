@@ -26,7 +26,7 @@ export class ChannelsService {
   ) {}
 
   async findAll() {
-    return await this.channelsRepository.find({order: {name: "DESC"}});
+    return await this.channelsRepository.find({ order: { name: 'DESC' } });
   }
 
   async findChannelById(id: number, relations: Array<string> = []) {
@@ -104,17 +104,7 @@ export class ChannelsService {
     );
   }
 
-  async leave(channelId: number, userId: number) {
-    return await this.channelUserPermissionsRepository.softDelete({
-      channelId,
-      userId,
-    });
-  }
-
-  async updateUserPermissions(
-    channelId: number,
-    channelUserData: ChannelUser,
-  ) {
+  async updateUserPermissions(channelId: number, channelUserData: ChannelUser) {
     const permission: Pick<ChannelUserPermission, 'role' | 'ban_until'> = {
       role: channelUserData.role,
       ban_until: null,

@@ -177,4 +177,53 @@ export class UsersService {
     }
     return user.following.some((u) => u.id === targetId);
   }
+
+  async getBlockUsers(
+    id: number,
+  ): Promise<User[]> {
+    const user = await this.userRepository.findOne(id, {relations: ['block_users']});
+    if (!user) {
+      return null;
+    }
+    return user.block_users;
+  }
+
+  async block(id: number, targetId: number) {
+    const user = await this.userRepository.findOne(
+      { id },
+      { relations: ['block_users'] },
+    );
+    const targetUser = await this.userRepository.findOne(targetId);
+    if (!user || !targetUser) {
+      return false;
+    }
+    user.block_users.push(targetUser);
+    const ret = await this.userRepository.save(user);
+    return !!ret;
+  }
+
+  async unBlock(id: number, targetId: number) {
+    const user = await this.userRepository.findOne(
+      { id },
+      { relations: ['block_users'] },
+    );
+    const targetUserIndex = user.block_users.findIndex((u) => u.id === targetId);
+    if (targetUserIndex < 0) {
+      return false;
+    }
+    user.block_users.splice(targetUserIndex, 1);
+    const ret = await this.userRepository.save(user);
+    return !!ret;
+  }
+
+  async isBlocking(id: number, targetId: number) {
+    const user = await this.userRepository.findOne(
+      { id },
+      { relations: ['block_users'] },
+    );
+    if (!user) {
+      return null;
+    }
+    return user.block_users.some((u) => u.id === targetId);
+  }
 }

@@ -54,6 +54,10 @@ export class User {
   @ManyToMany(() => User, (user) => user.followers)
   following: User[];
 
+  @ManyToMany(() => User)
+  @JoinTable()
+  block_users: User[];
+ 
   @ManyToMany(() => Achievement)
   @JoinTable()
   achievements: Achievement[];

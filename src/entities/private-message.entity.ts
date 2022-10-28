@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -23,6 +24,7 @@ export class PrivateMessage {
   to_user: User;
 
   @OneToOne(() => Message)
+  @JoinColumn()
   message: Message;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })

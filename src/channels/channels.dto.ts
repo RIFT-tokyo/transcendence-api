@@ -2,6 +2,7 @@ import { ChannelUserPermission as EntityChannelUserPermission } from '../entitie
 import { Channel as EntityChannel } from '../entities/channel.entity';
 import { ChannelMessage } from '../entities/channel-message.entity';
 import { Channel } from '../generated/model/channel';
+import { PrivateMessage } from 'src/entities/private-message.entity';
 import { Role } from '../generated/model/role';
 import { ChannelUser } from '../generated/model/channelUser';
 import { User } from '../generated/model/user';
@@ -52,16 +53,28 @@ export class WSResponseMessageDTO {
     display_name: string;
   };
 
-  constructor(channelMessage: ChannelMessage) {
-    this.id = channelMessage.message.id;
-    this.text = channelMessage.message.text;
-    this.createdAt = channelMessage.message.created_at;
-    this.user = {
-      id: channelMessage.user.id,
-      username: channelMessage.user.username,
-      profile_image: channelMessage.user.profile_image,
-      display_name: channelMessage.user.display_name,
-    };
+  constructor(message: ChannelMessage | PrivateMessage) {
+    if (message instanceof ChannelMessage) {
+      this.id = message.message.id;
+      this.text = message.message.text;
+      this.createdAt = message.message.created_at;
+      this.user = {
+        id: message.user.id,
+        username: message.user.username,
+        profile_image: message.user.profile_image,
+        display_name: message.user.display_name,
+      };
+    } else {
+      this.id = message.message.id;
+      this.text = message.message.text;
+      this.createdAt = message.message.created_at;
+      this.user = {
+        id: message.from_user.id,
+        username: message.from_user.username,
+        profile_image: message.from_user.profile_image,
+        display_name: message.from_user.display_name,
+      };
+    }
   }
 }
 
@@ -70,10 +83,15 @@ export class ChannelUserDTO implements ChannelUser {
   role: Role;
   is_ban: boolean;
 
-  constructor(channelUserPermission: EntityChannelUserPermission, now: Date = new Date()) {
+  constructor(
+    channelUserPermission: EntityChannelUserPermission,
+    now: Date = new Date(),
+  ) {
     this.user = new ResponseUserDTO(channelUserPermission.user);
     this.role = channelUserPermission.role;
-    this.is_ban = channelUserPermission.ban_until !== null && channelUserPermission.ban_until > now;
+    this.is_ban =
+      channelUserPermission.ban_until !== null &&
+      channelUserPermission.ban_until > now;
   }
 }
 

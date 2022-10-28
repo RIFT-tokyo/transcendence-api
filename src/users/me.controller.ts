@@ -21,6 +21,7 @@ import { ResponseUserDTO } from './users.dto';
 import { ResponseChannelDTO } from '../channels/channels.dto';
 import { ChannelPassword } from '../generated';
 import { ChannelsService } from '../channels/channels.service';
+import { PmsService } from '../pms/pms.service';
 
 @Controller('me')
 @UseInterceptors(CurrentUserInterceptor)
@@ -29,6 +30,7 @@ export class MeController {
   constructor(
     private readonly usersService: UsersService,
     private readonly channelsService: ChannelsService,
+    private readonly pmsService: PmsService,
   ) {}
 
   @UseGuards(AuthenticatedGuard)
@@ -77,17 +79,25 @@ export class MeController {
     return new ResponseChannelDTO(channelUserPermission);
   }
 
-  // TODO: チャンネルleave機能実装時にコメントアウトを解除する
-  // @UseGuards(AuthenticatedGuard)
-  // @Delete('channels/:channelId')
-  // @HttpCode(204)
-  // async leaveChannel(
-  //   @Session() session: UserSession,
-  //   @Param('channelId', ParseIntPipe) channelId: number,
-  // ): Promise<void> {
-  //   const ret = await this.channelsService.leave(channelId, session.userId);
-  //   if (ret.affected === 0) {
-  //     throw new NotFoundException('ChannelUser not found');
-  //   }
-  // }
+  @UseGuards(AuthenticatedGuard)
+  @Get('pms')
+  async getMePMs(
+    @Session() session: UserSession,
+  ): Promise<ResponseUserDTO[]> {
+    const privateMessageUser = await this.pmsService.findPrivateMessageUserById(session.userId);
+    return privateMessageUser ? privateMessageUser.to_users.map((user) => new ResponseUserDTO(user)) : [];
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Put('pms/:userId')
+  async createPM(
+    @Session() session: UserSession,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<ResponseUserDTO> {
+    const user = await this.pmsService.findOrCreatePrivateMessageUser(session.userId, userId);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return new ResponseUserDTO(user);
+  }
 }

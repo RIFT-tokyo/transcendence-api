@@ -11,6 +11,7 @@ import { MatchesModule } from './matches/matches.module';
 import { ChannelsController } from './channels/channels.controller';
 import { ChannelsService } from './channels/channels.service';
 import { ChannelsModule } from './channels/channels.module';
+import { PmsModule } from './pms/pms.module';
 
 @Module({
   imports: [
@@ -22,13 +23,13 @@ import { ChannelsModule } from './channels/channels.module';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       synchronize: false,
-      logging: 'all',
       entities: ['dist/**/*.entity{.js,.ts}'],
     }),
     UsersModule,
     AuthModule,
     ChannelsModule,
     MatchesModule,
+    PmsModule,
   ],
   controllers: [AppController, UsersController, ChannelsController],
   providers: [AppService, UsersService, ChannelsService, AppGateway],
