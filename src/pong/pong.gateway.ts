@@ -12,7 +12,7 @@ import { CreateMatchDTO } from '../matches/match.dto';
 import { Match, Result } from '../entities/match.entity';
 
 type WaitingStatus = {
-  id: number | undefined;
+  id: number | null;
   isReady: boolean;
 };
 
@@ -32,21 +32,28 @@ export class PongGateway {
 
   @WebSocketServer()
   server: Server;
+
   roomIdStates = new Map<string, PongMatch>();
 
   // create match
   @SubscribeMessage('match:create')
   async handleNewRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: CreateMatchDTO,
   ): Promise<void> {
+    const userId = client.handshake.auth.userID;
     const newRoomId = Math.random().toString(36).substr(2, 9);
-    const match = await this.matchesService.create(body);
+    const match = await this.matchesService.create({
+      host_player_id: userId,
+      guest_player_id: null,
+      host_player_points: null,
+      guest_player_points: null,
+      result: null
+    });
     this.roomIdStates.set(newRoomId, {
       match,
       users: {
-        host: { id: body.host_player_id, isReady: false },
-        guest: { id: undefined, isReady: false },
+        host: { id: userId, isReady: false },
+        guest: { id: null, isReady: false },
       },
     });
     client.join(newRoomId);
@@ -116,7 +123,10 @@ export class PongGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { roomId: string },
   ) {
+    // roomをstateから削除する
     const state = this.roomIdStates.get(body.roomId);
     this.matchesService.finishGame(state.match);
   }
+
+  // TODO: handleDisconnectを検知して、相手のゲームを終了させる
 }
