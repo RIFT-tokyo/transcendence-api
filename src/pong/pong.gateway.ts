@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -27,8 +27,9 @@ type PongMatch = {
 @WebSocketGateway({ cors: true, namespace: '/pong' })
 export class PongGateway {
   @Inject()
-  // private readonly logger = new Logger('PongGateway');
   private readonly matchesService: MatchesService;
+
+  private readonly logger = new Logger('PongGateway');
 
   @WebSocketServer()
   server: Server;
@@ -39,44 +40,47 @@ export class PongGateway {
   @SubscribeMessage('match:create')
   async handleNewRoom(
     @ConnectedSocket() client: Socket,
+    @MessageBody() { roomId }: {roomId: string},
   ): Promise<void> {
     const userId = client.handshake.auth.userID;
-    const newRoomId = Math.random().toString(36).substr(2, 9);
+    if (!roomId || this.roomIdStates.has(roomId)) {
+      client.emit('match:create', { isSucceeded: false, roomId: null });
+      return;
+    }
     const match = await this.matchesService.create({
       host_player_id: userId,
-      guest_player_id: null,
-      host_player_points: null,
-      guest_player_points: null,
-      result: null
     });
-    this.roomIdStates.set(newRoomId, {
+    this.roomIdStates.set(roomId, {
       match,
       users: {
         host: { id: userId, isReady: false },
         guest: { id: null, isReady: false },
       },
     });
-    client.join(newRoomId);
-    client.emit('match:create', { isSucceeded: true, roomId: newRoomId });
+    this.logger.debug(JSON.stringify({roomIdStates: Object.fromEntries(this.roomIdStates)}));
+    client.join(roomId);
+    client.emit('match:create', { isSucceeded: true, roomId: roomId });
   }
 
   // join match
   @SubscribeMessage('match:join')
   handleJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: string,
+    @MessageBody() { roomId }: {roomId: string},
   ): void {
     const userId = client.handshake.auth.userID;
     const status = this.roomIdStates.get(roomId);
-    if (status) {
-      this.roomIdStates.set(roomId, {
-        match: status.match,
-        users: {
-          host: { id: status[0].id, isReady: status[0].isReady },
-          guest: { id: userId, isReady: false },
-        },
-      });
+    if (!status) {
+      client.emit('match:join', { isSucceeded: false });
+      return;
     }
+    this.roomIdStates.set(roomId, {
+      match: status.match,
+      users: {
+        host: { id: status[0].id, isReady: status[0].isReady },
+        guest: { id: userId, isReady: false },
+      },
+    });
     client.join(roomId);
     client.emit('match:join', { isSucceeded: true });
   }
@@ -89,7 +93,8 @@ export class PongGateway {
     const userId = client.handshake.auth.userID;
     const state = this.roomIdStates.get(roomId);
     if (!state) {
-      throw Error();
+      client.emit('match:ready', { isSucceeded: false });
+      return;
     }
     if (state.users.host.id === userId) {
       state.users.host.isReady = true;

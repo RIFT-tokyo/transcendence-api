@@ -38,9 +38,7 @@ export class ResponseMatchListDTO implements MatchList {
 }
 
 export class CreateMatchDTO implements Match {
-  host_player_id: number | null;
-  guest_player_id: number | null;
-  host_player_points: number | null;
-  guest_player_points: number | null;
-  result: Result | null;
+  host_player_id: number;
+  guest_player_id?: number;
+  result?: Result;
 }
