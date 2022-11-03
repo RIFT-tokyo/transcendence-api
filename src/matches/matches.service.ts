@@ -4,12 +4,14 @@ import { EntriesList } from '../types/EntriesList';
 import { IsNull, Not, Repository } from 'typeorm';
 import { Match, Result } from '../entities/match.entity';
 import { CreateMatchDTO } from './match.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class MatchesService {
   constructor(
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
+    private readonly usersService: UsersService,
   ) {}
 
   async findAll(limit?: number, offset?: number): Promise<EntriesList<Match>> {
@@ -33,9 +35,11 @@ export class MatchesService {
   }
 
   async create(match: CreateMatchDTO): Promise<Match> {
-    const result = await this.matchRepository.insert(match);
-    const id = result.identifiers[0].id;
-    return this.matchRepository.findOne(id);
+    const hostUser = await this.usersService.findUserById(match.host_player_id);
+    const result = await this.matchRepository.save({
+      host_player: hostUser,
+    });
+    return result;
   }
 
   async finishGame(match: Match): Promise<Match> {

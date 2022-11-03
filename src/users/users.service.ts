@@ -178,10 +178,10 @@ export class UsersService {
     return user.following.some((u) => u.id === targetId);
   }
 
-  async getBlockUsers(
-    id: number,
-  ): Promise<User[]> {
-    const user = await this.userRepository.findOne(id, {relations: ['block_users']});
+  async getBlockUsers(id: number): Promise<User[]> {
+    const user = await this.userRepository.findOne(id, {
+      relations: ['block_users'],
+    });
     if (!user) {
       return null;
     }
@@ -207,7 +207,9 @@ export class UsersService {
       { id },
       { relations: ['block_users'] },
     );
-    const targetUserIndex = user.block_users.findIndex((u) => u.id === targetId);
+    const targetUserIndex = user.block_users.findIndex(
+      (u) => u.id === targetId,
+    );
     if (targetUserIndex < 0) {
       return false;
     }
