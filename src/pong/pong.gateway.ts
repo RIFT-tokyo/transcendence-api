@@ -47,7 +47,6 @@ export class PongGateway {
       client.emit('match:create', { isSucceeded: false, roomId: null });
       return;
     }
-    this.logger.debug(userId);
     const match = await this.matchesService.create({
       host_player_id: userId,
     });
@@ -58,9 +57,6 @@ export class PongGateway {
         guest: { id: null, isReady: false },
       },
     });
-    this.logger.debug(
-      JSON.stringify({ roomIdStates: Object.fromEntries(this.roomIdStates) }),
-    );
     client.join(roomId);
     client.emit('match:create', { isSucceeded: true, roomId: roomId });
   }
@@ -73,14 +69,14 @@ export class PongGateway {
   ): void {
     const userId = client.handshake.auth.userID;
     const status = this.roomIdStates.get(roomId);
-    if (!status) {
+    if (!status || status.users.guest.id) {
       client.emit('match:join', { isSucceeded: false });
       return;
     }
     this.roomIdStates.set(roomId, {
       match: status.match,
       users: {
-        host: { id: status[0].id, isReady: status[0].isReady },
+        host: { id: status.users.host.id, isReady: status.users.host.isReady },
         guest: { id: userId, isReady: false },
       },
     });
@@ -91,12 +87,11 @@ export class PongGateway {
   @SubscribeMessage('match:ready')
   handleReady(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: string,
+    @MessageBody() { roomId }: { roomId: string },
   ): void {
     const userId = client.handshake.auth.userID;
     const state = this.roomIdStates.get(roomId);
     if (!state) {
-      client.emit('match:ready', { isSucceeded: false });
       return;
     }
     if (state.users.host.id === userId) {
@@ -104,8 +99,6 @@ export class PongGateway {
     } else {
       state.users.guest.isReady = true;
     }
-    client.emit('match:ready', { isSucceeded: true });
-
     if (state.users.host.isReady && state.users.guest.isReady) {
       this.server.to(roomId).emit('match:start', { isSucceeded: true });
     }
