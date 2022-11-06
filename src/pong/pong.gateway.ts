@@ -8,7 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { MatchesService } from '../matches/matches.service';
 import { Server, Socket } from 'socket.io';
-import { CreateMatchDTO } from '../matches/match.dto';
+import { CreateMatchDTO, ResponseMatchDTO } from '../matches/match.dto';
 import { Match, Result } from '../entities/match.entity';
 
 type WaitingStatus = {
@@ -26,6 +26,8 @@ type PongMatch = {
 
 @WebSocketGateway({ cors: true, namespace: '/pong' })
 export class PongGateway {
+  private readonly GOAL_POINT = 3;
+
   @Inject()
   private readonly matchesService: MatchesService;
 
@@ -106,7 +108,7 @@ export class PongGateway {
 
   // // earn point in the match
   @SubscribeMessage('match:get-point')
-  handleGainPoint(
+  async handleGainPoint(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { roomId: string; userId: number },
   ) {
@@ -114,18 +116,26 @@ export class PongGateway {
     if (!state) {
       throw Error();
     }
+    const match = await this.matchesService.gainPoint(state.match.id, state.users.host.id === body.userId);
+    if (match.host_player_points >= this.GOAL_POINT || match.guest_player_points >= this.GOAL_POINT) {
+      this.server.to(body.roomId).emit('match:finish', new ResponseMatchDTO(match));
+      this.roomIdStates.delete(body.roomId);
+    } else {
+      this.server.to(body.roomId).emit('match:status', new ResponseMatchDTO(match));
+      state.match = match;
+    }
   }
 
   // // finish the match
-  @SubscribeMessage('match:finish')
-  handleFinishGame(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() body: { roomId: string },
-  ) {
-    // roomをstateから削除する
-    const state = this.roomIdStates.get(body.roomId);
-    this.matchesService.finishGame(state.match);
-  }
+  // @SubscribeMessage('match:finish')
+  // handleFinishGame(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() body: { roomId: string },
+  // ) {
+  //   // roomをstateから削除する
+  //   const state = this.roomIdStates.get(body.roomId);
+  //   this.matchesService.finishGame(state.match);
+  // }
 
   // TODO: handleDisconnectを検知して、相手のゲームを終了させる
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntriesList } from '../types/EntriesList';
 import { IsNull, Not, Repository } from 'typeorm';
@@ -40,6 +40,20 @@ export class MatchesService {
       host_player: hostUser,
     });
     return result;
+  }
+
+  async gainPoint(id: number, isHost: boolean): Promise<Match> {
+    // TODO: transactionを貼りたい
+    const match = await this.findOne(id);
+    if (!match) {
+      throw new NotFoundException();
+    }
+    if (isHost) {
+      match.host_player_points++;
+    } else {
+      match.guest_player_points++;
+    }
+    return await this.matchRepository.save(match);
   }
 
   async finishGame(match: Match): Promise<Match> {
