@@ -20,8 +20,8 @@ export class ResponseMatchDTO implements Match {
     this.host_player_points = match.host_player_points;
     this.guest_player_points = match.guest_player_points;
     this.result = match.result;
-    this.start_at = match.start_at.toISOString();
-    this.end_at = match.end_at.toISOString();
+    this.start_at = match.start_at ? match.start_at.toISOString() : undefined;
+    this.end_at = match.end_at ? match.end_at.toISOString() : undefined;
   }
 }
 

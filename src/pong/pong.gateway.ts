@@ -65,18 +65,19 @@ export class PongGateway {
 
   // join match
   @SubscribeMessage('match:join')
-  handleJoinRoom(
+  async handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() { roomId }: { roomId: string },
-  ): void {
+  ): Promise<void> {
     const userId = client.handshake.auth.userID;
     const status = this.roomIdStates.get(roomId);
     if (!status || status.users.guest.id) {
       client.emit('match:join', { isSucceeded: false });
       return;
     }
+    const match = await this.matchesService.joinUser(status.match.id, userId);
     this.roomIdStates.set(roomId, {
-      match: status.match,
+      match,
       users: {
         host: { id: status.users.host.id, isReady: status.users.host.isReady },
         guest: { id: userId, isReady: false },
@@ -102,12 +103,12 @@ export class PongGateway {
       state.users.guest.isReady = true;
     }
     if (state.users.host.isReady && state.users.guest.isReady) {
-      this.server.to(roomId).emit('match:start', { isSucceeded: true });
+      this.server.to(roomId).emit('match:start', new ResponseMatchDTO(state.match));
     }
   }
 
-  // // earn point in the match
-  @SubscribeMessage('match:get-point')
+  // gain point in the match
+  @SubscribeMessage('match:gain-point')
   async handleGainPoint(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { roomId: string; userId: number },

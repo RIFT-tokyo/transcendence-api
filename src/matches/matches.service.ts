@@ -42,6 +42,19 @@ export class MatchesService {
     return result;
   }
 
+  async joinUser(matchId: number, userId: number): Promise<Match> {
+    const joinUser = await this.usersService.findUserById(userId);
+    await this.matchRepository.save({
+      id: matchId,
+      guest_player: joinUser,
+    });
+    const match = await this.findOne(matchId);
+    if (!match) {
+      throw new NotFoundException();
+    }
+    return match;
+  }
+
   async gainPoint(id: number, isHost: boolean): Promise<Match> {
     // TODO: transactionを貼りたい
     const match = await this.findOne(id);
