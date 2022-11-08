@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Like, Connection, Repository } from 'typeorm';
@@ -8,6 +8,8 @@ import { EntriesList } from '../types/EntriesList';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger('UsersService');
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,

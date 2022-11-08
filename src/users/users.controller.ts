@@ -109,6 +109,11 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUserDTO> {
+    const sameUsernameUser = await this.usersService.findUserByUsername(userData.username);
+    if (sameUsernameUser && sameUsernameUser.id !== id) {
+      throw new BadRequestException(`${userData.username} is already taken`);
+    }
+
     const user = await this.usersService.updateUser(id, userData);
     if (!user) {
       throw new NotFoundException('User not found');
