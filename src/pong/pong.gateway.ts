@@ -118,11 +118,11 @@ export class PongGateway {
       throw Error();
     }
     const match = await this.matchesService.gainPoint(state.match.id, state.users.host.id === body.userId);
+    this.server.to(body.roomId).emit('match:status', new ResponseMatchDTO(match));
     if (match.host_player_points >= this.GOAL_POINT || match.guest_player_points >= this.GOAL_POINT) {
-      this.server.to(body.roomId).emit('match:finish', new ResponseMatchDTO(match));
+      this.server.to(body.roomId).emit('match:finish', {});
       this.roomIdStates.delete(body.roomId);
     } else {
-      this.server.to(body.roomId).emit('match:status', new ResponseMatchDTO(match));
       state.match = match;
     }
   }
