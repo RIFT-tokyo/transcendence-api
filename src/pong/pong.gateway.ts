@@ -37,6 +37,7 @@ export class PongGateway {
   server: Server;
 
   roomIdStates = new Map<string, PongMatch>();
+  autoMatchRoomId: string | null = null;
 
   // create match
   @SubscribeMessage('match:create')
@@ -103,7 +104,9 @@ export class PongGateway {
       state.users.guest.isReady = true;
     }
     if (state.users.host.isReady && state.users.guest.isReady) {
-      this.server.to(roomId).emit('match:start', new ResponseMatchDTO(state.match));
+      this.server
+        .to(roomId)
+        .emit('match:start', new ResponseMatchDTO(state.match));
     }
   }
 
@@ -117,9 +120,17 @@ export class PongGateway {
     if (!state) {
       throw Error();
     }
-    const match = await this.matchesService.gainPoint(state.match.id, state.users.host.id === body.userId);
-    this.server.to(body.roomId).emit('match:status', new ResponseMatchDTO(match));
-    if (match.host_player_points >= this.GOAL_POINT || match.guest_player_points >= this.GOAL_POINT) {
+    const match = await this.matchesService.gainPoint(
+      state.match.id,
+      state.users.host.id === body.userId,
+    );
+    this.server
+      .to(body.roomId)
+      .emit('match:status', new ResponseMatchDTO(match));
+    if (
+      match.host_player_points >= this.GOAL_POINT ||
+      match.guest_player_points >= this.GOAL_POINT
+    ) {
       this.server.to(body.roomId).emit('match:finish', {});
       this.roomIdStates.delete(body.roomId);
     } else {
@@ -127,16 +138,47 @@ export class PongGateway {
     }
   }
 
-  // // finish the match
-  // @SubscribeMessage('match:finish')
-  // handleFinishGame(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() body: { roomId: string },
-  // ) {
-  //   // roomをstateから削除する
-  //   const state = this.roomIdStates.get(body.roomId);
-  //   this.matchesService.finishGame(state.match);
-  // }
+  @SubscribeMessage('match:auto')
+  async handleAutoMatch(@ConnectedSocket() client: Socket): Promise<void> {
+    const userId = client.handshake.auth.userID;
+    if (this.autoMatchRoomId === null) {
+      this.autoMatchRoomId = Math.random().toString(32).substring(2, 15);
+      const match = await this.matchesService.create({
+        host_player_id: userId,
+      });
+      this.roomIdStates.set(this.autoMatchRoomId, {
+        match,
+        users: {
+          host: { id: userId, isReady: false },
+          guest: { id: null, isReady: false },
+        },
+      });
+      client.join(this.autoMatchRoomId);
+      client.emit('match:auto', {
+        isSucceeded: true,
+        roomId: this.autoMatchRoomId,
+      });
+    } else {
+      const status = this.roomIdStates.get(this.autoMatchRoomId);
+      const match = await this.matchesService.joinUser(status.match.id, userId);
+      this.roomIdStates.set(this.autoMatchRoomId, {
+        match,
+        users: {
+          host: {
+            id: status.users.host.id,
+            isReady: status.users.host.isReady,
+          },
+          guest: { id: userId, isReady: false },
+        },
+      });
+      client.join(this.autoMatchRoomId);
+      client.emit('match:auto', {
+        isSucceeded: true,
+        roomId: this.autoMatchRoomId,
+      });
+      this.autoMatchRoomId = null;
+    }
+  }
 
   // TODO: handleDisconnectを検知して、相手のゲームを終了させる
 }
