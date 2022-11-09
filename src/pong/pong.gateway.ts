@@ -11,17 +11,19 @@ import { Server, Socket } from 'socket.io';
 import { CreateMatchDTO, ResponseMatchDTO } from '../matches/match.dto';
 import { Match, Result } from '../entities/match.entity';
 
-type WaitingStatus = {
+type UserStatus = {
   id: number | null;
   isReady: boolean;
+  position: [number, number, number] | null;
 };
 
 type PongMatch = {
   match: Match | null;
   users: {
-    host: WaitingStatus;
-    guest: WaitingStatus;
+    host: UserStatus;
+    guest: UserStatus;
   };
+  ballPosition: [number, number, number] | null;
 };
 
 @WebSocketGateway({ cors: true, namespace: '/pong' })
@@ -56,9 +58,10 @@ export class PongGateway {
     this.roomIdStates.set(roomId, {
       match,
       users: {
-        host: { id: userId, isReady: false },
-        guest: { id: null, isReady: false },
+        host: { id: userId, isReady: false, position: null },
+        guest: { id: null, isReady: false, position: null },
       },
+      ballPosition: null,
     });
     client.join(roomId);
     client.emit('match:create', { isSucceeded: true, roomId: roomId });
@@ -77,13 +80,12 @@ export class PongGateway {
       return;
     }
     const match = await this.matchesService.joinUser(status.match.id, userId);
-    this.roomIdStates.set(roomId, {
-      match,
-      users: {
-        host: { id: status.users.host.id, isReady: status.users.host.isReady },
-        guest: { id: userId, isReady: false },
-      },
-    });
+    this.roomIdStates[this.autoMatchRoomId].match = match;
+    this.roomIdStates[this.autoMatchRoomId].users.guest = {
+      id: userId,
+      isReady: false,
+      position: null,
+    };
     client.join(roomId);
     client.emit('match:join', { isSucceeded: true });
   }
@@ -116,13 +118,13 @@ export class PongGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { roomId: string; userId: number },
   ) {
-    const state = this.roomIdStates.get(body.roomId);
-    if (!state) {
+    const status = this.roomIdStates.get(body.roomId);
+    if (!status) {
       throw Error();
     }
     const match = await this.matchesService.gainPoint(
-      state.match.id,
-      state.users.host.id === body.userId,
+      status.match.id,
+      status.users.host.id === body.userId,
     );
     this.server
       .to(body.roomId)
@@ -134,7 +136,7 @@ export class PongGateway {
       this.server.to(body.roomId).emit('match:finish', {});
       this.roomIdStates.delete(body.roomId);
     } else {
-      state.match = match;
+      status.match = match;
     }
   }
 
@@ -149,9 +151,10 @@ export class PongGateway {
       this.roomIdStates.set(this.autoMatchRoomId, {
         match,
         users: {
-          host: { id: userId, isReady: false },
-          guest: { id: null, isReady: false },
+          host: { id: userId, isReady: false, position: null },
+          guest: { id: null, isReady: false, position: null },
         },
+        ballPosition: null,
       });
       client.join(this.autoMatchRoomId);
       client.emit('match:auto', {
@@ -161,16 +164,12 @@ export class PongGateway {
     } else {
       const status = this.roomIdStates.get(this.autoMatchRoomId);
       const match = await this.matchesService.joinUser(status.match.id, userId);
-      this.roomIdStates.set(this.autoMatchRoomId, {
-        match,
-        users: {
-          host: {
-            id: status.users.host.id,
-            isReady: status.users.host.isReady,
-          },
-          guest: { id: userId, isReady: false },
-        },
-      });
+      this.roomIdStates[this.autoMatchRoomId].match = match;
+      this.roomIdStates[this.autoMatchRoomId].users.guest = {
+        id: userId,
+        isReady: false,
+        position: null,
+      };
       client.join(this.autoMatchRoomId);
       client.emit('match:auto', {
         isSucceeded: true,
@@ -178,6 +177,34 @@ export class PongGateway {
       });
       this.autoMatchRoomId = null;
     }
+  }
+
+  @SubscribeMessage('pong:position')
+  async handlePaddlePosition(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    {
+      roomId,
+      position,
+    }: { roomId: string; position: [number, number, number] },
+  ) {
+    const userId = client.handshake.auth.userID;
+    const status = this.roomIdStates.get(roomId);
+    if (!status) {
+      throw Error();
+    }
+    const isHost = userId === status.users.host.id;
+    if (isHost) {
+      status.users.host.position = position;
+    } else {
+      status.users.guest.position = position;
+    }
+    // 座標の処理(衝突)
+    client.broadcast.emit('pong:position', {
+      host: status.users.host.position,
+      guest: status.users.guest.position,
+      ball: status.ballPosition
+    });
   }
 
   // TODO: handleDisconnectを検知して、相手のゲームを終了させる
