@@ -80,12 +80,14 @@ export class PongGateway {
       return;
     }
     const match = await this.matchesService.joinUser(status.match.id, userId);
-    this.roomIdStates[this.autoMatchRoomId].match = match;
-    this.roomIdStates[this.autoMatchRoomId].users.guest = {
-      id: userId,
-      isReady: false,
-      position: null,
-    };
+    this.roomIdStates.set(roomId, {
+      match,
+      users: {
+        host: status.users.host,
+        guest: { id: userId, isReady: false, position: null },
+      },
+      ballPosition: null,
+    });
     client.join(roomId);
     client.emit('match:join', { isSucceeded: true });
   }
@@ -164,12 +166,14 @@ export class PongGateway {
     } else {
       const status = this.roomIdStates.get(this.autoMatchRoomId);
       const match = await this.matchesService.joinUser(status.match.id, userId);
-      this.roomIdStates[this.autoMatchRoomId].match = match;
-      this.roomIdStates[this.autoMatchRoomId].users.guest = {
-        id: userId,
-        isReady: false,
-        position: null,
-      };
+      this.roomIdStates.set(this.autoMatchRoomId, {
+        match,
+        users: {
+          host: status.users.host,
+          guest: { id: userId, isReady: false, position: null },
+        },
+        ballPosition: null,
+      });
       client.join(this.autoMatchRoomId);
       client.emit('match:auto', {
         isSucceeded: true,
@@ -203,7 +207,7 @@ export class PongGateway {
     client.broadcast.emit('pong:position', {
       host: status.users.host.position,
       guest: status.users.guest.position,
-      ball: status.ballPosition
+      ball: status.ballPosition,
     });
   }
 
