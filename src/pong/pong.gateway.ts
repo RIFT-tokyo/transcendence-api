@@ -10,6 +10,7 @@ import { MatchesService } from '../matches/matches.service';
 import { Server, Socket } from 'socket.io';
 import { CreateMatchDTO, ResponseMatchDTO } from '../matches/match.dto';
 import { Match, Result } from '../entities/match.entity';
+import { PongService } from './pong.service';
 
 type UserStatus = {
   id: number | null;
@@ -32,6 +33,7 @@ export class PongGateway {
 
   @Inject()
   private readonly matchesService: MatchesService;
+  private readonly pongService: PongService;
 
   private readonly logger = new Logger('PongGateway');
 
@@ -80,14 +82,8 @@ export class PongGateway {
       return;
     }
     const match = await this.matchesService.joinUser(status.match.id, userId);
-    this.roomIdStates.set(roomId, {
-      match,
-      users: {
-        host: status.users.host,
-        guest: { id: userId, isReady: false, position: null },
-      },
-      ballPosition: null,
-    });
+    status.match = match;
+    status.users.guest.id = userId;
     client.join(roomId);
     client.emit('match:join', { isSucceeded: true });
   }
@@ -108,6 +104,7 @@ export class PongGateway {
       state.users.guest.isReady = true;
     }
     if (state.users.host.isReady && state.users.guest.isReady) {
+      this.pongService.createGame(roomId);
       this.server
         .to(roomId)
         .emit('match:start', new ResponseMatchDTO(state.match));
@@ -166,14 +163,8 @@ export class PongGateway {
     } else {
       const status = this.roomIdStates.get(this.autoMatchRoomId);
       const match = await this.matchesService.joinUser(status.match.id, userId);
-      this.roomIdStates.set(this.autoMatchRoomId, {
-        match,
-        users: {
-          host: status.users.host,
-          guest: { id: userId, isReady: false, position: null },
-        },
-        ballPosition: null,
-      });
+      status.match = match;
+      status.users.guest.id = userId;
       client.join(this.autoMatchRoomId);
       client.emit('match:auto', {
         isSucceeded: true,
