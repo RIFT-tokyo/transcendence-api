@@ -33,6 +33,7 @@ export class PongGateway {
 
   @Inject()
   private readonly matchesService: MatchesService;
+  @Inject()
   private readonly pongService: PongService;
 
   private readonly logger = new Logger('PongGateway');
