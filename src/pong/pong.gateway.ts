@@ -196,6 +196,7 @@ export class PongGateway {
       status.users.guest.position = position;
     }
     // 座標の処理(衝突)
+    status.ballPosition = this.pongService.calcBallPosition(roomId, status.users.host.position, status.users.guest.position);
     client.broadcast.emit('pong:position', {
       host: status.users.host.position,
       guest: status.users.guest.position,

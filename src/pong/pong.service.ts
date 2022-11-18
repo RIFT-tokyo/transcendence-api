@@ -16,11 +16,13 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-const STAGE_X = 8.4;
+const STAGE_X = 7.6;
 const STAGE_Z = 20;
 
-const PADDLE_X = 20;
+const PADDLE_X = 2;
 const PADDLE_Z = 0.4;
+
+const BALL_RADIUS = 0.2;
 
 @Injectable()
 export class PongService {
@@ -32,8 +34,8 @@ export class PongService {
       guestPosition: [0, 0, 0],
       ballState: {
         position: [0, 0, 0],
-        speed: 1,
-        direction: [1, 0, 1],
+        speed: 1.1,
+        direction: [0.01, 0, 0.01],
       }
     }
     this.roomIdStates.set(roomId, game);
@@ -59,10 +61,10 @@ export class PongService {
     }
 
     // 壁に当たったら反射
-    if (gameState.ballState.position[X] <= -STAGE_X / 2) {
+    if (gameState.ballState.position[X] <= -(STAGE_X / 2 - BALL_RADIUS)) {
       gameState.ballState.direction[X] = -gameState.ballState.direction[X];
     }
-    if (gameState.ballState.position[X] >= STAGE_X / 2) {
+    if (gameState.ballState.position[X] >= STAGE_X / 2 - BALL_RADIUS) {
       gameState.ballState.direction[X] = -gameState.ballState.direction[X];
     }
 
@@ -79,7 +81,8 @@ export class PongService {
       ) {
         // ボールはホストに向かっているか
         if (gameState.ballState.direction[Z] > 0) {
-          gameState.ballState.direction[Z] = -gameState.ballState.direction[Z];
+          const abs = Math.abs(gameState.ballState.direction[Z]);
+          gameState.ballState.direction[Z] = - (abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01);
         }
       }
     }
@@ -93,12 +96,15 @@ export class PongService {
         gameState.ballState.position[X] <= guestPosition[X] + PADDLE_X / 2 &&
         gameState.ballState.position[X] >= guestPosition[X] - PADDLE_X / 2
       ) {
-        // ボールはホストに向かっているか
+        // ボールはゲストに向かっているか
         if (gameState.ballState.direction[Z] < 0) {
-          gameState.ballState.direction[Z] = -gameState.ballState.direction[Z];
+          // gameState.ballState.direction[Z] = -gameState.ballState.direction[Z] * 1.1;
+          const abs = Math.abs(gameState.ballState.direction[Z]);
+          gameState.ballState.direction[Z] = (abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01);
         }
       }
     }
+
 
     return gameState.ballState.position;
   }
