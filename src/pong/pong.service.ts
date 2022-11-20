@@ -12,6 +12,8 @@ type GameState = {
   ballState: BallState;
 }
 
+type Obtainer = 'host' | 'guest' | null;
+
 const X = 0;
 const Y = 1;
 const Z = 2;
@@ -41,14 +43,23 @@ export class PongService {
     this.roomIdStates.set(roomId, game);
   }
 
-  calcBallPosition(
+  calcPosition(
     roomId: string,
-    hostPosition: Vector,
-    guestPosition: Vector,
-  ): Vector {
+    isHost: boolean,
+    position: Vector,
+  ): {
+    host: Vector,
+    guest: Vector,
+    ball: Vector,
+  } {
     const gameState = this.roomIdStates.get(roomId);
     if (!gameState) {
       throw new Error();
+    }
+    if (isHost) {
+      gameState.hostPosition = position;
+    } else {
+      gameState.guestPosition = position;
     }
 
     gameState.ballState.position[X] += gameState.ballState.direction[X] * gameState.ballState.speed;
@@ -71,13 +82,13 @@ export class PongService {
     // ぱどるにあたったら反射
     // z方向
     if (
-      gameState.ballState.position[Z] <= hostPosition[Z] + PADDLE_Z &&
-      gameState.ballState.position[Z] >= hostPosition[Z]
+      gameState.ballState.position[Z] <= gameState.hostPosition[Z] + PADDLE_Z &&
+      gameState.ballState.position[Z] >= gameState.hostPosition[Z]
     ) {
       // x方向
       if (
-        gameState.ballState.position[X] <= hostPosition[X] + PADDLE_X / 2 &&
-        gameState.ballState.position[X] >= hostPosition[X] - PADDLE_X / 2
+        gameState.ballState.position[X] <= gameState.hostPosition[X] + PADDLE_X / 2 &&
+        gameState.ballState.position[X] >= gameState.hostPosition[X] - PADDLE_X / 2
       ) {
         // ボールはホストに向かっているか
         if (gameState.ballState.direction[Z] > 0) {
@@ -88,13 +99,13 @@ export class PongService {
     }
     // z方向
     if (
-      gameState.ballState.position[Z] <= guestPosition[Z] + PADDLE_Z &&
-      gameState.ballState.position[Z] >= guestPosition[Z]
+      gameState.ballState.position[Z] <= gameState.guestPosition[Z] + PADDLE_Z &&
+      gameState.ballState.position[Z] >= gameState.guestPosition[Z]
     ) {
       // x方向
       if (
-        gameState.ballState.position[X] <= guestPosition[X] + PADDLE_X / 2 &&
-        gameState.ballState.position[X] >= guestPosition[X] - PADDLE_X / 2
+        gameState.ballState.position[X] <= gameState.guestPosition[X] + PADDLE_X / 2 &&
+        gameState.ballState.position[X] >= gameState.guestPosition[X] - PADDLE_X / 2
       ) {
         // ボールはゲストに向かっているか
         if (gameState.ballState.direction[Z] < 0) {
@@ -105,7 +116,20 @@ export class PongService {
       }
     }
 
+    return {
+      host: gameState.hostPosition,
+      guest: gameState.guestPosition,
+      ball: gameState.ballState.position,
+    };
+  }
 
-    return gameState.ballState.position;
+  isBallInGoalArea(ballPosition: Vector): Obtainer {
+    if (STAGE_Z / 2 <= ballPosition[Z]) {
+      return 'guest';
+    }
+    if (-STAGE_Z / 2 >= ballPosition[Z]) {
+      return 'host';
+    }
+    return null;
   }
 }
