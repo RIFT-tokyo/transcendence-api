@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { Interval } from '@nestjs/schedule';
 
 type Vector = [number, number, number];
 type BallState = {
@@ -10,7 +11,7 @@ type GameState = {
   hostPosition: Vector;
   guestPosition: Vector;
   ballState: BallState;
-}
+};
 
 type Obtainer = 'host' | 'guest' | null;
 
@@ -25,21 +26,22 @@ const PADDLE_X = 2;
 const PADDLE_Z = 0.4;
 
 const BALL_RADIUS = 0.2;
+const INITIAL_BALL_STATE: BallState = {
+  position: [0, 0, 0],
+  speed: 1.1,
+  direction: [0.01, 0, 0.01],
+};
 
 @Injectable()
 export class PongService {
   private roomIdStates = new Map<string, GameState>();
-
+  private readonly logger = new Logger('PongService');
   createGame(roomId: string): void {
     const game: GameState = {
       hostPosition: [0, 0, 0],
       guestPosition: [0, 0, 0],
-      ballState: {
-        position: [0, 0, 0],
-        speed: 1.1,
-        direction: [0.01, 0, 0.01],
-      }
-    }
+      ballState: INITIAL_BALL_STATE,
+    };
     this.roomIdStates.set(roomId, game);
   }
 
@@ -48,9 +50,9 @@ export class PongService {
     isHost: boolean,
     position: Vector,
   ): {
-    host: Vector,
-    guest: Vector,
-    ball: Vector,
+    host: Vector;
+    guest: Vector;
+    ball: Vector;
   } {
     const gameState = this.roomIdStates.get(roomId);
     if (!gameState) {
@@ -62,12 +64,17 @@ export class PongService {
       gameState.guestPosition = position;
     }
 
-    gameState.ballState.position[X] += gameState.ballState.direction[X] * gameState.ballState.speed;
-    gameState.ballState.position[Z] += gameState.ballState.direction[Z] * gameState.ballState.speed;
+    gameState.ballState.position[X] +=
+      gameState.ballState.direction[X] * gameState.ballState.speed;
+    gameState.ballState.position[Z] +=
+      gameState.ballState.direction[Z] * gameState.ballState.speed;
 
     if (gameState.ballState.direction[X] > gameState.ballState.speed * 2) {
       gameState.ballState.direction[X] = gameState.ballState.speed * 2;
-    } else if (gameState.ballState.direction[X] < -gameState.ballState.speed * 2) {
+    } else if (
+      gameState.ballState.direction[X] <
+      -gameState.ballState.speed * 2
+    ) {
       gameState.ballState.direction[X] = -gameState.ballState.speed * 2;
     }
 
@@ -87,31 +94,40 @@ export class PongService {
     ) {
       // x方向
       if (
-        gameState.ballState.position[X] <= gameState.hostPosition[X] + PADDLE_X / 2 &&
-        gameState.ballState.position[X] >= gameState.hostPosition[X] - PADDLE_X / 2
+        gameState.ballState.position[X] <=
+          gameState.hostPosition[X] + PADDLE_X / 2 &&
+        gameState.ballState.position[X] >=
+          gameState.hostPosition[X] - PADDLE_X / 2
       ) {
         // ボールはホストに向かっているか
         if (gameState.ballState.direction[Z] > 0) {
           const abs = Math.abs(gameState.ballState.direction[Z]);
-          gameState.ballState.direction[Z] = - (abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01);
+          gameState.ballState.direction[Z] = -(
+            abs +
+            Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01
+          );
         }
       }
     }
     // z方向
     if (
-      gameState.ballState.position[Z] <= gameState.guestPosition[Z] + PADDLE_Z &&
+      gameState.ballState.position[Z] <=
+        gameState.guestPosition[Z] + PADDLE_Z &&
       gameState.ballState.position[Z] >= gameState.guestPosition[Z]
     ) {
       // x方向
       if (
-        gameState.ballState.position[X] <= gameState.guestPosition[X] + PADDLE_X / 2 &&
-        gameState.ballState.position[X] >= gameState.guestPosition[X] - PADDLE_X / 2
+        gameState.ballState.position[X] <=
+          gameState.guestPosition[X] + PADDLE_X / 2 &&
+        gameState.ballState.position[X] >=
+          gameState.guestPosition[X] - PADDLE_X / 2
       ) {
         // ボールはゲストに向かっているか
         if (gameState.ballState.direction[Z] < 0) {
           // gameState.ballState.direction[Z] = -gameState.ballState.direction[Z] * 1.1;
           const abs = Math.abs(gameState.ballState.direction[Z]);
-          gameState.ballState.direction[Z] = (abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01);
+          gameState.ballState.direction[Z] =
+            abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01;
         }
       }
     }
@@ -131,5 +147,23 @@ export class PongService {
       return 'host';
     }
     return null;
+  }
+
+  resetBallPosition(roomId: string) {
+    const gameState = this.roomIdStates.get(roomId);
+    if (!gameState) {
+      throw new Error();
+    }
+    gameState.ballState = INITIAL_BALL_STATE;
+    return {
+      host: gameState.hostPosition,
+      guest: gameState.guestPosition,
+      ball: gameState.ballState.position,
+    };
+  }
+
+  @Interval(1000)
+  handleInterval() {
+    this.logger.debug('Called every 1 seconds');
   }
 }

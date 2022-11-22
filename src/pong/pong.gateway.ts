@@ -23,11 +23,12 @@ type PongMatch = {
     host: UserStatus;
     guest: UserStatus;
   };
+  obtainer: 'host' | 'guest' | null;
 };
 
 @WebSocketGateway({ cors: true, namespace: '/pong' })
 export class PongGateway {
-  private readonly GOAL_POINT = 3;
+  private readonly GOAL_POINT = 3000;
 
   @Inject()
   private readonly matchesService: MatchesService;
@@ -62,6 +63,7 @@ export class PongGateway {
         host: { id: userId, isReady: false },
         guest: { id: null, isReady: false },
       },
+      obtainer: null,
     });
     client.join(roomId);
     client.emit('match:create', { isSucceeded: true, roomId: roomId });
@@ -151,6 +153,7 @@ export class PongGateway {
           host: { id: userId, isReady: false },
           guest: { id: null, isReady: false },
         },
+        obtainer: null,
       });
       client.join(this.autoMatchRoomId);
       client.emit('match:auto', {
@@ -187,14 +190,37 @@ export class PongGateway {
     }
     const isHost = userId === status.users.host.id;
 
-    // 座標の処理(衝突)
-    const pongStatus = this.pongService.calcPosition(roomId, isHost, position);
+    if (!status.obtainer) {
+      // 座標の処理(衝突)
+      let pongStatus = this.pongService.calcPosition(roomId, isHost, position);
 
-    // 点数判定処理
-    const obtainer = this.pongService.isBallInGoalArea(pongStatus.ball);
-    // TODO: 点数加算をMatchesServiceに
+      // 点数判定処理
+      status.obtainer = this.pongService.isBallInGoalArea(pongStatus.ball);
 
-    client.broadcast.emit('pong:position', pongStatus);
+      // 点数加算をMatchesServiceに
+      if (status.obtainer) {
+        const match = await this.matchesService.gainPoint(
+          status.match.id,
+          status.obtainer === 'host',
+        );
+        this.server
+          .to(roomId)
+          .emit('match:status', new ResponseMatchDTO(match));
+        if (
+          match.host_player_points >= this.GOAL_POINT ||
+          match.guest_player_points >= this.GOAL_POINT
+        ) {
+          this.server.to(roomId).emit('match:finish', {});
+          this.roomIdStates.delete(roomId);
+        } else {
+          status.match = match;
+          pongStatus = this.pongService.resetBallPosition(roomId);
+        }
+      }
+
+      this.server.to(roomId).emit('pong:position', pongStatus);
+      status.obtainer = null;
+    }
   }
 
   // TODO: handleDisconnectを検知して、相手のゲームを終了させる
