@@ -8,23 +8,8 @@ import {
 } from '@nestjs/websockets';
 import { MatchesService } from '../matches/matches.service';
 import { Server, Socket } from 'socket.io';
-import { CreateMatchDTO, ResponseMatchDTO } from '../matches/match.dto';
-import { Match, Result } from '../entities/match.entity';
+import { ResponseMatchDTO } from '../matches/match.dto';
 import { PongService } from './pong.service';
-
-type UserStatus = {
-  id: number | null;
-  isReady: boolean;
-};
-
-type PongMatch = {
-  match: Match | null;
-  users: {
-    host: UserStatus;
-    guest: UserStatus;
-  };
-  obtainer: 'host' | 'guest' | null;
-};
 
 @WebSocketGateway({ cors: true, namespace: '/pong' })
 export class PongGateway {
@@ -40,7 +25,6 @@ export class PongGateway {
   @WebSocketServer()
   server: Server;
 
-  roomIdStates = new Map<string, PongMatch>();
   autoMatchRoomId: string | null = null;
 
   // create match
@@ -50,21 +34,11 @@ export class PongGateway {
     @MessageBody() { roomId }: { roomId: string },
   ): Promise<void> {
     const userId = client.handshake.auth.userID;
-    if (!roomId || this.roomIdStates.has(roomId)) {
+    if (!roomId || this.pongService.getRoom(roomId)) {
       client.emit('match:create', { isSucceeded: false, roomId: null });
       return;
     }
-    const match = await this.matchesService.create({
-      host_player_id: userId,
-    });
-    this.roomIdStates.set(roomId, {
-      match,
-      users: {
-        host: { id: userId, isReady: false },
-        guest: { id: null, isReady: false },
-      },
-      obtainer: null,
-    });
+    this.pongService.createRoom(userId, roomId);
     client.join(roomId);
     client.emit('match:create', { isSucceeded: true, roomId: roomId });
   }
@@ -76,14 +50,12 @@ export class PongGateway {
     @MessageBody() { roomId }: { roomId: string },
   ): Promise<void> {
     const userId = client.handshake.auth.userID;
-    const status = this.roomIdStates.get(roomId);
+    const status = this.pongService.getRoom(roomId);
     if (!status || status.users.guest.id) {
       client.emit('match:join', { isSucceeded: false });
       return;
     }
-    const match = await this.matchesService.joinUser(status.match.id, userId);
-    status.match = match;
-    status.users.guest.id = userId;
+    this.pongService.joinUser(userId, roomId);
     client.join(roomId);
     client.emit('match:join', { isSucceeded: true });
   }
@@ -94,16 +66,12 @@ export class PongGateway {
     @MessageBody() { roomId }: { roomId: string },
   ): void {
     const userId = client.handshake.auth.userID;
-    const state = this.roomIdStates.get(roomId);
+    const state = this.pongService.getRoom(roomId);
     if (!state) {
       return;
     }
-    if (state.users.host.id === userId) {
-      state.users.host.isReady = true;
-    } else {
-      state.users.guest.isReady = true;
-    }
-    if (state.users.host.isReady && state.users.guest.isReady) {
+    const canGameStart = this.pongService.setReady(roomId, userId);
+    if (canGameStart) {
       this.pongService.createGame(roomId);
       this.server
         .to(roomId)
