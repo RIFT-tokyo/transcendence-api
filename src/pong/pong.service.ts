@@ -51,6 +51,8 @@ export class PongService {
   private roomIdStates = new Map<string, RoomState>();
   private readonly logger = new Logger('PongService');
 
+  private autoMatchRoomId: string | null = null;
+
   @Inject()
   private readonly matchesService: MatchesService;
 
@@ -61,11 +63,12 @@ export class PongService {
   async createRoom(
     hostUserId: number,
     roomId: string | null = null,
-  ): Promise<void> {
+  ): Promise<string> {
     const match = await this.matchesService.create({
       host_player_id: hostUserId,
     });
-    this.roomIdStates.set(roomId, {
+    const newRoomId = roomId ?? Math.random().toString(32).substring(2, 15);
+    this.roomIdStates.set(newRoomId, {
       match: match,
       users: {
         host: { id: hostUserId, isReady: false },
@@ -73,13 +76,27 @@ export class PongService {
       },
       obtainer: null,
     });
+    return newRoomId;
   }
 
-  async joinUser(userId: number, roomId: string): Promise<void> {
+  async joinUser(userId: number, roomId: string): Promise<string> {
     const status = this.getRoom(roomId);
     const match = await this.matchesService.joinUser(status.match.id, userId);
     status.match = match;
     status.users.guest.id = userId;
+    return roomId;
+  }
+
+  async autoMatch(userId: number): Promise<string> {
+    if (this.autoMatchRoomId === null) {
+      this.autoMatchRoomId = await this.createRoom(userId);
+      return this.autoMatchRoomId;
+    } else {
+      const roomId = this.autoMatchRoomId;
+      this.autoMatchRoomId = null;
+      await this.joinUser(userId, roomId);
+      return roomId;
+    }
   }
 
   setReady(roomId: string, userId: number): boolean {
@@ -97,6 +114,16 @@ export class PongService {
     state.hostPosition = [0, 0, 0];
     state.guestPosition = [0, 0, 0];
     state.ballState = INITIAL_BALL_STATE;
+  }
+
+  setPlayerPosition(roomId: string, userId: number, position: Vector) {
+    const state = this.getRoom(roomId);
+    const isHost = state.users.host.id === userId;
+    if (isHost) {
+      state.hostPosition = position;
+    } else {
+      state.guestPosition = position;
+    }
   }
 
   calcPosition(
@@ -147,77 +174,77 @@ export class PongService {
     };
   }
 
-  @Interval(1000 / 60)
-  handleInterval() {
-    this.roomIdStates.forEach((gameState) => {
-      gameState.ballState.position[X] +=
-        gameState.ballState.direction[X] * gameState.ballState.speed;
-      gameState.ballState.position[Z] +=
-        gameState.ballState.direction[Z] * gameState.ballState.speed;
+  // @Interval(1000 / 60)
+  // handleInterval() {
+  //   this.roomIdStates.forEach((gameState) => {
+  //     gameState.ballState.position[X] +=
+  //       gameState.ballState.direction[X] * gameState.ballState.speed;
+  //     gameState.ballState.position[Z] +=
+  //       gameState.ballState.direction[Z] * gameState.ballState.speed;
 
-      if (gameState.ballState.direction[X] > gameState.ballState.speed * 2) {
-        gameState.ballState.direction[X] = gameState.ballState.speed * 2;
-      } else if (
-        gameState.ballState.direction[X] <
-        -gameState.ballState.speed * 2
-      ) {
-        gameState.ballState.direction[X] = -gameState.ballState.speed * 2;
-      }
+  //     if (gameState.ballState.direction[X] > gameState.ballState.speed * 2) {
+  //       gameState.ballState.direction[X] = gameState.ballState.speed * 2;
+  //     } else if (
+  //       gameState.ballState.direction[X] <
+  //       -gameState.ballState.speed * 2
+  //     ) {
+  //       gameState.ballState.direction[X] = -gameState.ballState.speed * 2;
+  //     }
 
-      // 壁に当たったら反射
-      if (gameState.ballState.position[X] <= -(STAGE_X / 2 - BALL_RADIUS)) {
-        gameState.ballState.direction[X] = -gameState.ballState.direction[X];
-      }
-      if (gameState.ballState.position[X] >= STAGE_X / 2 - BALL_RADIUS) {
-        gameState.ballState.direction[X] = -gameState.ballState.direction[X];
-      }
+  //     // 壁に当たったら反射
+  //     if (gameState.ballState.position[X] <= -(STAGE_X / 2 - BALL_RADIUS)) {
+  //       gameState.ballState.direction[X] = -gameState.ballState.direction[X];
+  //     }
+  //     if (gameState.ballState.position[X] >= STAGE_X / 2 - BALL_RADIUS) {
+  //       gameState.ballState.direction[X] = -gameState.ballState.direction[X];
+  //     }
 
-      // ぱどるにあたったら反射
-      // z方向
-      if (
-        gameState.ballState.position[Z] <=
-          gameState.hostPosition[Z] + PADDLE_Z &&
-        gameState.ballState.position[Z] >= gameState.hostPosition[Z]
-      ) {
-        // x方向
-        if (
-          gameState.ballState.position[X] <=
-            gameState.hostPosition[X] + PADDLE_X / 2 &&
-          gameState.ballState.position[X] >=
-            gameState.hostPosition[X] - PADDLE_X / 2
-        ) {
-          // ボールはホストに向かっているか
-          if (gameState.ballState.direction[Z] > 0) {
-            const abs = Math.abs(gameState.ballState.direction[Z]);
-            gameState.ballState.direction[Z] = -(
-              abs +
-              Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01
-            );
-          }
-        }
-      }
-      // z方向
-      if (
-        gameState.ballState.position[Z] <=
-          gameState.guestPosition[Z] + PADDLE_Z &&
-        gameState.ballState.position[Z] >= gameState.guestPosition[Z]
-      ) {
-        // x方向
-        if (
-          gameState.ballState.position[X] <=
-            gameState.guestPosition[X] + PADDLE_X / 2 &&
-          gameState.ballState.position[X] >=
-            gameState.guestPosition[X] - PADDLE_X / 2
-        ) {
-          // ボールはゲストに向かっているか
-          if (gameState.ballState.direction[Z] < 0) {
-            // gameState.ballState.direction[Z] = -gameState.ballState.direction[Z] * 1.1;
-            const abs = Math.abs(gameState.ballState.direction[Z]);
-            gameState.ballState.direction[Z] =
-              abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01;
-          }
-        }
-      }
-    });
-  }
+  //     // ぱどるにあたったら反射
+  //     // z方向
+  //     if (
+  //       gameState.ballState.position[Z] <=
+  //         gameState.hostPosition[Z] + PADDLE_Z &&
+  //       gameState.ballState.position[Z] >= gameState.hostPosition[Z]
+  //     ) {
+  //       // x方向
+  //       if (
+  //         gameState.ballState.position[X] <=
+  //           gameState.hostPosition[X] + PADDLE_X / 2 &&
+  //         gameState.ballState.position[X] >=
+  //           gameState.hostPosition[X] - PADDLE_X / 2
+  //       ) {
+  //         // ボールはホストに向かっているか
+  //         if (gameState.ballState.direction[Z] > 0) {
+  //           const abs = Math.abs(gameState.ballState.direction[Z]);
+  //           gameState.ballState.direction[Z] = -(
+  //             abs +
+  //             Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01
+  //           );
+  //         }
+  //       }
+  //     }
+  //     // z方向
+  //     if (
+  //       gameState.ballState.position[Z] <=
+  //         gameState.guestPosition[Z] + PADDLE_Z &&
+  //       gameState.ballState.position[Z] >= gameState.guestPosition[Z]
+  //     ) {
+  //       // x方向
+  //       if (
+  //         gameState.ballState.position[X] <=
+  //           gameState.guestPosition[X] + PADDLE_X / 2 &&
+  //         gameState.ballState.position[X] >=
+  //           gameState.guestPosition[X] - PADDLE_X / 2
+  //       ) {
+  //         // ボールはゲストに向かっているか
+  //         if (gameState.ballState.direction[Z] < 0) {
+  //           // gameState.ballState.direction[Z] = -gameState.ballState.direction[Z] * 1.1;
+  //           const abs = Math.abs(gameState.ballState.direction[Z]);
+  //           gameState.ballState.direction[Z] =
+  //             abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01;
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
 }
