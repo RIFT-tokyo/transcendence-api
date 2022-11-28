@@ -1,33 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Interval } from '@nestjs/schedule';
+import { BallState, Obtainer, RoomState, Vector } from '../types/Pong';
 import { MatchesService } from '../matches/matches.service';
 import { Match } from '../entities/match.entity';
-
-type Vector = [number, number, number];
-type BallState = {
-  position: Vector;
-  speed: number;
-  direction: Vector;
-};
-
-type UserStatus = {
-  id: number | null;
-  isReady: boolean;
-};
-
-type RoomState = {
-  hostPosition?: Vector;
-  guestPosition?: Vector;
-  ballState?: BallState;
-  match?: Match | null;
-  users?: {
-    host: UserStatus;
-    guest: UserStatus;
-  };
-  obtainer?: 'host' | 'guest' | null;
-};
-
-type Obtainer = 'host' | 'guest' | null;
 
 const X = 0;
 const Y = 1;
@@ -43,7 +17,7 @@ const BALL_RADIUS = 0.2;
 const INITIAL_BALL_STATE: BallState = {
   position: [0, 0, 0],
   speed: 1.1,
-  direction: [0.01, 0, 0.01],
+  direction: [0.1, 0, 0.1],
 };
 
 @Injectable()
@@ -74,7 +48,6 @@ export class PongService {
         host: { id: hostUserId, isReady: false },
         guest: { id: null, isReady: false },
       },
-      obtainer: null,
     });
     return newRoomId;
   }
@@ -106,7 +79,12 @@ export class PongService {
     } else {
       state.users.guest.isReady = true;
     }
-    return state.users.host.isReady && state.users.guest.isReady;
+    const allPlayerReady =
+      state.users.host.isReady && state.users.guest.isReady;
+    if (allPlayerReady) {
+      state.match.start_at = new Date();
+    }
+    return allPlayerReady;
   }
 
   createGame(roomId: string): void {
@@ -126,31 +104,6 @@ export class PongService {
     }
   }
 
-  calcPosition(
-    roomId: string,
-    isHost: boolean,
-    position: Vector,
-  ): {
-    host: Vector;
-    guest: Vector;
-    ball: Vector;
-  } {
-    const gameState = this.roomIdStates.get(roomId);
-    if (!gameState) {
-      throw new Error();
-    }
-    if (isHost) {
-      gameState.hostPosition = position;
-    } else {
-      gameState.guestPosition = position;
-    }
-    return {
-      host: gameState.hostPosition,
-      guest: gameState.guestPosition,
-      ball: gameState.ballState.position,
-    };
-  }
-
   isBallInGoalArea(ballPosition: Vector): Obtainer {
     if (STAGE_Z / 2 <= ballPosition[Z]) {
       return 'guest';
@@ -161,90 +114,107 @@ export class PongService {
     return null;
   }
 
-  resetBallPosition(roomId: string) {
-    const gameState = this.roomIdStates.get(roomId);
-    if (!gameState) {
-      throw new Error();
+  calcBallPosition(roomState: RoomState): RoomState {
+    roomState.ballState.position[X] +=
+      roomState.ballState.direction[X] * roomState.ballState.speed;
+    roomState.ballState.position[Z] +=
+      roomState.ballState.direction[Z] * roomState.ballState.speed;
+
+    if (roomState.ballState.direction[X] > roomState.ballState.speed * 2) {
+      roomState.ballState.direction[X] = roomState.ballState.speed * 2;
+    } else if (
+      roomState.ballState.direction[X] <
+      -roomState.ballState.speed * 2
+    ) {
+      roomState.ballState.direction[X] = -roomState.ballState.speed * 2;
     }
-    gameState.ballState = INITIAL_BALL_STATE;
-    return {
-      host: gameState.hostPosition,
-      guest: gameState.guestPosition,
-      ball: gameState.ballState.position,
-    };
+
+    // 壁に当たったら反射
+    if (roomState.ballState.position[X] <= -(STAGE_X / 2 - BALL_RADIUS)) {
+      roomState.ballState.direction[X] = -roomState.ballState.direction[X];
+    }
+    if (roomState.ballState.position[X] >= STAGE_X / 2 - BALL_RADIUS) {
+      roomState.ballState.direction[X] = -roomState.ballState.direction[X];
+    }
+
+    // ぱどるにあたったら反射
+    // z方向
+    if (
+      roomState.ballState.position[Z] <= roomState.hostPosition[Z] + PADDLE_Z &&
+      roomState.ballState.position[Z] >= roomState.hostPosition[Z]
+    ) {
+      // x方向
+      if (
+        roomState.ballState.position[X] <=
+          roomState.hostPosition[X] + PADDLE_X / 2 &&
+        roomState.ballState.position[X] >=
+          roomState.hostPosition[X] - PADDLE_X / 2
+      ) {
+        // ボールはホストに向かっているか
+        if (roomState.ballState.direction[Z] > 0) {
+          const abs = Math.abs(roomState.ballState.direction[Z]);
+          roomState.ballState.direction[Z] = -(
+            abs +
+            Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01
+          );
+        }
+      }
+    }
+    // z方向
+    if (
+      roomState.ballState.position[Z] <=
+        roomState.guestPosition[Z] + PADDLE_Z &&
+      roomState.ballState.position[Z] >= roomState.guestPosition[Z]
+    ) {
+      // x方向
+      if (
+        roomState.ballState.position[X] <=
+          roomState.guestPosition[X] + PADDLE_X / 2 &&
+        roomState.ballState.position[X] >=
+          roomState.guestPosition[X] - PADDLE_X / 2
+      ) {
+        // ボールはゲストに向かっているか
+        if (roomState.ballState.direction[Z] < 0) {
+          // roomState.ballState.direction[Z] = -roomState.ballState.direction[Z] * 1.1;
+          const abs = Math.abs(roomState.ballState.direction[Z]);
+          roomState.ballState.direction[Z] =
+            abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01;
+        }
+      }
+    }
+    return roomState;
   }
 
-  // @Interval(1000 / 60)
-  // handleInterval() {
-  //   this.roomIdStates.forEach((gameState) => {
-  //     gameState.ballState.position[X] +=
-  //       gameState.ballState.direction[X] * gameState.ballState.speed;
-  //     gameState.ballState.position[Z] +=
-  //       gameState.ballState.direction[Z] * gameState.ballState.speed;
+  getBallPositions(): Map<string, { obtainer: Obtainer; position: Vector }> {
+    const res: Map<string, { obtainer: Obtainer; position: Vector }> =
+      new Map();
 
-  //     if (gameState.ballState.direction[X] > gameState.ballState.speed * 2) {
-  //       gameState.ballState.direction[X] = gameState.ballState.speed * 2;
-  //     } else if (
-  //       gameState.ballState.direction[X] <
-  //       -gameState.ballState.speed * 2
-  //     ) {
-  //       gameState.ballState.direction[X] = -gameState.ballState.speed * 2;
-  //     }
+    this.roomIdStates.forEach((gameState, roomId) => {
+      if (gameState.match.start_at && !gameState.match.end_at) {
+        gameState = this.calcBallPosition(gameState);
+        const obtainer = this.isBallInGoalArea(gameState.ballState.position);
+        if (obtainer) {
+          this.logger.debug('hello');
+          gameState.ballState = INITIAL_BALL_STATE;
+        }
+        res.set(roomId, {
+          obtainer: obtainer,
+          position: gameState.ballState.position,
+        });
+      }
+    });
 
-  //     // 壁に当たったら反射
-  //     if (gameState.ballState.position[X] <= -(STAGE_X / 2 - BALL_RADIUS)) {
-  //       gameState.ballState.direction[X] = -gameState.ballState.direction[X];
-  //     }
-  //     if (gameState.ballState.position[X] >= STAGE_X / 2 - BALL_RADIUS) {
-  //       gameState.ballState.direction[X] = -gameState.ballState.direction[X];
-  //     }
+    return res;
+  }
 
-  //     // ぱどるにあたったら反射
-  //     // z方向
-  //     if (
-  //       gameState.ballState.position[Z] <=
-  //         gameState.hostPosition[Z] + PADDLE_Z &&
-  //       gameState.ballState.position[Z] >= gameState.hostPosition[Z]
-  //     ) {
-  //       // x方向
-  //       if (
-  //         gameState.ballState.position[X] <=
-  //           gameState.hostPosition[X] + PADDLE_X / 2 &&
-  //         gameState.ballState.position[X] >=
-  //           gameState.hostPosition[X] - PADDLE_X / 2
-  //       ) {
-  //         // ボールはホストに向かっているか
-  //         if (gameState.ballState.direction[Z] > 0) {
-  //           const abs = Math.abs(gameState.ballState.direction[Z]);
-  //           gameState.ballState.direction[Z] = -(
-  //             abs +
-  //             Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01
-  //           );
-  //         }
-  //       }
-  //     }
-  //     // z方向
-  //     if (
-  //       gameState.ballState.position[Z] <=
-  //         gameState.guestPosition[Z] + PADDLE_Z &&
-  //       gameState.ballState.position[Z] >= gameState.guestPosition[Z]
-  //     ) {
-  //       // x方向
-  //       if (
-  //         gameState.ballState.position[X] <=
-  //           gameState.guestPosition[X] + PADDLE_X / 2 &&
-  //         gameState.ballState.position[X] >=
-  //           gameState.guestPosition[X] - PADDLE_X / 2
-  //       ) {
-  //         // ボールはゲストに向かっているか
-  //         if (gameState.ballState.direction[Z] < 0) {
-  //           // gameState.ballState.direction[Z] = -gameState.ballState.direction[Z] * 1.1;
-  //           const abs = Math.abs(gameState.ballState.direction[Z]);
-  //           gameState.ballState.direction[Z] =
-  //             abs + Math.log(abs > 1 ? abs * 1.1 : 1.1) * 0.01;
-  //         }
-  //       }
-  //     }
-  //   });
-  // }
+  async gainPoint(roomId: string, isHost: boolean): Promise<Match> {
+    const status = await this.getRoom(roomId);
+    if (!status) {
+      throw Error();
+    }
+    status.match = await this.matchesService.gainPoint(status.match.id, isHost);
+    return status.match;
+  }
+
+  // TODO: ゲーム終了時にMatch.end_atに追加する
 }

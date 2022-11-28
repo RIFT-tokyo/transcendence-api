@@ -11,6 +11,7 @@ import { MatchesService } from '../matches/matches.service';
 import { Server, Socket } from 'socket.io';
 import { ResponseMatchDTO } from '../matches/match.dto';
 import { PongService } from './pong.service';
+import { Obtainer, Vector } from '../types/Pong';
 
 @WebSocketGateway({ cors: true, namespace: '/pong' })
 export class PongGateway {
@@ -167,9 +168,22 @@ export class PongGateway {
     // }
   }
 
-  @Interval(1000)
+  @Interval(1000 / 30)
   handleInterval() {
-    this.logger.debug('hello');
+    const ballPositions: Map<string, { obtainer: Obtainer; position: Vector }> =
+      this.pongService.getBallPositions();
+    ballPositions.forEach(async (ballPosition, roomId) => {
+      this.server.to(roomId).emit('pong:ball-position', ballPosition.position);
+      if (ballPosition.obtainer) {
+        const match = await this.pongService.gainPoint(
+          roomId,
+          ballPosition.obtainer === 'host',
+        );
+        this.server
+          .to(roomId)
+          .emit('match:status', new ResponseMatchDTO(match));
+      }
+    });
   }
 
   // TODO: handleDisconnectを検知して、相手のゲームを終了させる
