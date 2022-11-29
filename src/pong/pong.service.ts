@@ -14,11 +14,6 @@ const PADDLE_X = 2;
 const PADDLE_Z = 0.4;
 
 const BALL_RADIUS = 0.2;
-const INITIAL_BALL_STATE: BallState = {
-  position: [0, 0, 0],
-  speed: 1.1,
-  direction: [0.1, 0, 0.1],
-};
 
 @Injectable()
 export class PongService {
@@ -72,7 +67,7 @@ export class PongService {
     }
   }
 
-  setReady(roomId: string, userId: number): boolean {
+  async setReady(roomId: string, userId: number): Promise<boolean> {
     const state = this.getRoom(roomId);
     if (state.users.host.id === userId) {
       state.users.host.isReady = true;
@@ -82,7 +77,7 @@ export class PongService {
     const allPlayerReady =
       state.users.host.isReady && state.users.guest.isReady;
     if (allPlayerReady) {
-      state.match.start_at = new Date();
+      state.match = await this.matchesService.startGame(state.match.id);
     }
     return allPlayerReady;
   }
@@ -91,11 +86,18 @@ export class PongService {
     const state = this.getRoom(roomId);
     state.hostPosition = [0, 0, 0];
     state.guestPosition = [0, 0, 0];
-    state.ballState = INITIAL_BALL_STATE;
+    state.ballState = {
+      position: [0, 0, 0],
+      speed: 1.1,
+      direction: [0.1, 0, 0.1],
+    };
   }
 
   setPlayerPosition(roomId: string, userId: number, position: Vector) {
     const state = this.getRoom(roomId);
+    if (!state) {
+      throw Error();
+    }
     const isHost = state.users.host.id === userId;
     if (isHost) {
       state.hostPosition = position;
@@ -194,8 +196,11 @@ export class PongService {
         gameState = this.calcBallPosition(gameState);
         const obtainer = this.isBallInGoalArea(gameState.ballState.position);
         if (obtainer) {
-          this.logger.debug('hello');
-          gameState.ballState = INITIAL_BALL_STATE;
+          gameState.ballState = {
+            position: [0, 0, 0],
+            speed: 1.1,
+            direction: [0.1, 0, 0.1],
+          };
         }
         res.set(roomId, {
           obtainer: obtainer,
@@ -212,8 +217,13 @@ export class PongService {
     if (!status) {
       throw Error();
     }
-    status.match = await this.matchesService.gainPoint(status.match.id, isHost);
-    return status.match;
+    const match = await this.matchesService.gainPoint(status.match.id, isHost);
+    if (match.end_at) {
+      this.roomIdStates.delete(roomId);
+    } else {
+      status.match = match;
+    }
+    return match;
   }
 
   // TODO: ゲーム終了時にMatch.end_atに追加する

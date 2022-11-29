@@ -6,6 +6,8 @@ import { Match, Result } from '../entities/match.entity';
 import { CreateMatchDTO } from './match.dto';
 import { UsersService } from '../users/users.service';
 
+const GOAL_POINT = 7;
+
 @Injectable()
 export class MatchesService {
   constructor(
@@ -66,6 +68,21 @@ export class MatchesService {
     } else {
       match.guest_player_points++;
     }
+    if (
+      match.host_player_points >= GOAL_POINT ||
+      match.guest_player_points >= GOAL_POINT
+    ) {
+      match.end_at = new Date();
+    }
+    return await this.matchRepository.save(match);
+  }
+
+  async startGame(id: number): Promise<Match> {
+    const match = await this.findOne(id);
+    if (!match) {
+      throw new NotFoundException();
+    }
+    match.start_at = new Date();
     return await this.matchRepository.save(match);
   }
 

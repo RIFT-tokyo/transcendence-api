@@ -15,8 +15,6 @@ import { Obtainer, Vector } from '../types/Pong';
 
 @WebSocketGateway({ cors: true, namespace: '/pong' })
 export class PongGateway {
-  private readonly GOAL_POINT = 3000;
-
   @Inject()
   private readonly matchesService: MatchesService;
   @Inject()
@@ -63,16 +61,16 @@ export class PongGateway {
   }
 
   @SubscribeMessage('match:ready')
-  handleReady(
+  async handleReady(
     @ConnectedSocket() client: Socket,
     @MessageBody() { roomId }: { roomId: string },
-  ): void {
+  ): Promise<void> {
     const userId = client.handshake.auth.userID;
     const state = this.pongService.getRoom(roomId);
     if (!state) {
       return;
     }
-    const canGameStart = this.pongService.setReady(roomId, userId);
+    const canGameStart = await this.pongService.setReady(roomId, userId);
     if (canGameStart) {
       this.pongService.createGame(roomId);
       this.server
@@ -182,6 +180,9 @@ export class PongGateway {
         this.server
           .to(roomId)
           .emit('match:status', new ResponseMatchDTO(match));
+        if (match.end_at) {
+          this.server.to(roomId).emit('match:finish', {});
+        }
       }
     });
   }
