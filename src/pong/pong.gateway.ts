@@ -79,34 +79,6 @@ export class PongGateway {
     }
   }
 
-  // gain point in the match
-  // @SubscribeMessage('match:gain-point')
-  // async handleGainPoint(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() body: { roomId: string; userId: number },
-  // ) {
-  //   const status = this.roomIdStates.get(body.roomId);
-  //   if (!status) {
-  //     throw Error();
-  //   }
-  //   const match = await this.matchesService.gainPoint(
-  //     status.match.id,
-  //     status.users.host.id === body.userId,
-  //   );
-  //   this.server
-  //     .to(body.roomId)
-  //     .emit('match:status', new ResponseMatchDTO(match));
-  //   if (
-  //     match.host_player_points >= this.GOAL_POINT ||
-  //     match.guest_player_points >= this.GOAL_POINT
-  //   ) {
-  //     this.server.to(body.roomId).emit('match:finish', {});
-  //     this.roomIdStates.delete(body.roomId);
-  //   } else {
-  //     status.match = match;
-  //   }
-  // }
-
   @SubscribeMessage('match:auto')
   async handleAutoMatch(@ConnectedSocket() client: Socket): Promise<void> {
     const userId = client.handshake.auth.userID;
@@ -128,42 +100,26 @@ export class PongGateway {
     }: { roomId: string; position: [number, number, number] },
   ) {
     const userId = client.handshake.auth.userID;
-    this.pongService.setPlayerPosition(roomId, userId, position);
+    const isSuccess = this.pongService.setPlayerPosition(
+      roomId,
+      userId,
+      position,
+    );
 
-    client.broadcast.emit('pong:enemy-position', position);
-    // const status = this.roomIdStates.get(roomId);
-    // if (!status) {
-    //   throw Error();
-    // }
-    // const isHost = userId === status.users.host.id;
-    // if (!status.obtainer) {
-    //   // 座標の処理(衝突)
-    //   let pongStatus = this.pongService.calcPosition(roomId, isHost, position);
-    //   // 点数判定処理
-    //   status.obtainer = this.pongService.isBallInGoalArea(pongStatus.ball);
-    //   // 点数加算をMatchesServiceに
-    //   if (status.obtainer) {
-    //     const match = await this.matchesService.gainPoint(
-    //       status.match.id,
-    //       status.obtainer === 'host',
-    //     );
-    //     this.server
-    //       .to(roomId)
-    //       .emit('match:status', new ResponseMatchDTO(match));
-    //     if (
-    //       match.host_player_points >= this.GOAL_POINT ||
-    //       match.guest_player_points >= this.GOAL_POINT
-    //     ) {
-    //       this.server.to(roomId).emit('match:finish', {});
-    //       this.roomIdStates.delete(roomId);
-    //     } else {
-    //       status.match = match;
-    //       pongStatus = this.pongService.resetBallPosition(roomId);
-    //     }
-    //   }
-    //   this.server.to(roomId).emit('pong:position', pongStatus);
-    //   status.obtainer = null;
-    // }
+    if (isSuccess) {
+      client.broadcast.emit('pong:enemy-position', position);
+    }
+  }
+
+  @SubscribeMessage('pong:player-disconnect')
+  handlePlayerDisconnect(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    { roomId, status }: { roomId: string; status: string },
+  ) {
+    const userId = client.handshake.auth.userID;
+    this.pongService.handlePlayerDisconnect(roomId, userId, status);
+    client.leave(roomId);
   }
 
   @Interval(1000 / 30)
@@ -186,6 +142,4 @@ export class PongGateway {
       }
     });
   }
-
-  // TODO: handleDisconnectを検知して、相手のゲームを終了させる
 }

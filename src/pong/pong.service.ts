@@ -93,10 +93,10 @@ export class PongService {
     };
   }
 
-  setPlayerPosition(roomId: string, userId: number, position: Vector) {
+  setPlayerPosition(roomId: string, userId: number, position: Vector): boolean {
     const state = this.getRoom(roomId);
     if (!state) {
-      throw Error();
+      return false;
     }
     const isHost = state.users.host.id === userId;
     if (isHost) {
@@ -104,6 +104,7 @@ export class PongService {
     } else {
       state.guestPosition = position;
     }
+    return true;
   }
 
   isBallInGoalArea(ballPosition: Vector): Obtainer {
@@ -226,5 +227,20 @@ export class PongService {
     return match;
   }
 
-  // TODO: ゲーム終了時にMatch.end_atに追加する
+  async handlePlayerDisconnect(roomId: string, userId: number, status: string) {
+    const roomStatus = await this.getRoom(roomId);
+    if (!roomStatus) {
+      return;
+    }
+    const isHost = roomStatus.users.host.id === userId;
+
+    if (status === 'waiting' && isHost) {
+      this.roomIdStates.delete(roomId);
+      if (roomId === this.autoMatchRoomId) {
+        this.autoMatchRoomId = null;
+      }
+    } else if (status === 'play') {
+      //
+    }
+  }
 }
