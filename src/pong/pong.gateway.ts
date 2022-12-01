@@ -111,7 +111,7 @@ export class PongGateway {
     }
   }
 
-  @SubscribeMessage('pong:player-disconnect')
+  @SubscribeMessage('pong:leave')
   handlePlayerDisconnect(
     @ConnectedSocket() client: Socket,
     @MessageBody()
