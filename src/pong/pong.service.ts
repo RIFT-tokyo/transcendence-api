@@ -1,7 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { BallState, Obtainer, RoomState, Vector } from '../types/Pong';
+import { Obtainer, RoomState, Vector } from '../types/Pong';
 import { MatchesService } from '../matches/matches.service';
 import { Match } from '../entities/match.entity';
+import { Interval } from '@nestjs/schedule';
 
 const X = 0;
 const Y = 1;
@@ -74,6 +75,7 @@ export class PongService {
     } else {
       state.users.guest.isReady = true;
     }
+
     const allPlayerReady =
       state.users.host.isReady && state.users.guest.isReady;
     if (allPlayerReady) {
@@ -88,7 +90,7 @@ export class PongService {
     state.guestPosition = [0, 0, 0];
     state.ballState = {
       position: [0, 0, 0],
-      speed: 1.1,
+      speed: 2,
       direction: [0.1, 0, 0.1],
     };
   }
@@ -199,7 +201,7 @@ export class PongService {
         if (obtainer) {
           gameState.ballState = {
             position: [0, 0, 0],
-            speed: 1.1,
+            speed: 2,
             direction: [0.1, 0, 0.1],
           };
         }
@@ -234,13 +236,19 @@ export class PongService {
     }
     const isHost = roomStatus.users.host.id === userId;
 
-    if (status === 'waiting' && isHost) {
+    if ((status === 'waiting' || status === 'back_to_top') && isHost) {
       this.roomIdStates.delete(roomId);
       if (roomId === this.autoMatchRoomId) {
         this.autoMatchRoomId = null;
       }
-    } else if (status === 'play') {
-      //
     }
+  }
+
+  @Interval(3000)
+  debugRoom(): void {
+    this.logger.debug('********************************************');
+    this.roomIdStates.forEach((state, key) => {
+      this.logger.debug(`${key}: ${JSON.stringify(state)}`);
+    });
   }
 }

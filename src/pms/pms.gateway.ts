@@ -43,7 +43,6 @@ export class PmsGateway {
       body.toUserID,
       body.text,
     );
-    this.logger.debug(JSON.stringify(privateMessage));
     this.server
       .to(this.getPmID(body.fromUserID, body.toUserID))
       .emit(
@@ -57,9 +56,7 @@ export class PmsGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: JoinPmBody,
   ) {
-    this.logger.debug(body);
     client.join(this.getPmID(body.fromUserID, body.toUserID));
-    this.logger.debug(this.getPmID(body.fromUserID, body.toUserID));
 
     const messages = await this.pmsService.findAllPrivateMessages(
       body.fromUserID,
@@ -69,7 +66,6 @@ export class PmsGateway {
       'private-message:receive-all',
       messages.map((msg) => new WSResponseMessageDTO(msg)),
     );
-    this.logger.debug('--------');
   }
 
   @SubscribeMessage('pm:leave')

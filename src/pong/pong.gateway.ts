@@ -38,7 +38,7 @@ export class PongGateway {
       client.emit('match:create', { isSucceeded: false, roomId: null });
       return;
     }
-    this.pongService.createRoom(userId, roomId);
+    await this.pongService.createRoom(userId, roomId);
     client.join(roomId);
     client.emit('match:create', { isSucceeded: true, roomId: roomId });
   }
