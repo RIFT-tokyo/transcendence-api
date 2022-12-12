@@ -55,7 +55,7 @@ export class PongGateway {
       client.emit('match:join', { isSucceeded: false });
       return;
     }
-    this.pongService.joinUser(userId, roomId);
+    await this.pongService.joinUser(userId, roomId);
     client.join(roomId);
     client.emit('match:join', { isSucceeded: true });
   }

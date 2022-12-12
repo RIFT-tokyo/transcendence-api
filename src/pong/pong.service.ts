@@ -15,6 +15,7 @@ const PADDLE_X = 2;
 const PADDLE_Z = 0.4;
 
 const BALL_RADIUS = 0.2;
+const NORM = 0.14;
 
 @Injectable()
 export class PongService {
@@ -28,6 +29,15 @@ export class PongService {
 
   getRoom(roomId: string): RoomState {
     return this.roomIdStates.get(roomId);
+  }
+
+  initDirection(): Vector {
+    const min = 0.5;
+    const max = 0.9;
+    const randomSign = () => (Math.random() > 0.5 ? 1 : -1);
+    const dirX = (Math.random() * (max - min) + min) * NORM;
+    const dirZ = Math.sqrt(NORM * NORM - dirX * dirX);
+    return [randomSign() * dirX, 0, randomSign() * dirZ];
   }
 
   async createRoom(
@@ -91,7 +101,7 @@ export class PongService {
     state.ballState = {
       position: [0, 0, 0],
       speed: 2,
-      direction: [0.1, 0, 0.1],
+      direction: this.initDirection(),
     };
   }
 
@@ -142,11 +152,14 @@ export class PongService {
       roomState.ballState.direction[X] = -roomState.ballState.direction[X];
     }
 
+    // roomState.hostPosition[Z] - PADDLE_Z / 2 - BALL_RADIUS <= roomState.ballState.position[Z] <= roomState.hostPosition[Z] - BALL_RADIUS
     // ぱどるにあたったら反射
     // z方向
     if (
-      roomState.ballState.position[Z] <= roomState.hostPosition[Z] + PADDLE_Z &&
-      roomState.ballState.position[Z] >= roomState.hostPosition[Z]
+      roomState.hostPosition[Z] - PADDLE_Z / 2 - BALL_RADIUS <=
+        roomState.ballState.position[Z] &&
+      roomState.ballState.position[Z] <=
+        roomState.hostPosition[Z] + PADDLE_Z / 4 - BALL_RADIUS
     ) {
       // x方向
       if (
@@ -165,11 +178,13 @@ export class PongService {
         }
       }
     }
+    // roomState.guestPosition[Z] + BALL_RADIUS <= roomState.ballState.position[Z] <= roomState.guestPosition[Z] + BALL_RADIUS + PADDLE_Z / 2
     // z方向
     if (
+      roomState.guestPosition[Z] - PADDLE_Z / 4 + BALL_RADIUS <=
+        roomState.ballState.position[Z] &&
       roomState.ballState.position[Z] <=
-        roomState.guestPosition[Z] + PADDLE_Z &&
-      roomState.ballState.position[Z] >= roomState.guestPosition[Z]
+        roomState.guestPosition[Z] + BALL_RADIUS + PADDLE_Z / 2
     ) {
       // x方向
       if (
@@ -202,7 +217,7 @@ export class PongService {
           gameState.ballState = {
             position: [0, 0, 0],
             speed: 2,
-            direction: [0.1, 0, 0.1],
+            direction: this.initDirection(),
           };
         }
         res.set(roomId, {
