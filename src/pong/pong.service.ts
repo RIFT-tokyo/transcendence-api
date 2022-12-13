@@ -78,6 +78,18 @@ export class PongService {
     }
   }
 
+  addWatcher(roomId: string): Match | null {
+    const status = this.getRoom(roomId);
+    if (
+      !status ||
+      !status.match ||
+      !(status.match.start_at && !status.match.end_at)
+    ) {
+      return null;
+    }
+    return status.match;
+  }
+
   async setReady(roomId: string, userId: number): Promise<boolean> {
     const state = this.getRoom(roomId);
     if (state.users.host.id === userId) {

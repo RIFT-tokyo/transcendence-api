@@ -18,6 +18,9 @@ export class Achievement {
   description: string;
 
   @Column({ nullable: false })
+  condition_number: number;
+
+  @Column({ nullable: false })
   image: string;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })

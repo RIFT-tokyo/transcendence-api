@@ -50,6 +50,7 @@ export class AddAchievements implements Seeder {
         {
           name: 'Winner',
           description: 'Win a game',
+          condition_number: 1,
           image:
             process.env.AWS_S3_HOST_ENDPOINT_URL +
             '/' +
@@ -60,6 +61,7 @@ export class AddAchievements implements Seeder {
         {
           name: 'Victor',
           description: 'Win 10 games',
+          condition_number: 10,
           image:
             process.env.AWS_S3_HOST_ENDPOINT_URL +
             '/' +

@@ -13,6 +13,7 @@ import { ChannelsService } from './channels/channels.service';
 import { ChannelsModule } from './channels/channels.module';
 import { PmsModule } from './pms/pms.module';
 import { PongModule } from './pong/pong.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -26,6 +27,12 @@ import { PongModule } from './pong/pong.module';
       synchronize: false,
       // logging: true,
       entities: ['dist/**/*.entity{.js,.ts}'],
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT),
+      },
     }),
     UsersModule,
     AuthModule,

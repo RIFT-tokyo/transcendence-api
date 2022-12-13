@@ -60,6 +60,19 @@ export class PongGateway {
     client.emit('match:join', { isSucceeded: true });
   }
 
+  @SubscribeMessage('match:watch')
+  handleWatchRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { roomId }: { roomId: string },
+  ): void {
+    const match = this.pongService.addWatcher(roomId);
+    if (!match) {
+      client.emit('match:watch', { isSucceeded: false });
+    }
+    client.join(roomId);
+    client.emit('match:watch', { isSucceeded: true, match: match });
+  }
+
   @SubscribeMessage('match:ready')
   async handleReady(
     @ConnectedSocket() client: Socket,
@@ -97,7 +110,8 @@ export class PongGateway {
     {
       roomId,
       position,
-    }: { roomId: string; position: [number, number, number] },
+      isHost,
+    }: { roomId: string; position: [number, number, number]; isHost: boolean },
   ) {
     const userId = client.handshake.auth.userID;
     const isSuccess = this.pongService.setPlayerPosition(
@@ -107,7 +121,10 @@ export class PongGateway {
     );
 
     if (isSuccess) {
-      client.broadcast.emit('pong:enemy-position', position);
+      client.broadcast.emit('pong:player-position', {
+        isHost: isHost,
+        position: position,
+      });
     }
   }
 
@@ -137,6 +154,7 @@ export class PongGateway {
           .to(roomId)
           .emit('match:status', new ResponseMatchDTO(match));
         if (match.end_at) {
+          // TODO: 勝者の累積勝敗数を数えて、アチーブメントの付与を行う(job, queue, task)
           this.server.to(roomId).emit('match:finish', {});
         }
       }
