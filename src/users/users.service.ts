@@ -5,6 +5,7 @@ import { Like, Connection, Repository } from 'typeorm';
 import { CreateUserDTO, UpdateUserDTO } from './users.dto';
 import * as bcrypt from 'bcrypt';
 import { EntriesList } from '../types/EntriesList';
+import { Achievement } from '../entities/achievement.entity';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +14,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Achievement)
+    private readonly achievementRepository: Repository<Achievement>,
     @InjectConnection() private readonly connection: Connection,
   ) {}
 
@@ -229,5 +232,29 @@ export class UsersService {
       return null;
     }
     return user.block_users.some((u) => u.id === targetId);
+  }
+
+  async addAchievement(id: number, winCounts: number, loseCounts: number) {
+    const user = await this.findUserById(id);
+    const allAchievements = await this.achievementRepository.find();
+    const targetAchievements = allAchievements.filter(
+      (achievement: Achievement) => {
+        if (
+          achievement.condition_number < 0 &&
+          achievement.condition_number >= -loseCounts
+        ) {
+          return true;
+        }
+        if (
+          achievement.condition_number >= 0 &&
+          achievement.condition_number <= winCounts
+        ) {
+          return true;
+        }
+        return false;
+      },
+    );
+    user.achievements = targetAchievements;
+    await this.userRepository.save(user);
   }
 }

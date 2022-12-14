@@ -155,6 +155,8 @@ export class PongGateway {
           .emit('match:status', new ResponseMatchDTO(match));
         if (match.end_at) {
           // TODO: 勝者の累積勝敗数を数えて、アチーブメントの付与を行う(job, queue, task)
+          this.pongService.addAchievement(match.host_player.id);
+          this.pongService.addAchievement(match.guest_player.id);
           this.server.to(roomId).emit('match:finish', {});
         }
       }

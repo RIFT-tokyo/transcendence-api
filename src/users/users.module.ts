@@ -9,9 +9,14 @@ import { CurrentUserInterceptor } from '../common/interceptor/current-user.inter
 import { UsersGateway } from './users.gateway';
 import { ChannelsModule } from '../channels/channels.module';
 import { PmsModule } from '../pms/pms.module';
+import { Achievement } from '../entities/achievement.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), forwardRef(() => ChannelsModule), forwardRef(() => PmsModule)],
+  imports: [
+    TypeOrmModule.forFeature([User, Achievement]),
+    forwardRef(() => ChannelsModule),
+    forwardRef(() => PmsModule),
+  ],
   exports: [TypeOrmModule, UsersService],
   providers: [
     UsersService,

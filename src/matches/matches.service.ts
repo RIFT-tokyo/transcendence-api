@@ -97,4 +97,24 @@ export class MatchesService {
     const result = await this.matchRepository.save(match);
     return result;
   }
+
+  async getAllResult(userId: number): Promise<Match[]> {
+    return await this.matchRepository.find({
+      relations: ['host_player', 'guest_player'],
+      where: [
+        {
+          host_player: { id: userId },
+          guest_player: Not(IsNull()),
+          start_at: Not(IsNull()),
+          end_at: Not(IsNull()),
+        },
+        {
+          guest_player: { id: userId },
+          host_player: Not(IsNull()),
+          start_at: Not(IsNull()),
+          end_at: Not(IsNull()),
+        },
+      ],
+    });
+  }
 }

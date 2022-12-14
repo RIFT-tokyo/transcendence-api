@@ -3,6 +3,8 @@ import { Obtainer, RoomState, Vector } from '../types/Pong';
 import { MatchesService } from '../matches/matches.service';
 import { Match } from '../entities/match.entity';
 import { Interval } from '@nestjs/schedule';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 const X = 0;
 const Y = 1;
@@ -19,10 +21,19 @@ const NORM = 0.14;
 
 @Injectable()
 export class PongService {
+  constructor(
+    @InjectQueue('pong')
+    private readonly pongQueue: Queue,
+  ) {}
+
   private roomIdStates = new Map<string, RoomState>();
   private readonly logger = new Logger('PongService');
 
   private autoMatchRoomId: string | null = null;
+
+  addAchievement(userId: number) {
+    return this.pongQueue.add('addAchievement', { userId }, {});
+  }
 
   @Inject()
   private readonly matchesService: MatchesService;
