@@ -1,3 +1,4 @@
+import { IsDate } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -5,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -19,26 +21,36 @@ export class Match {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'host_player_id' })
   host_player: User;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'guest_player_id' })
-  guest_player: User;
+  guest_player: User | null;
 
-  @Column({ nullable: false, default: 0 })
+  @Column({ default: 0 })
   host_player_points: number;
 
-  @Column({ nullable: false, default: 0 })
+  @Column({ default: 0 })
   guest_player_points: number;
 
   @Column({ type: 'enum', enum: Result, default: Result.DRAW })
   result: Result;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
-  start_at: Date;
+  @Column({ type: 'timestamp with time zone', nullable: true })
+  @IsDate()
+  start_at: Date | null;
 
   @Column({ type: 'timestamp with time zone', nullable: true })
-  end_at: Date;
+  @IsDate()
+  end_at: Date | null;
+
+  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @IsDate()
+  create_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  @IsDate()
+  updated_at: Date;
 }

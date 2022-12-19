@@ -12,6 +12,8 @@ import { ChannelsController } from './channels/channels.controller';
 import { ChannelsService } from './channels/channels.service';
 import { ChannelsModule } from './channels/channels.module';
 import { PmsModule } from './pms/pms.module';
+import { PongModule } from './pong/pong.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -23,13 +25,21 @@ import { PmsModule } from './pms/pms.module';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       synchronize: false,
+      // logging: true,
       entities: ['dist/**/*.entity{.js,.ts}'],
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT),
+      },
     }),
     UsersModule,
     AuthModule,
     ChannelsModule,
     MatchesModule,
     PmsModule,
+    PongModule,
   ],
   controllers: [AppController, UsersController, ChannelsController],
   providers: [AppService, UsersService, ChannelsService, AppGateway],
