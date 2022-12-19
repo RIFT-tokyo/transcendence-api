@@ -8,8 +8,11 @@ export class AddAchievements implements Seeder {
     const fileDir = 'src/images/';
     const prizeKey = 'achievements/prize.png';
     const trophyKey = 'achievements/trophy.png';
+    const jakeKey = 'achievements/jake.png';
     const prizeBuffer = readFileSync(fileDir + prizeKey);
     const trophyBuffer = readFileSync(fileDir + trophyKey);
+    const jakeBuffer = readFileSync(fileDir + jakeKey);
+
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
@@ -41,6 +44,20 @@ export class AddAchievements implements Seeder {
         }
       },
     );
+    s3.upload(
+      {
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Body: jakeBuffer,
+        Key: jakeKey,
+      },
+      function (err) {
+        if (err) {
+          console.log(err);
+        }
+      },
+    );
+
+    await connection.query('ALTER SEQUENCE achievement_id_seq RESTART WITH 1;');
 
     await connection
       .createQueryBuilder()
@@ -69,7 +86,19 @@ export class AddAchievements implements Seeder {
             '/' +
             trophyKey,
         },
+        {
+          name: 'Loser',
+          description: 'Lose a game',
+          condition_number: -1,
+          image:
+            process.env.AWS_S3_HOST_ENDPOINT_URL +
+            '/' +
+            process.env.AWS_S3_BUCKET_NAME +
+            '/' +
+            jakeKey,
+        },
       ])
+      .orIgnore()
       .execute();
   }
 }
