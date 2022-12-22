@@ -81,11 +81,13 @@ export class MeController {
 
   @UseGuards(AuthenticatedGuard)
   @Get('pms')
-  async getMePMs(
-    @Session() session: UserSession,
-  ): Promise<ResponseUserDTO[]> {
-    const privateMessageUser = await this.pmsService.findPrivateMessageUserById(session.userId);
-    return privateMessageUser ? privateMessageUser.to_users.map((user) => new ResponseUserDTO(user)) : [];
+  async getMePMs(@Session() session: UserSession): Promise<ResponseUserDTO[]> {
+    const privateMessageUser = await this.pmsService.findPrivateMessageUserById(
+      session.userId,
+    );
+    return privateMessageUser
+      ? privateMessageUser.to_users.map((user) => new ResponseUserDTO(user))
+      : [];
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -94,7 +96,10 @@ export class MeController {
     @Session() session: UserSession,
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<ResponseUserDTO> {
-    const user = await this.pmsService.findOrCreatePrivateMessageUser(session.userId, userId);
+    const user = await this.pmsService.findOrCreatePrivateMessageUser(
+      session.userId,
+      userId,
+    );
     if (!user) {
       throw new NotFoundException();
     }

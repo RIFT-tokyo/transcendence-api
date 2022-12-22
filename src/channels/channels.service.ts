@@ -84,6 +84,24 @@ export class ChannelsService {
     return this.channelUserPermissionsRepository.save(channelUserPermission);
   }
 
+  async update(channelId: number, channelData: NewChannel, userId: number) {
+    const channel = await this.findChannelById(channelId, ['users']);
+    const isEditable = channel.users.find((user) => user.role !== null);
+    if (!isEditable) {
+      return null;
+    }
+    if (channelData.password) {
+      channelData.password = await bcrypt.hash(
+        channelData.password,
+        Number(process.env.HASH_SALT),
+      );
+    }
+    channel.name = channelData.name;
+    channel.password = channelData.password;
+
+    return this.channelsRepository.save(channel);
+  }
+
   async join(channel: Channel, userId: number, password?: string) {
     if (
       channel.password &&

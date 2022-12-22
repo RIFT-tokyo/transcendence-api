@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -47,6 +48,23 @@ export class ChannelsController {
   }
 
   @UseGuards(AuthenticatedGuard)
+  @Put(':id')
+  async updateChannel(
+    @Session() session: UserSession,
+    @Body() channelData: NewChannel,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    const channel = await this.channelsService.update(
+      id,
+      channelData,
+      session.userId,
+    );
+    if (!channel) {
+      throw new BadRequestException('Permission denied');
+    }
+  }
+
+  @UseGuards(AuthenticatedGuard)
   @Get(':id/users')
   async getChannelUsers(
     @Param('id', ParseIntPipe) id: number,
@@ -76,10 +94,7 @@ export class ChannelsController {
     await Promise.all(
       channelUserList.map(
         async (channelUser) =>
-          await this.channelsService.updateUserPermissions(
-            id,
-            channelUser,
-          ),
+          await this.channelsService.updateUserPermissions(id, channelUser),
       ),
     );
 

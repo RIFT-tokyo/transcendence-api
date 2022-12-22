@@ -5,6 +5,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Logger,
   NotFoundException,
   Post,
   Put,
@@ -24,9 +25,23 @@ import { Password } from '../generated/model/password';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  private readonly logger = new Logger('AuthController');
+
+  private validateAlNum(str: string): boolean {
+    return !!str.match(/^[0-9a-zA-Z]+$/);
+  }
+
   @Post('signup')
   @HttpCode(204)
   async createUser(@Body() body: Login, @Session() session: UserSession) {
+    if (
+      !this.validateAlNum(body.username) ||
+      !this.validateAlNum(body.password)
+    ) {
+      throw new BadRequestException(
+        'username and password must contain only alphanumeric characters',
+      );
+    }
     const user = await this.authService.signup(body);
     if (!user) {
       throw new ConflictException('User already exists');
@@ -39,6 +54,14 @@ export class AuthController {
   @Post('login')
   @HttpCode(204)
   async login(@Body() body: Login, @Session() session: UserSession) {
+    if (
+      !this.validateAlNum(body.username) ||
+      !this.validateAlNum(body.password)
+    ) {
+      throw new BadRequestException(
+        'username and password must contain only alphanumeric characters',
+      );
+    }
     const user = await this.authService.login(body);
     if (!user) {
       throw new BadRequestException('Invalid credentials');
@@ -61,6 +84,9 @@ export class AuthController {
     @Req() request: { user: User },
     @Session() session: UserSession,
   ) {
+    this.logger.debug(
+      `callback: ${JSON.stringify(request.user)}, ${JSON.stringify(session)}`,
+    );
     const user = await this.authService.findUserById(request.user.id);
     session.userId = request.user.id;
     session.isTwoFaEnabled = user.is_two_fa_enabled;
@@ -68,6 +94,7 @@ export class AuthController {
     if (user.is_two_fa_enabled) {
       return { url: process.env.FRONT_TWO_FA_URL };
     }
+    this.logger.debug('最後まで来てるか');
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -84,6 +111,14 @@ export class AuthController {
     @Body() body: Password,
     @Session() session: UserSession,
   ) {
+    if (
+      !this.validateAlNum(body.old_password) ||
+      !this.validateAlNum(body.new_password)
+    ) {
+      throw new BadRequestException(
+        'password must contain only alphanumeric characters',
+      );
+    }
     const user = await this.authService.updatePassword(
       session.userId,
       body.old_password,

@@ -56,6 +56,9 @@ export class UsersService {
         Number(process.env.HASH_SALT),
       );
     }
+    if (userData.display_name === '') {
+      userData.display_name = null;
+    }
     await this.userRepository.update(id, userData);
     return await this.userRepository.findOne(
       { id },

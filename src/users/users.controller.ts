@@ -38,6 +38,10 @@ export class UsersController {
   private readonly logger = new Logger('UsersController');
   constructor(private readonly usersService: UsersService) {}
 
+  private validateAlNum(str: string): boolean {
+    return !!str.match(/^[0-9a-zA-Z]+$/);
+  }
+
   private async deleteS3Object(key: string) {
     const s3 = new S3({
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
@@ -109,7 +113,14 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() userData: UpdateUserDTO,
   ): Promise<ResponseUserDTO> {
-    const sameUsernameUser = await this.usersService.findUserByUsername(userData.username);
+    if (!this.validateAlNum(userData.username)) {
+      throw new BadRequestException(
+        'username must contain only alphanumeric characters',
+      );
+    }
+    const sameUsernameUser = await this.usersService.findUserByUsername(
+      userData.username,
+    );
     if (sameUsernameUser && sameUsernameUser.id !== id) {
       throw new BadRequestException(`${userData.username} is already taken`);
     }

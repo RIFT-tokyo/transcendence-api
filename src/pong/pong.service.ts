@@ -282,11 +282,11 @@ export class PongService {
     }
   }
 
-  @Interval(3000)
-  debugRoom(): void {
-    this.logger.debug('********************************************');
-    this.roomIdStates.forEach((state, key) => {
-      this.logger.debug(`${key}: ${JSON.stringify(state)}`);
-    });
-  }
+  // @Interval(3000)
+  // debugRoom(): void {
+  //   this.logger.debug('********************************************');
+  //   this.roomIdStates.forEach((state, key) => {
+  //     this.logger.debug(`${key}: ${JSON.stringify(state)}`);
+  //   });
+  // }
 }
