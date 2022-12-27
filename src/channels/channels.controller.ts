@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -54,6 +55,9 @@ export class ChannelsController {
     @Body() channelData: NewChannel,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {
+    if (channelData.name === '' || channelData.password === '') {
+      throw new BadRequestException('name and password must not be empty');
+    }
     const channel = await this.channelsService.update(
       id,
       channelData,
@@ -61,6 +65,18 @@ export class ChannelsController {
     );
     if (!channel) {
       throw new BadRequestException('Permission denied');
+    }
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Delete(':id')
+  async exitChannel(
+    @Session() session: UserSession,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    const isSucceeded = await this.channelsService.exit(session.userId, id);
+    if (!isSucceeded) {
+      throw new BadRequestException('Exit failed');
     }
   }
 

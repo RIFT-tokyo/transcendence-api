@@ -102,6 +102,18 @@ export class ChannelsService {
     return this.channelsRepository.save(channel);
   }
 
+  async exit(userId: number, channelId: number): Promise<boolean> {
+    const permission = await this.channelUserPermissionsRepository.findOne({
+      userId,
+      channelId,
+    });
+    if (!permission) {
+      return false;
+    }
+    await this.channelUserPermissionsRepository.softDelete(permission);
+    return true;
+  }
+
   async join(channel: Channel, userId: number, password?: string) {
     if (
       channel.password &&
