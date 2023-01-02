@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Param,
@@ -13,7 +12,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ChannelUser, NewChannel, UpdateChannelUser } from '../generated';
+import { ChannelUser, NewChannel } from '../generated';
 import { UserSession } from '../types/UserSession';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { ChannelUserDTO, ResponseChannelDTO } from './channels.dto';
@@ -65,18 +64,6 @@ export class ChannelsController {
     );
     if (!channel) {
       throw new BadRequestException('Permission denied');
-    }
-  }
-
-  @UseGuards(AuthenticatedGuard)
-  @Delete(':id')
-  async exitChannel(
-    @Session() session: UserSession,
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<void> {
-    const isSucceeded = await this.channelsService.exit(session.userId, id);
-    if (!isSucceeded) {
-      throw new BadRequestException('Exit failed');
     }
   }
 
