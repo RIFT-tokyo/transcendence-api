@@ -5,7 +5,6 @@ import {
   Controller,
   Get,
   HttpCode,
-  Logger,
   NotFoundException,
   Post,
   Put,
@@ -24,8 +23,6 @@ import { Password } from '../generated/model/password';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  private readonly logger = new Logger('AuthController');
 
   private validateAlNum(str: string): boolean {
     return !!str.match(/^[0-9a-zA-Z]+$/);
@@ -84,9 +81,6 @@ export class AuthController {
     @Req() request: { user: User },
     @Session() session: UserSession,
   ) {
-    this.logger.debug(
-      `callback: ${JSON.stringify(request.user)}, ${JSON.stringify(session)}`,
-    );
     const user = await this.authService.findUserById(request.user.id);
     session.userId = request.user.id;
     session.isTwoFaEnabled = user.is_two_fa_enabled;
@@ -94,7 +88,6 @@ export class AuthController {
     if (user.is_two_fa_enabled) {
       return { url: process.env.FRONT_TWO_FA_URL };
     }
-    this.logger.debug('最後まで来てるか');
   }
 
   @UseGuards(AuthenticatedGuard)
