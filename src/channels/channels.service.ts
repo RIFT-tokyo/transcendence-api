@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from '../entities/channel.entity';
-import { In, Repository } from 'typeorm';
-import { ChannelUser, NewChannel, UpdateChannelUser } from '../generated';
+import { Repository } from 'typeorm';
+import { ChannelUser, NewChannel } from '../generated';
 import * as bcrypt from 'bcrypt';
 import { ChannelMessage } from '../entities/channel-message.entity';
 import { Message } from '../entities/message.entity';
@@ -24,6 +24,8 @@ export class ChannelsService {
     private readonly messageRepository: Repository<Message>,
     private readonly usersService: UsersService,
   ) {}
+
+  private readonly logger = new Logger('ChannelService');
 
   async findAll() {
     return await this.channelsRepository.find({ order: { name: 'DESC' } });
@@ -100,6 +102,22 @@ export class ChannelsService {
     channel.password = channelData.password;
 
     return this.channelsRepository.save(channel);
+  }
+
+  async exit(userId: number, channelId: number): Promise<boolean> {
+    const permission = await this.channelUserPermissionsRepository.update(
+      {
+        userId,
+        channelId,
+      },
+      {
+        deleted_at: new Date(),
+      },
+    );
+    if (!permission) {
+      return false;
+    }
+    return true;
   }
 
   async join(channel: Channel, userId: number, password?: string) {

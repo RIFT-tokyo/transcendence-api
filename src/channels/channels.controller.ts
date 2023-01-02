@@ -12,7 +12,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ChannelUser, NewChannel, UpdateChannelUser } from '../generated';
+import { ChannelUser, NewChannel } from '../generated';
 import { UserSession } from '../types/UserSession';
 import { AuthenticatedGuard } from '../common/guards/authenticated.guard';
 import { ChannelUserDTO, ResponseChannelDTO } from './channels.dto';
@@ -54,6 +54,9 @@ export class ChannelsController {
     @Body() channelData: NewChannel,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {
+    if (channelData.name === '' || channelData.password === '') {
+      throw new BadRequestException('name and password must not be empty');
+    }
     const channel = await this.channelsService.update(
       id,
       channelData,

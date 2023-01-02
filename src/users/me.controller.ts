@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   InternalServerErrorException,
   Logger,
@@ -77,6 +79,21 @@ export class MeController {
       throw new UnauthorizedException();
     }
     return new ResponseChannelDTO(channelUserPermission);
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Delete('channels/:channelId')
+  async exitChannel(
+    @Session() session: UserSession,
+    @Param('channelId', ParseIntPipe) channelId: number,
+  ): Promise<void> {
+    const isSucceeded = await this.channelsService.exit(
+      session.userId,
+      channelId,
+    );
+    if (!isSucceeded) {
+      throw new BadRequestException('Exit failed');
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
