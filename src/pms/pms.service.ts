@@ -41,7 +41,6 @@ export class PmsService {
     });
   }
 
-  // ・createMessageで呼ばれる ・ユーザーステータスリストのDMアイコン押した時に呼ばれる
   async findOrCreatePrivateMessageUser(fromUserId: number, toUserId: number) {
     const fromUser = await this.usersService.findUserById(fromUserId);
     const toUser = await this.usersService.findUserById(toUserId);
@@ -71,7 +70,6 @@ export class PmsService {
         toUser,
       ];
     }
-    // privateMessageUserを返す
     await this.privateMessageUserRepository.save(fromUserPrivateMessageUser);
     return toUser;
   }
@@ -83,7 +81,9 @@ export class PmsService {
       return null;
     }
 
-    // toUser側のPrivateMessageUserのto_usersにfromUserがいなかったら追加してやる
+    // fromUser, toUserそれぞれのPrivateMessageUserのto_usersに
+    // 相手のUserがいなかったら追加してあげる
+    await this.findOrCreatePrivateMessageUser(fromUserId, toUserId);
     await this.findOrCreatePrivateMessageUser(toUserId, fromUserId);
 
     const message = new Message();
