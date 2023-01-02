@@ -117,10 +117,6 @@ export class ChannelsService {
     if (!permission) {
       return false;
     }
-    // this.logger.debug('*********************');
-    // this.logger.debug(JSON.stringify(permission));
-    // await this.channelUserPermissionsRepository.softDelete(permission);
-    // this.logger.debug(JSON.stringify(permission));
     return true;
   }
 
